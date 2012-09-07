@@ -1,0 +1,199 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+
+lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
+lti:BaseUrlChoice rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:selector ;
+    bind:associationType bind:Composition
+  ] .
+lti:BaseUrlSelector rdf:type bind:EmbeddableClass .
+lti:BaseUrlSelector rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:applies_to ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:Contact rdf:type bind:EmbeddableClass .
+lti:Endpoint rdf:type bind:EmbeddableClass .
+lti:Endpoint rdf:type bind:AbstractClass .
+lti:ServiceProvider rdf:type bind:Addressable .
+lti:ServiceProvider rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:support ;
+    bind:associationType bind:Composition
+  ] .
+lti:IconEndpoint rdf:type bind:EmbeddableClass .
+lti:IconInfo rdf:type bind:EmbeddableClass .
+lti:IconInfo rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:default_location ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:icon_style ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:IconStyle rdf:type bind:Enum .
+lti:LocalizedName rdf:type bind:EmbeddableClass .
+lti:LocalizedText rdf:type bind:EmbeddableClass .
+lti:MessageHandler rdf:type bind:EmbeddableClass .
+lti:MessageHandler rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:enabled_capability ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:message_type ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:parameter ;
+    bind:associationType bind:Composition
+  ] .
+lti:ProductInfo rdf:type bind:EmbeddableClass .
+lti:ProductInfo rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:instance ;
+    bind:associationType bind:Composition
+  ] .
+lti:ProductFamily rdf:type bind:EmbeddableClass .
+lti:ProductFamily rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:version ;
+    bind:associationType bind:Composition
+  ] .
+lti:ProductProfile rdf:type bind:Addressable .
+lti:ProductProfile rdf:type bind:AbstractClass .
+lti:ProductProfile rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:service_offered ;
+    bind:associationType bind:Composition
+  ] .
+lti:ServiceDescriptor rdf:type bind:Addressable .
+lti:ServiceDescriptor rdf:type bind:AbstractClass .
+lti:ToolConsumerProfile rdf:type bind:Addressable .
+lti:ToolConsumerProfile rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:capability_offered ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:ToolProfile rdf:type bind:Addressable .
+lti:ToolProfile rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:message ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:resource_handler ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:base_url_choice ;
+    bind:associationType bind:Composition
+  ] .
+lti:ResourceHandler rdf:type bind:EmbeddableClass .
+lti:ResourceHandler rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:resource_type ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:message ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:icon_info ;
+    bind:associationType bind:Composition
+  ] .
+lti:Parameter rdf:type bind:EmbeddableClass .
+lti:ShortLocalizedName rdf:type bind:EmbeddableClass .
+lti:Vendor rdf:type bind:Addressable .
+lti:Vendor rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:product ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:contact ;
+    bind:associationType bind:Composition
+  ] .
+lti:Capability rdf:type bind:Enum .
+lti:MessageType rdf:type bind:EmbeddableClass .
+lti:MessageType rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:http_method ;
+    bind:associationType bind:Composition
+  ] .
+lti:SecurityContract rdf:type bind:EmbeddableClass .
+lti:SecurityContract rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:tool_service ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:end_user_service ;
+    bind:associationType bind:Composition
+  ] .
+lti:ServiceProfile rdf:type bind:EmbeddableClass .
+lti:ServiceProfile rdf:type bind:AbstractClass .
+lti:ServiceProfile rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:service ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:RestServiceProfile rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:action ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:ResourceType rdf:type bind:EmbeddableClass .
+lti:ResourceType rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:resource_type_owner ;
+    bind:inverseAssociationType bind:Composition ;
+    bind:inverseUnboundedCardinality true
+  ] .
+lti:HasCode rdf:type bind:AbstractClass .
+lti:RestService rdf:type bind:Addressable .
+lti:RestService rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:action ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:ProductInstance rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:service_provider ;
+    bind:associationType bind:Aggregation ;
+    bind:inverseUnboundedCardinality true
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:profile ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:support ;
+    bind:associationType bind:Composition
+  ] .
+lti:ToolProxy rdf:type bind:Addressable .
+lti:ToolProxy rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:tool_profile ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:security_contract ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:tool_consumer_profile ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:enabled_capability ;
+    bind:associationType bind:Aggregation
+  ] .
+
+lti:HttpMethod rdf:type bind:Enum .
+
