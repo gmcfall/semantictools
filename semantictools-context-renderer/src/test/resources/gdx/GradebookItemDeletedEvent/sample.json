@@ -1,0 +1,17 @@
+{
+  "@context" : "http://purl.org/pearson/core/v1/ctx/outcomes/GradebookItemDeletedEvent",
+  "@type" : "GradebookItemEvent",
+
+  "header" : {
+    "version" : "1.0",
+    "msgId" : "11ecf52f-d88b-4ce1-a33b-5566d2f53733",
+    "timestamp" : "2012-04-11T12:38:59-04:00",
+    "sourceId" : "urn:udson:pearson.com/xl",
+    "destinationId" : "urn:udson:pearson.com/eclg"
+  },
+
+  "body" : {
+    "@id" : "http://mathxl.com/lineitem/292755",
+    "lastModified" : "2012-03-09T12:38:59-04:00"
+  }
+}

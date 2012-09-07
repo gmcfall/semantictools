@@ -1,0 +1,67 @@
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/nces/v1/vocab/ceds#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "ceds" .
+
+ceds:OrganizationPersonRole rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:person;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:orgUnit;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:role;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "Represents the membership of a specified person in a specified organization with a specified role (or set of roles)." .
+
+ceds:Person rdf:type owl:Class ;
+  rdfs:subClassOf liscom:SourcedObject ,
+  [ a owl:Restriction ;
+    owl:onProperty      owl:sameAs;
+    owl:onClass         ceds:Person
+  ] ; 
+  rdfs:comment "Represents a single individual (such as a learner or an instructor)." .
+
+ceds:Organization rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:onClass         xsd:normalizedString
+  ] ; 
+  rdfs:comment "Represents an organizational unit, such as an educational institution, a department within an educational institution, a class or course section within a department, etc." .
+
+ceds:Role rdf:type owl:Class ; 
+  rdfs:comment "Represents one possible role for members of some organizational unit." .
+
+ceds:Institution rdf:type owl:Class ;
+  rdfs:subClassOf ceds:Organization .
+
+ceds:person rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Person ;
+  rdfs:comment "The person who is a member of the specified organizational unit." .
+
+ceds:orgUnit rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Organization ;
+  rdfs:comment "The organizational unit to which the Person belongs (Course Section, Department, School District, etc.)" .
+
+ceds:role rdf:type rdf:Property ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Role ;
+  rdfs:comment "The person's role within the specified organizational unit." .
+
+ceds:Teacher rdf:type ceds:Role .
+

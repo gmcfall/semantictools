@@ -1,0 +1,44 @@
+@prefix lisc: <http://www.imsglobal.org/imspurl/lis/v2/vocab/course#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lis/v2/vocab/course#> a owl:Ontology  ;
+  rdfs:label "LIS Course Management Vocabulary" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lisc" .
+
+lisc:Context rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lisc:label;
+    owl:minCardinality  1;
+    rdfs:comment "A human readable label used to help identify the Context."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lisc:title;
+    owl:minCardinality  1;
+    rdfs:comment "The title of the context."
+  ] ; 
+  rdfs:comment "An organizational unit." .
+
+lisc:CourseSection rdf:type owl:Class ;
+  rdfs:subClassOf lisc:Context ; 
+  rdfs:comment "A CourseSection is a way to represent a group of people associated with a course or class.  These groups may include everyone in the class or course, or may be subsets of that whole group.  CourseSections may have sub-sections (these are created as separate Group objects linked using the relationship).  Examples of a CourseSection are Lecture, Laboratory, Studio, Seminar, etc.  There may be several instances of a type of CourseSection e.g., multiple lectures." .
+
+lisc:Group rdf:type owl:Class ;
+  rdfs:subClassOf lisc:Context ; 
+  rdfs:comment "Represents a concrete organization unit larger than a CourseTemplate or smaller than a CourseSection." .
+
+lisc:label rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:Context ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A human readable label used to help identify the Context." .
+
+lisc:title rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:Context ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "The title of the context." .
+

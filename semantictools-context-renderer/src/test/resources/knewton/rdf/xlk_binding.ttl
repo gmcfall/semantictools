@@ -1,0 +1,26 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlk: <http://purl.org/pearson/xl/v1/vocab/knewton#> .
+
+xlk:KnewtonRecommendations rdf:type bind:Addressable .
+xlk:KnewtonRecommendations rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:orgUnit ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:person ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:recommendations ;
+    bind:associationType bind:Aggregation
+  ] .
+xlk:Recommendation rdf:type bind:Addressable .
+xlk:Recommendation rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:bookPart ;
+    bind:associationType bind:Aggregation
+  ] .
+

@@ -1,0 +1,9 @@
+{
+  "@context" : "http://purl.org/schema/ctx/v1/Person",
+  "@type" : "Person",
+  "email" : [ 
+    "jsmith@example.org"
+  ],
+  "givenName" : "John",
+  "familyName" : "Smith"
+}

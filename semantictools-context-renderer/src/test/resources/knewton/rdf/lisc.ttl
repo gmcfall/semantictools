@@ -1,0 +1,63 @@
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/ims/lis/v1/vocab/course#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lisc" .
+
+lisc:CourseSection rdf:type owl:Class ;
+  rdfs:subClassOf ceds:Organization ,
+  [ a owl:Restriction ;
+    owl:onProperty      psoe:textbook;
+    owl:maxCardinality  1
+  ] ; 
+  rdfs:comment """A CourseSection is a way to represent a group of people associated with a course or class.  These groups may include everyone in the class or course, or may be subsets of that whole group.  CourseSections may have sub-sections (these are created as separate Group objects linked using the relationship).  Examples of a CourseSection are Lecture, Laboratory, Studio, Seminar, etc.  There may be several instances of a type of CourseSection e.g. multiple lectures.
+Several CourseSections can be associated using a SectionAssociation.""" .
+
+lisc:TimeFrame rdf:type owl:Class ; 
+  rdfs:comment "Defines the period for which a particular activity is permitted." .
+
+lisc:courseTitle rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:string ;
+  rdfs:comment "The title of the course section" .
+
+lisc:resetMasteryAfterEachAttempt rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:boolean .
+
+lisc:masteryLevel rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:float .
+
+lisc:timeFrame rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range lisc:TimeFrame ;
+  rdfs:comment "Specifies the time period during which this course section is active (i.e. the begin and end dates for the section)." .
+
+lisc:masteryInfo rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:MasteryInfo ;
+  rdfs:comment "Defines the mastery level for a particular type of assignment within the course section." .
+
+lisc:learningAid rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:LearningAid .
+
+lisc:begin rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:TimeFrame ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The start date/time of the activity." .
+
+lisc:end rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:TimeFrame ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The end date/time of the activity." .
+

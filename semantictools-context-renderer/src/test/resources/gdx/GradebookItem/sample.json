@@ -1,0 +1,42 @@
+{
+  "@context" : "http://purl.org/pearson/core/v1/ctx/outcomes/GradebookItemEvent",
+  "@type" : "GradebookItemEvent",
+
+  "metadata" : {
+    "version" : "1.0",
+    "msgId" : "11ecf52f-d88b-4ce1-a33b-5566d2f53733",
+    "timestamp" : "2012-04-11T12:38:59-04:00",
+    "sourceId" : "urn:udson:pearson.com/xl",
+    "destinationId" : "urn:udson:pearson.com/eclg"
+  },
+
+  "body" : {
+    "label" : "Chapter 3 Quiz",
+    "integrationContract" : "urn:pso:vendor/pearson.com/product/econ_xl",
+    "context" : "urn:udson:pearson.com/sms/prod:course/jsmith38271",
+    "assignment" : {
+      "@id" : "http://mathxl.com/assignments/94722",
+      "taxon" : [
+        "http://purl.org/ASN/resources/S114362E",
+        "http://purl.org/ASN/resources/S114362F"
+      ]
+    },
+    "assignmentAdministration" : {
+      "assignmentType" : {
+        "@id" : "http://mathxl.com/assignmentTypes#QUIZ",
+        "label" : "Quiz"
+      },
+      "contentLocation" : ["urn:lss:ecollege.unit:1"],
+      "startDateTime" : "2012-04-11T12:38:59-04:00",
+      "endDateTime" : "2012-05-11T12:38:59-04:00"
+    },
+    "resultValueSpec" : {
+      "@type" : "NumericLimits",
+      "totalMaximum" : 110,
+      "normalMaximum" : 100,
+      "extraCreditMaximum" : 10      
+    },
+    "includedInGrade" : true,
+    "lastModified" : "2012-03-09T12:38:59-04:00"
+  }
+}

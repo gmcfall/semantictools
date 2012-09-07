@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#"
+  targetNamespace="http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#"
+  elementFormDefault="qualified">
+  <xsd:annotation>
+    <xsd:appinfo>
+      <label>LTI Datatypes</label>
+      <prefix>ltid</prefix>
+    </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:simpleType id="GUID.Type" name="GUID.Type">
+    <xsd:restriction base="xsd:token">
+      <xsd:maxLength value="4096"/>
+      <xsd:pattern value="\S*"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>
+

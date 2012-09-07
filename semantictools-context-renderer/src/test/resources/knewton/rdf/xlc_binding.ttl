@@ -1,0 +1,8 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+
+xlc:BookPart rdf:type bind:Addressable .
+xlc:MasteryInfo rdf:type bind:EmbeddableClass .
+xlc:LearningAid rdf:type bind:Addressable .
+

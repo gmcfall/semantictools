@@ -1,0 +1,131 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
+@prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
+
+po:GradebookItem rdf:type bind:Addressable .
+po:GradebookItem rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:assignmentAdministration ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:context ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:assignment ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:itemVitality ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:integrationContract ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:resultValueSpec ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:enabledCapability ;
+    bind:associationType bind:Aggregation
+  ] .
+po:AssignmentAdministration rdf:type bind:EmbeddableClass .
+po:AssignmentAdministration rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:assignmentType ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:contentLocation ;
+    bind:associationType bind:Aggregation
+  ] .
+po:AssignmentType rdf:type bind:Addressable .
+po:Assignment rdf:type bind:Addressable .
+po:Assignment rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:taxon ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:defaultResultValueSpec ;
+    bind:associationType bind:Composition
+  ] .
+po:GradebookItemEvent rdf:type bind:Addressable .
+po:GradebookItemEvent rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pm:body ;
+    bind:associationType bind:Composition
+  ] .
+po:AssignmentResult rdf:type bind:Addressable .
+po:AssignmentResult rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:gradebookItem ;
+    bind:inverseAssociationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:candidate ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:savedReason ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:resultStatus ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:totalScore ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:curvedScore ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:normalScore ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:extraCreditScore ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:resultVitality ;
+    bind:associationType bind:Aggregation
+  ] .
+po:ResultReason rdf:type bind:Enum .
+po:AssignmentResultEvent rdf:type bind:Addressable .
+po:AssignmentResultEvent rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:body ;
+    bind:associationType bind:Aggregation
+  ] .
+po:ResultStatus rdf:type bind:Enum .
+po:GradebookItemVitality rdf:type bind:Enum .
+po:ItemResultVitality rdf:type bind:Enum .
+po:ContentItem rdf:type bind:Addressable .
+po:ResultValueSpec rdf:type bind:AbstractClass .
+po:NumericLimits rdf:type bind:EmbeddableClass .
+po:ValueList rdf:type bind:Addressable .
+po:ValueList rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:orderedValue ;
+    bind:associationType bind:Composition
+  ] .
+po:OrderedValue rdf:type bind:EmbeddableClass .
+po:OrderedValue rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:valueRange ;
+    bind:associationType bind:Composition
+  ] .
+po:ValueRange rdf:type bind:EmbeddableClass .
+po:Score rdf:type bind:EmbeddableClass .
+po:Score rdf:type bind:AbstractClass .
+po:ResultVitality rdf:type bind:Enum .
+

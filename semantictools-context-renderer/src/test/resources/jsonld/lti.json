@@ -1,0 +1,92 @@
+{
+  "liso" : "http://www.imsglobal.org/vocab/lis/v1/outcomes#",
+  "lisx" : "http://www.imsglobal.org/durable/lis/v1/lisx#",
+  "lti" : "http://www.imsglobal.org/vocab/lti/v1/lti#",
+  "xsd" : "http://www.w3.org/2001/XMLSchema#",
+  "AssignmentAdministration" : "lti:AssignmentAdministration",
+  "Capability" : "lti:Capability",
+  "LaunchMode" : "lti:LaunchMode",
+  "LineItem" : "liso:LineItem",
+  "LineItemType" : "lti:LineItemType",
+  "LocalizedString" : "lti:LocalizedString",
+  "Property" : "lti:Property",
+  "PropertySet" : "lti:PropertySet",
+  "ScoreAlgorithm" : "lti:ScoreAlgorithm",
+  "analyze-results" : "lti:analyze-results",
+  "average-score" : "lti:average-score",
+  "begin" : "lti:begin",
+  "best-score" : "lti:best-score",
+  "create-result" : "lti:create-result",
+  "delete" : "lti:delete",
+  "edit-assignment-administration" : "lti:edit-assignment-administration",
+  "edit-contents" : "lti:edit-contents",
+  "first-attempt" : "lti:first-attempt",
+  "last-attempt" : "lti:last-attempt",
+  "practice" : "lti:practice",
+  "preview" : "lti:preview",
+  "resume" : "lti:resume",
+  "review" : "lti:review",
+  "view-contents" : "lti:view-contents",
+  "worst-score" : "lti:worst-score",
+  "allowedAction" : {
+    "@id" : "lti:allowedAction",
+    "@type" : "@id"
+  },
+  "defaultValue" : {
+    "@id" : "lti:defaultValue",
+    "@type" : "xsd:string"
+  },
+  "dueDateTime" : {
+    "@id" : "lti:dueDateTime",
+    "@type" : "xsd:dateTime"
+  },
+  "enabledCapability" : {
+    "@id" : "lti:enabledCapability",
+    "@type" : "@id"
+  },
+  "launchDisabled" : {
+    "@id" : "lti:launchDisabled",
+    "@type" : "xsd:boolean"
+  },
+  "lineItem" : {
+    "@id" : "lisx:lineItem",
+    "@type" : "@id"
+  },
+  "localeKey" : {
+    "@id" : "lti:localeKey",
+    "@type" : "xsd:token"
+  },
+  "maxAttemptsAllowed" : {
+    "@id" : "lti:maxAttemptsAllowed",
+    "@type" : "xsd:integer"
+  },
+  "name" : {
+    "@id" : "lti:name",
+    "@type" : "xsd:token"
+  },
+  "property" : "lti:property",
+  "scoreAlgorithm" : {
+    "@id" : "lti:scoreAlgorithm",
+    "@type" : "@id"
+  },
+  "startDateTime" : {
+    "@id" : "lti:startDateTime",
+    "@type" : "xsd:dateTime"
+  },
+  "timeLimit" : {
+    "@id" : "lti:timeLimit",
+    "@type" : "http://www.w3.org/2004/10/xpath-datatypes#dayTimeDuration"
+  },
+  "value" : {
+    "@id" : "lti:value",
+    "@type" : "xsd:string"
+  },
+  "visibleEnd" : {
+    "@id" : "lti:visibleEnd",
+    "@type" : "xsd:dateTime"
+  },
+  "visibleStart" : {
+    "@id" : "lti:visibleStart",
+    "@type" : "xsd:dateTime"
+  }
+}

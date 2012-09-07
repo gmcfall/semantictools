@@ -1,0 +1,35 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ceds:OrganizationPersonRole rdf:type bind:Addressable .
+ceds:OrganizationPersonRole rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:person ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:orgUnit ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:role ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty psoe:institution ;
+    bind:associationType bind:Aggregation
+  ] .
+ceds:Person rdf:type bind:Addressable .
+ceds:Person rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty owl:sameAs ;
+    bind:associationType bind:Aggregation
+  ] .
+ceds:Organization rdf:type bind:Addressable .
+ceds:Role rdf:type bind:Enum .
+ceds:Institution rdf:type bind:Addressable .
+

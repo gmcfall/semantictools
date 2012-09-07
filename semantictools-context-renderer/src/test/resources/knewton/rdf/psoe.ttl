@@ -1,0 +1,36 @@
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/ed/v1/vocab/psoe#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "psoe" .
+
+psoe:Book rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      psoe:bookCode;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "Represents a physical book or an eBook." .
+
+psoe:institution rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Institution ;
+  rdfs:comment "The institution to which the organizational unit belongs." .
+
+psoe:bookCode rdf:type owl:FunctionalProperty ;
+  rdfs:domain psoe:Book ;
+  rdfs:range xsd:token ;
+  rdfs:comment "A code that uniquely identifies the book.  This property is unique within the namespace of the publisher." .
+
+psoe:textbook rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range psoe:Book ;
+  rdfs:comment "The textbook used in this course section." .
+

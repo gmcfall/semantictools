@@ -1,0 +1,30 @@
+{
+  "@context" : "http://purl.org/pearson/core/v1/ctx/outcomes/AssignmentResultEvent",
+  "@type" : "AssignmentResultEvent",
+
+  "metadata" : {
+    "version" : "1.0",
+    "sourceId" : "urn:udson:pearson.com/xl",
+    "destinationId" : "urn:udson:pearson.com/eclg",
+    "msgId" : "4a65e87c-af60-4b65-b764-c0901820d2f8",
+    "timestamp" : "2012-04-13T09:15:49-04:00"
+  },
+  
+  "body" : {
+    "@id" : "http://mathxl.com/results/827461",
+    "gradebookItem" : "http://mathxl.com/lineitem/292755",
+    "candidate" : "urn:udson:pearson.com/sms/prod:user/372639",
+    "resultStatus" : "Complete",
+    "resultVitality" : "Effective",
+    "savedReason" : {
+      "@id" : "http://purl.org/pearson/xl/v1/outcomes#SystemScored",
+      "label" : "Scored by XL Platform"
+    },
+    "totalScore" : 77,
+    "normalScore" : 82,
+    "extraCreditScore" : 5,
+    "penalty" : 10,
+    "comments" : "Johnny was penalized for turning in the assignment late",
+    "lastModified" : "2012-04-13T09:15:49-04:00"
+  }
+}

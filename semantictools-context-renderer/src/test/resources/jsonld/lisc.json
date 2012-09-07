@@ -1,0 +1,14 @@
+{
+  "lisc" : "http://www.imsglobal.org/vocab/lis/v2/context#",
+  "lisd" : "http://www.imsglobal.org/vocab/lis/v2/datatypes#",
+  "Context" : "lisc:Context",
+  "CourseOffering" : "lisc:CourseOffering",
+  "CourseSection" : "lisc:CourseSection",
+  "CourseTemplate" : "lisc:CourseTemplate",
+  "Group" : "lisc:Group",
+  "SectionAssociation" : "lisc:SectionAssociation",
+  "contextIdentifier" : {
+    "@id" : "lisc:contextIdentifier",
+    "@type" : "lisd:GUID.Type"
+  }
+}

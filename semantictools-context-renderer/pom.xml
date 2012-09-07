@@ -1,0 +1,131 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/Schema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.semantictools</groupId>
+	<artifactId>semantictools-context-renderer</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0</version>
+	<name>SemanticTools Context Renderer</name>
+	
+	<properties>
+		<build.finalName>semantictools-context-renderer</build.finalName>
+		<jena.version>2.7.0-incubating</jena.version>
+		<joda-time.version>2.0</joda-time.version>
+    <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
+	</properties>
+	
+	<repositories>
+	
+
+    <repository>
+      <id>apache-repo-releases</id>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Maven 2 Repository</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>
+		<repository>
+			<id>maven-repository.dev.java.net</id>
+			<name>Java.net Maven 1 Repository (legacy)</name>
+			<url>http://download.java.net/maven/1</url>
+			<layout>legacy</layout>
+		</repository>
+
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Maven 2 Repository</name>
+			<url>http://download.java.net/maven/2</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>maven-repository.dev.java.net</id>
+			<name>Java.net Maven 1 Repository (legacy)</name>
+			<url>http://download.java.net/maven/1</url>
+			<layout>legacy</layout>
+		</pluginRepository>
+	</pluginRepositories>
+	<dependencies>
+	
+	   <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.0.1</version>
+     </dependency>
+
+    <dependency>
+	    <groupId>org.apache.httpcomponents</groupId>
+	    <artifactId>httpmime</artifactId>
+	    <version>4.0.1</version>
+    </dependency>
+     
+	
+            
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda-time.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<version>${jena.version}</version>
+		</dependency>		
+	
+		<dependency>
+			<groupId>org.semantictools</groupId>
+			<artifactId>semantictools-json-ld</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.4</version>
+      <scope>test</scope>
+    </dependency>
+	</dependencies>
+	<profiles>
+        <profile>
+            <id>jdk14-jdk15</id>
+            <activation>
+                <jdk>!1.6</jdk>
+            </activation>
+        </profile>
+    </profiles>
+	<build>
+		<finalName>${build.finalName}</finalName>
+		<resources>
+		</resources>
+		<plugins>
+      <plugin>
+         <artifactId>maven-compiler-plugin</artifactId>
+         <version>2.0.2</version>
+         <configuration>
+             <source>1.6</source>
+             <target>1.6</target>
+         </configuration>
+      </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.10</version>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+        </plugin>
+
+
+		</plugins>
+	</build>
+	
+</project>

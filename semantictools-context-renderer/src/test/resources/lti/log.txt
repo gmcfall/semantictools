@@ -1,0 +1,26 @@
+2012-06-14
+* Changed multiplicity of BaseUrlChoice.selector from [1] to [0..1].
+* Updated description of BaseUrlChoice. 
+* Renamed "capability" property of MessageHandler to "enabled_capability"
+* Added description of RestService class
+* Added description of RestService.format property
+* Added description of RestService.action property
+* Added description of ProductInfo.product_family property
+* Added description of ResourceHandler.message property
+* Added description of ResourceHandler.icon_info property
+* Added description of ResourceHandler.resource_type property
+* Eliminated unused LocalizedTitle class
+* Eliminated ToolProxyBindingState class.  This will be reintroduced later when we support 
+  state-changed-notification message types.
+* Excluded ProductInstance.profile property from application/vnd.ims.lti.v2.ToolConsumerProfile+json 
+ 
+Known Issues:
+* The RDF Ontology generated from the Star UML model generates an owl:Restriction for a
+  property only if the cardinality of that field is customized within the scope of a particular class.
+  This is appropriate from a pure data modeling perspective.  However, it means that class-specific
+  descriptions for properties are lost.  Need to update the RDF Ontology generator so that
+  these descriptions are preserved.
+  
+* Should rewrite URLs to be relative, so that local references within the zip file resolve.
+
+* Remove namespace prefix from simple datatype names since the namespace is declared in the JSON-LD context.

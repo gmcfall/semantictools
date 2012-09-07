@@ -1,0 +1,23 @@
+@prefix pc: <http://purl.org/pearson/core/v1/vocab/course#> .
+@prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/core/v1/vocab/course#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "pc" .
+
+pc:CourseSection rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pc:courseSectionGUID;
+    owl:minCardinality  1
+  ] .
+
+pc:courseSectionGUID rdf:type owl:FunctionalProperty ;
+  rdfs:domain pc:CourseSection ;
+  rdfs:range lisd:GUID.Type .
+

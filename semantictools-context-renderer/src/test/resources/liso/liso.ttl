@@ -1,0 +1,171 @@
+@prefix liso: <http://www.imsglobal.org/imspurl/lis/v2/vocab/outcomes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lisc: <http://www.imsglobal.org/imspurl/lis/v2/vocab/course#> .
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lis/v2/vocab/outcomes#> a owl:Ontology  ;
+  rdfs:label "LIS Outcomes Vocabulary" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "liso" .
+
+liso:LineItem rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      liso:label;
+    owl:minCardinality  1;
+    rdfs:comment "A short label that describes this LineItem, suitable for display in a grade book or a report."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:guid;
+    rdfs:comment "A globally unique identifier for this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:result;
+    rdfs:comment "A result defined within this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:context;
+    owl:minCardinality  1;
+    rdfs:comment "The context with which this LineItem is associated."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:lineItemType;
+    owl:minCardinality  1;
+    rdfs:comment "The container for the definition of the type of lineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:custom;
+    rdfs:comment "A custom property attached to this LineItem by the external Tool that \"owns\" the LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:resultValue;
+    owl:minCardinality  1;
+    rdfs:comment "The ResultValue that defines the type of scores recorded in the Results associated with this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:dataSource;
+    owl:minCardinality  1;
+    rdfs:comment "The DataSource that produced this LineItem"
+  ] ; 
+  rdfs:comment "A LineItem is a list of Result objects that are, in general, associated with some course activity." .
+
+liso:Result rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      liso:lineItem;
+    rdfs:comment "The LineItem within which this Result is defined."
+  ] ; 
+  rdfs:comment "This is the container for the results.  Result objects do not have to be associated with a LineItem." .
+
+liso:LineItemType rdf:type owl:Class .
+
+liso:ResultValue rdf:type owl:Class ; 
+  rdfs:comment "The container for the information that defines the nature of the value contained in a Result value.  For example this could define a list of grades, the minimum and maximum score, etc." .
+
+liso:DataSource rdf:type owl:Class ; 
+  rdfs:comment "DataSource is a resource that represents the system that produced some data item or is the system of record for that item." .
+
+liso:Score rdf:type owl:Class ; 
+  rdfs:comment "An abstract class that represents a users score on an assignment or activity." .
+
+liso:OrderedValue rdf:type owl:Class ;
+  rdfs:subClassOf liso:Score ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:ordinal;
+    owl:minCardinality  1;
+    rdfs:comment "An integer used to defining the ordering of this OrderedValue relative to other OrderedValues in the parent ValueList."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:grade;
+    owl:minCardinality  1;
+    rdfs:comment "A string that represents the Learner's score on an assignment or activity."
+  ] ; 
+  rdfs:comment "A specific value in the list of permitted values." .
+
+liso:ValueList rdf:type owl:Class ;
+  rdfs:subClassOf liso:ResultValue ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:orderedValue;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "The list of ordered values that can be assigned to a Result object." .
+
+liso:ValueRange rdf:type owl:Class ;
+  rdfs:subClassOf liso:ResultValue ; 
+  rdfs:comment "Container for the minimum and maximum value permitted for the Result object." .
+
+liso:label rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A short label that describes this LineItem, suitable for display in a grade book or a report." .
+
+liso:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A globally unique identifier for this LineItem." .
+
+liso:result rdf:type rdf:Property ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:Result ;
+  owl:inverseOf liso:lineItem ;
+  rdfs:comment "A result defined within this LineItem." .
+
+liso:context rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range lisc:Context ;
+  rdfs:comment "The context with which this LineItem is associated." .
+
+liso:lineItemType rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:LineItemType ;
+  rdfs:comment "The container for the definition of the type of lineItem." .
+
+liso:custom rdf:type rdf:Property ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range lti:Property ;
+  rdfs:comment "A custom property attached to this LineItem by the external Tool that \"owns\" the LineItem." .
+
+liso:resultValue rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:ResultValue ;
+  rdfs:comment "The ResultValue that defines the type of scores recorded in the Results associated with this LineItem." .
+
+liso:dataSource rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:DataSource ;
+  rdfs:comment "The DataSource that produced this LineItem" .
+
+liso:lineItem rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range liso:LineItem ;
+  owl:inverseOf liso:result ;
+  rdfs:comment "The LineItem within which this Result is defined." .
+
+liso:score rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range liso:Score .
+
+liso:ordinal rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:OrderedValue ;
+  rdfs:range xsd:int ;
+  rdfs:comment "An integer used to defining the ordering of this OrderedValue relative to other OrderedValues in the parent ValueList." .
+
+liso:grade rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:OrderedValue ;
+  rdfs:range xsd:token ;
+  rdfs:comment "A string that represents the Learner's score on an assignment or activity." .
+
+liso:orderedValue rdf:type rdf:Property ;
+  rdfs:domain liso:ValueList ;
+  rdfs:range liso:OrderedValue .
+
+liso:MidTerm rdf:type liso:LineItemType .
+
+liso:Interim rdf:type liso:LineItemType .
+
+liso:Final rdf:type liso:LineItemType .
+

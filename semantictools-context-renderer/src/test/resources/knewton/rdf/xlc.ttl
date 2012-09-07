@@ -1,0 +1,64 @@
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xlat: <http://purl.org/pearson/xl/v1/vocab/AssignmentType#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/vocab/course#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlc" .
+
+xlc:BookPart rdf:type owl:Class .
+
+xlc:MasteryInfo rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:assignmentType;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:affectsStudyPlan;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:masteryLevel;
+    owl:minCardinality  1
+  ] .
+
+xlc:LearningAid rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:onClass         xsd:normalizedString;
+    owl:minQualifiedCardinality  1
+  ] .
+
+xlc:courseOwner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range ceds:OrganizationPersonRole ;
+  rdfs:comment "The OrganizationPersonRole record that identifies the \"owner\" of this course section." .
+
+xlc:coversBookPart rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:BookPart ;
+  rdfs:comment "Specifies a part of the textbook that this course section covers." .
+
+xlc:assignmentType rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xlat:AssignmentType ;
+  rdfs:comment "The type of assignment to which this MasteryInfo record applies." .
+
+xlc:affectsStudyPlan rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "Specifies whether the assignments of the specified type affect the learner's study plan." .
+
+xlc:masteryLevel rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xsd:float ;
+  rdfs:comment "Specifies the score that learners must achieve on assignments of the specified type in order to demonstrate mastery.  This is a value in the range [0, 1]." .
+

@@ -1,0 +1,20 @@
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lis/v1/liscom#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "liscom" .
+
+liscom:DataSource rdf:type owl:Class .
+
+liscom:SourcedObject rdf:type owl:Class .
+
+liscom:dataSource rdf:type rdf:Property ;
+  rdfs:domain liscom:SourcedObject ;
+  rdfs:range liscom:DataSource ;
+  rdfs:comment "The source system that generated this object." .
+

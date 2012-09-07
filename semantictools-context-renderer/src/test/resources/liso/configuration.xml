@@ -1,0 +1,30 @@
+<configuration>
+  <datatypes>
+    <xmlschema>
+      <prefix>XSD</prefix>
+      <uri>http://www.w3.org/2001/XMLSchema#</uri>
+      <file>${basedir}/src/main/resources/rdf/XSD.xsd</file>
+    </xmlschema>
+  </datatypes>
+  <ontologies>
+  <ontology>
+    <prefix>liso</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lis/v2/vocab/outcomes#</uri>
+    <file>${basedir}/src/main/resources/rdf/liso.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>lisc</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lis/v2/vocab/course#</uri>
+    <file>${basedir}/src/main/resources/rdf/lisc.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>lti</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#</uri>
+    <file>${basedir}/src/main/resources/rdf/lti.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  </ontologies>
+</configuration>
+

@@ -1,0 +1,144 @@
+{
+  "lisc" : "http://www.imsglobal.org/vocab/lis/v2/context#",
+  "liscom" : "http://www.imsglobal.org/vocab/lis/v2/common#",
+  "lisd" : "http://www.imsglobal.org/vocab/lis/v2/datatypes#",
+  "liso" : "http://www.imsglobal.org/vocab/lis/v1/outcomes#",
+  "lisx" : "http://www.imsglobal.org/durable/lis/v1/lisx#",
+  "lti" : "http://www.imsglobal.org/vocab/lti/v1/lti#",
+  "xsd" : "http://www.w3.org/2001/XMLSchema#",
+  "AssignmentAdministration" : "lti:AssignmentAdministration",
+  "Capability" : "lti:Capability",
+  "Context" : "lisc:Context",
+  "DataSource" : "liscom:DataSource",
+  "LaunchMode" : "lti:LaunchMode",
+  "LineItem" : "liso:LineItem",
+  "LineItemType" : "liso:LineItemType",
+  "LocalizedString" : "liso:LocalizedString",
+  "OrderedValue" : "liso:OrderedValue",
+  "Property" : "lti:Property",
+  "PropertySet" : "lti:PropertySet",
+  "ResultValue" : "liso:ResultValue",
+  "ScoreAlgorithm" : "lti:ScoreAlgorithm",
+  "ValueList" : "liso:ValueList",
+  "ValueRange" : "liso:ValueRange",
+  "Final" : "liso:Final",
+  "Homework" : "lti:Homework",
+  "Interim" : "liso:Interim",
+  "MidTerm" : "liso:MidTerm",
+  "Quiz" : "lti:Quiz",
+  "Test" : "lti:Test",
+  "analyze-results" : "lti:analyze-results",
+  "average-score" : "lti:average-score",
+  "begin" : "lti:begin",
+  "best-score" : "lti:best-score",
+  "create-result" : "lti:create-result",
+  "delete" : "lti:delete",
+  "edit-assignment-administration" : "lti:edit-assignment-administration",
+  "edit-contents" : "lti:edit-contents",
+  "first-attempt" : "lti:first-attempt",
+  "last-attempt" : "lti:last-attempt",
+  "practice" : "lti:practice",
+  "preview" : "lti:preview",
+  "resume" : "lti:resume",
+  "review" : "lti:review",
+  "view-contents" : "lti:view-contents",
+  "worst-score" : "lti:worst-score",
+  "allowedAction" : {
+    "@id" : "lti:allowedAction",
+    "@type" : "@id"
+  },
+  "assignmentAdministration" : "liso:assignmentAdministration",
+  "context" : {
+    "@id" : "liso:context",
+    "@type" : "@id"
+  },
+  "dataSource" : {
+    "@id" : "liso:dataSource",
+    "@type" : "@id"
+  },
+  "dueDateTime" : {
+    "@id" : "lti:dueDateTime",
+    "@type" : "xsd:dateTime"
+  },
+  "enabledCapability" : {
+    "@id" : "lti:enabledCapability",
+    "@type" : "@id"
+  },
+  "grade" : {
+    "@id" : "liso:grade",
+    "@type" : "xsd:string"
+  },
+  "guid" : {
+    "@id" : "liso:guid",
+    "@type" : "lisd:GUID.Type"
+  },
+  "label" : {
+    "@id" : "liso:label",
+    "@type" : "xsd:normalizedString"
+  },
+  "launchDisabled" : {
+    "@id" : "lti:launchDisabled",
+    "@type" : "xsd:boolean"
+  },
+  "lineItem" : {
+    "@id" : "lisx:lineItem",
+    "@type" : "@id"
+  },
+  "lineItemMessageSettings" : "liso:lineItemMessageSettings",
+  "lineItemType" : {
+    "@id" : "liso:lineItemType",
+    "@type" : "@id"
+  },
+  "max" : {
+    "@id" : "liso:max",
+    "@type" : "xsd:decimal"
+  },
+  "maxAttemptsAllowed" : {
+    "@id" : "lti:maxAttemptsAllowed",
+    "@type" : "xsd:integer"
+  },
+  "min" : {
+    "@id" : "liso:min",
+    "@type" : "xsd:decimal"
+  },
+  "name" : {
+    "@id" : "lti:name",
+    "@type" : "xsd:token"
+  },
+  "orderedValue" : "liso:orderedValue",
+  "ordinal" : {
+    "@id" : "liso:ordinal",
+    "@type" : "xsd:integer"
+  },
+  "property" : "lti:property",
+  "resultValue" : {
+    "@id" : "liso:resultValue",
+    "@type" : "@id"
+  },
+  "scoreAlgorithm" : {
+    "@id" : "lti:scoreAlgorithm",
+    "@type" : "@id"
+  },
+  "startDateTime" : {
+    "@id" : "lti:startDateTime",
+    "@type" : "xsd:dateTime"
+  },
+  "timeLimit" : {
+    "@id" : "lti:timeLimit",
+    "@type" : "http://www.w3.org/2004/10/xpath-datatypes#dayTimeDuration"
+  },
+  "value" : {
+    "@id" : "lti:value",
+    "@type" : "xsd:string"
+  },
+  "valueList" : "liso:valueList",
+  "valueRange" : "liso:valueRange",
+  "visibleEnd" : {
+    "@id" : "lti:visibleEnd",
+    "@type" : "xsd:dateTime"
+  },
+  "visibleStart" : {
+    "@id" : "lti:visibleStart",
+    "@type" : "xsd:dateTime"
+  }
+}

@@ -1,0 +1,36 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+
+lisc:CourseSection rdf:type bind:Addressable .
+lisc:CourseSection rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty psoe:textbook ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlc:courseOwner ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlc:coversBookPart ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:learningAid ;
+    bind:associationType bind:Aggregation
+  ] .
+lisc:CourseSection rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:timeFrame ;
+    bind:associationType bind:Composition
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:masteryInfo ;
+    bind:associationType bind:Composition
+  ] .
+lisc:TimeFrame rdf:type bind:EmbeddableClass .
+

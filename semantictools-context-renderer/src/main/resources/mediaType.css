@@ -1,0 +1,168 @@
+BODY {
+	font-family: sans-serif;
+	padding-left: 3em;
+}
+
+H1 {
+	font-size: 170%;
+	font-weight: normal;
+}
+
+.subtitle {
+  font-size: 130%;
+  margin-bottom: 1em;
+}
+
+H1, H2, H3, .subtitle {
+	color: #336699;
+  font-weight: normal;
+}
+H2 {
+	font-size: 150%;
+}
+
+
+
+H3.rdfType {
+	margin-top: 0.5in;
+	font-weight: normal;
+	padding-left: 0.5em;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	border-style: double;
+	border-color: #FFC425;
+	background-color: #336699;
+	color: white;
+}
+
+HR {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+TABLE.propertiesTable {
+	margin-top: 1em;
+}
+
+TABLE.propertiesTable TH, TABLE.enumTable TH  {
+	background-color: #D4D4D4;
+	padding: 5px;
+  border: 1px solid #9B9B9B;
+}
+
+TABLE.propertiesTable TD, TABLE.enumTable TD {
+	padding: 5px;
+  border: 1px solid #9B9B9B;
+}
+
+.toc {
+	list-style: none;
+}
+
+.toc a {
+	text-decoration: none;
+}
+
+.toc a:hover {
+	text-decoration: underline;
+}
+.overviewDiagram {
+	margin-top: 3%;
+	margin-left: 2%;
+	width: 90%;
+	height: 600px;
+	overflow: scroll;
+	border: 1px solid #9B9B9B;
+	background-color: #EEF3FA;
+	padding: 5px;
+}
+
+.jsonSample {
+  border: 1px solid #9B9B9B;
+  padding-left: 1em;
+  background-color: #EEF3FA;
+  margin-left: 2%;
+  width: 90%;
+  margin-top: 2em;
+}
+
+.jsonSnippet {
+	margin-left: 1em;
+	margin-right: 2em;
+  border: 1px solid #9B9B9B;
+  padding-left: 1em;
+  background-color: #EEF3FA;
+  float: right;	
+}
+
+.mediaTypeProperties {
+  margin-top: 2em;
+}
+
+TABLE.mediaTypeProperties TH {
+  background-color: #D4D4D4;
+  padding: 5px;
+  border: 1px solid #9B9B9B;
+}
+
+TABLE.mediaTypeProperties TD {
+  padding: 5px;
+  border: 1px solid #9B9B9B;
+}
+
+TABLE {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+DL.reservedTerms DT {
+	color: red;
+	font-family: Courier;
+	margin-top: 0.25em;
+}
+
+DL.references DT {
+	color: black;
+	font-weight: bold;
+	margin-top: 0.5em;
+}
+
+OL.uncondensed LI {
+	margin-top: 0.5em;
+}
+
+.classDiagram {
+	margin-bottom: 20px;
+	padding-left: 3%;
+}
+
+.figure {
+	margin-top: 0.25in;
+	margin-left: 0.5in;
+	margin-bottom: 0.25in;
+}
+
+.caption {
+	margin-top: 10px;
+	font-size: 75%;
+	font-style: italic;
+}
+
+.classComment{
+	margin-left: 3%;
+	margin-bottom: 3%;
+}
+
+.contributorLabel {
+	font-weight: bold;
+	margin-top: 0.5em;
+}
+
+.contributor {
+	margin-left: 2em;
+}
+
+.qualifier {
+	font-style: italic;
+	font-size: 70%;
+}

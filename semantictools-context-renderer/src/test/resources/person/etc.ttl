@@ -1,0 +1,20 @@
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix schema: <http://schema.org/> .
+
+<http://schema.org/> a owl:Ontology  ;
+  bind:suggestedPrefix "schema" .
+  
+
+schema:Person rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      schema:familyName;
+    owl:minCardinality  0;
+    owl:maxCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty     schema:givenName;
+    owl:minCardinality  0;
+    owl:maxCardinality  1;
+  ] .  

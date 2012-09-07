@@ -1,0 +1,47 @@
+<configuration>
+  <datatypes>
+    <xmlschema>
+      <prefix>lisd</prefix>
+      <uri>http://purl.org/pearson/core/v1/vocab/datatypes#</uri>
+      <file>${basedir}/src/main/resources/rdf/lisd.xsd</file>
+    </xmlschema>
+    <xmlschema>
+      <prefix>ltid</prefix>
+      <uri>http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#</uri>
+      <file>${basedir}/src/main/resources/rdf/ltid.xsd</file>
+    </xmlschema>
+  </datatypes>
+  <ontologies>
+  <ontology>
+    <prefix>owl</prefix>
+    <uri>http://www.w3.org/2002/07/owl#</uri>
+    <file>${basedir}/src/main/resources/rdf/owl.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>po</prefix>
+    <uri>http://purl.org/pearson/core/v1/vocab/outcomes#</uri>
+    <file>${basedir}/src/main/resources/rdf/po.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>pe</prefix>
+    <uri>http://purl.org/pearson/core/v1/vocab/enterprise#</uri>
+    <file>${basedir}/src/main/resources/rdf/pe.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>pm</prefix>
+    <uri>http://purl.org/pearson/core/v1/vocab/message#</uri>
+    <file>${basedir}/src/main/resources/rdf/pm.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>lti</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#</uri>
+    <file>${basedir}/src/main/resources/rdf/lti.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  </ontologies>
+</configuration>
+

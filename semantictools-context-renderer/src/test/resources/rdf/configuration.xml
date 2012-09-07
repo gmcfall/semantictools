@@ -1,0 +1,42 @@
+<configuration>
+  <datatypes>
+    <xmlschema>
+      <prefix>lti-type</prefix>
+      <uri>http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#</uri>
+      <file>${basedir}/src/main/resources/rdf/lti-type.xsd</file>
+    </xmlschema>
+  </datatypes>
+  <ontologies>
+  <ontology>
+    <prefix>lti</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#</uri>
+    <file>${basedir}/src/main/resources/rdf/lti.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>gws</prefix>
+    <uri>http://www.imsglobal.org/imspurl/gws/v1/vocab/gws#</uri>
+    <file>${basedir}/src/main/resources/rdf/gws.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>owl</prefix>
+    <uri>http://www.w3.org/2002/07/owl#</uri>
+    <file>${basedir}/src/main/resources/rdf/owl.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>ltiv</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lti/v1/variable#</uri>
+    <file>${basedir}/src/main/resources/rdf/ltiv.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>ltic</prefix>
+    <uri>http://www.imsglobal.org/imspurl/lti/v2/capability#</uri>
+    <file>${basedir}/src/main/resources/rdf/ltic.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  </ontologies>
+</configuration>
+

@@ -1,0 +1,554 @@
+@prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
+@prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/core/v1/vocab/outcomes#> a owl:Ontology  ;
+  rdfs:label "Pearson Outcomes" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "po" .
+
+po:GradebookItem rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:allValuesFrom  lisd:Label.Type;
+    owl:minCardinality  1;
+    owl:maxCardinality  1;
+    rdfs:comment "A human-friendly label (a.k.a. <em>title</em>) for the grade book item.  "
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:lastModified;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this grade book item was last modified (created, updated, or deleted)."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:includedInGrade;
+    owl:minCardinality  1;
+    rdfs:comment "A flag that indicates whether scores on the assignment associated with this gradebook item count toward the student's final grade in the course (or other learning context)."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:assignmentAdministration;
+    rdfs:comment "The assignmentAdministration resource specifies how and when a user may launch the assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:context;
+    owl:minCardinality  1;
+    rdfs:comment "The learning context in which the assignment was taken \u2013 typically a course section."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:assignment;
+    owl:minCardinality  1;
+    rdfs:comment "A container that holds information about the assignment such as the number of points that a learner can earn on the assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:itemVitality;
+    owl:minCardinality  1;
+    rdfs:comment "The status of the GradebookItem.  The status indicates, for example, whether the item contributes to the learner's grade, whether the item has been soft-deleted, etc."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:integrationContract;
+    rdfs:comment """<p>If the GradebookItem is associated with an external Tool, this property indirectly identifies the Tool Proxy that defines the integration contract.  This property points to the so-called ProductFamily to which the Tool belongs.  The associated Tool Proxy is discovered by searching the <code>context</code> for a Tool Proxy Binding that matches a Tool in the specified family.  This level of indirection allows for a Tool to be upgraded to a new version without breaking the grade book integration (or requiring all GradebookItems to be updated).</p>
+<p>
+The association with an LTI Tool allows for links to be established directly from the online gradebook or reporting system to the external Tool.  For example, it would allow an instructor to click on a score in the gradebook and navigate into the learning application to view the student responses to individual questions within an assignment.
+</p>
+<p>
+The integration contract may also specify a formal set of gradebook related capabilities that are enabled.  Alternatively, these capabilities may be specified directly on the GradebookItem.  See the <code>enabledCapability</code> property.
+</p>"""
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:resultValueSpec;
+    owl:minCardinality  1;
+    rdfs:comment "This resource specifies whether scores should be displayed as numbers or letter grades.  It also places constraints on acceptable values for scores on the assignment.  The GradebookItem stores its own private copy of the ResultValueSpec, which may be a copy of the default ResultValueSpec defined by the underlying assignment object."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:enabledCapability;
+    rdfs:comment """<p>Represents a bit of functionality that should be enabled for this GradebookItem.  For example, one formal Capability might specify that grade data must be routed to the online gradebook, and another Capability might specify that grade data must be routed to an enterprise reporting system.</p>
+<p>
+These capabilities may be negotiated in advance in the form of an integration contract (such as an LTI Tool Proxy), or they may be supplied separately for each GradebookItem through the collection of enabledCapability properties.
+</p>"""
+  ] ; 
+  rdfs:comment "A container that holds student results (i.e. scores) on a given assignment.  This object typically corresponds to a \"column\" in a grade book." .
+
+po:AssignmentAdministration rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:startDateTime;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time after which learners may begin taking the assignment.  Learners are not allowed to launch the assignment before this time."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:endDateTime;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time after which students are no longer permitted to launch the assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:assignmentType;
+    rdfs:comment "Specifies the assignment's type (Quiz, Test, Homework, etc.).  Note that the assignment type may change with each use of the assignment.  In one case, an assignment may be treated as a Quiz in another case it may be treated as a Test or a Homework.  For this reason, the AssignmentType is associated with the AssignmentAdministration rather than the underlying Assignment object itself."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:contentLocation;
+    rdfs:comment "This is a reference to the pedagogical material from which the learner may acquire the knowledge or skills needed to complete the assignment."
+  ] ; 
+  rdfs:comment "This container specifies how and when a user may launch an assignment." .
+
+po:AssignmentType rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:allValuesFrom  lisd:Label.Type;
+    owl:minCardinality  1;
+    owl:maxCardinality  1;
+    rdfs:comment "A human-friendly label for the AssignmentType."
+  ] ; 
+  rdfs:comment "Identifies the type of assignment (Test, Quiz, Homework, etc.).  Instances of the AssignmentType carry two properties:  (1) a URI that uniquely identifies the assignment type, and (2) a human-friendly label." .
+
+po:Assignment rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:taxon;
+    rdfs:comment "A taxon places the assignment within some taxonic hierarchy. This property is typically used to identify learning standards or skills that are assessed by the assignment. "
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:defaultResultValueSpec;
+    rdfs:comment "The default ResultValueSpec associated with this assignment.   The ResultValueSpec specifies whether scores on the assignment should be reported as floating point numbers or letter grades, and it provides constraints on those values.  As the name suggests, the defaultResultValueSpec is merely a default.  When an assignment is used in a learning context like a course section, it is associated with a GradebookItem that has its own resultValueSpec property.  Frequently, the resultValueSpec of the GradebookItem is  copy of the defaultResultValueSpec associated with the Assignment, but it may be different.  For example, extra credit points may be allowed or disallowed on a case-by-case basis.  "
+  ] ; 
+  rdfs:comment "This container represents an instance of some assignment such as a quiz, test, or homework assignment." .
+
+po:GradebookItemEvent rdf:type owl:Class ;
+  rdfs:subClassOf pm:Message ,
+  [ a owl:Restriction ;
+    owl:onProperty      pm:body;
+    owl:allValuesFrom  po:GradebookItem;
+    owl:minCardinality  1;
+    rdfs:comment "The GradebookItem that is being created or updated."
+  ] ; 
+  rdfs:comment "An event which signals that a GradebookItem has been created or updated." .
+
+po:AssignmentResult rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:penalty;
+    rdfs:comment "The number of points subtracted from the learner's score due to a penalty such as submitting the assignment after the due date."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:lastModified;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this AssignmentResult was last saved (either created or updated)."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:comments;
+    rdfs:comment "Comments about this result submitted by the Instructor or Proctor."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:gradebookItem;
+    owl:minCardinality  1;
+    rdfs:comment "The gradebookItem that serves as a parent container holding this AssignmentResult ."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:candidate;
+    owl:minCardinality  1;
+    rdfs:comment "The person taking the assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:savedReason;
+    rdfs:comment "Specifies the reason why this AssignmentResult entry was saved. For example, this property might indicate that the learner's assignment was manually graded by an instructor, or it might indicate that it was automatically scored by an assessment engine."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:resultStatus;
+    owl:minCardinality  1;
+    rdfs:comment "The state of the candidate's interaction with the assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:totalScore;
+    owl:minCardinality  1;
+    rdfs:comment """The total score on the assignment, given by:
+<pre>
+    totalScore = normalScore + extraCreditScore - penalty
+</pre>
+This value does <em>not</em> take into account the effects of curving.
+"""
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:curvedScore;
+    rdfs:comment "This is the final score received by the learner after curving has been applied.  If the curvedScore is omitted, then the result has not be curved and the totalScore is the final score."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:normalScore;
+    owl:minCardinality  1;
+    rdfs:comment "This is the score earned by the learner before adding any extra credit points.  This value contributes to the totalScore."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:extraCreditScore;
+    owl:minCardinality  1;
+    rdfs:comment "This is the total number of extra credit points earned by the learner.  This value contributes to the totalScore."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:resultVitality;
+    owl:minCardinality  1;
+    rdfs:comment "Specifies how a reporting system or grade book should interpret the AssignmentResult.  In particular, it specifies whether the AssignmentResult contains the effective score that counts towards the learner's grade, or whether the AssignmentResult has been superseded by another attempt by the learner on the assignment, or whether the AssignmentResult has been soft-deleted."
+  ] ; 
+  rdfs:comment "This container holds information about the result of a learner's interaction with an assignment.  Among other data, it contains the learner's score on the assignment." .
+
+po:ResultReason rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:label;
+    owl:minCardinality  1;
+    rdfs:comment "A human-friendly label for the ResultReason."
+  ] ; 
+  rdfs:comment """This entity specifies the reason why this AssignmentResult entry was saved. For example, this property might indicate that the learner's assignment was manually graded by an instructor, or it might indicate that it was automatically scored by an assessment engine.
+ The instances of ResultReason are extensible.  Each learning application is expected to define its own vocabulary.  A ResultReason object consists of a URI which serves as a unique identifier and a human-friendly label.""" .
+
+po:AssignmentResultEvent rdf:type owl:Class ;
+  rdfs:subClassOf pm:Message ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:body;
+    owl:minCardinality  1;
+    rdfs:comment "The AssignmentResult that is being created or updated."
+  ] ; 
+  rdfs:comment "An event which signals that an AssignmentResult has been created, updated or deleted." .
+
+po:ResultStatus rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:label;
+    rdfs:comment "A human-friendly label for this ResultStatus."
+  ] ; 
+  rdfs:comment "A value that represents the state of a candidate's interaction with an assignment." .
+
+po:GradebookItemVitality rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:label;
+    rdfs:comment "A human-friendly label for the vitality of the GradebookItem. "
+  ] ; 
+  rdfs:comment "GradebookItemVitality is a value that specifies whether or not a given GradebookItem has been soft-deleted." .
+
+po:ItemResultVitality rdf:type owl:Class ;
+  rdfs:subClassOf 
+    po:GradebookItemVitality ,
+    po:ResultVitality ; 
+  rdfs:comment """The class of individuals that serve as both GradebookItemVitality and ResultVitality values.
+""" .
+
+po:ContentItem rdf:type owl:Class ; 
+  rdfs:comment "ContentItem represents a chunk of content exposed within some learning context.  For example, it might correspond to a chapter, section, subsection, or specific page within an ebook.  More generally, it represents some web accessible learning resource." .
+
+po:ResultValueSpec rdf:type owl:Class ; 
+  rdfs:comment """ResultValueSpec is a data structure that specifies constraints on the valid values for scores on an assignment.  There are two concrete subtypes of ResultValueSpec:
+<OL>
+  <LI> <em>NumericLimits</em> which is used when scores are submitted as numerical values such as a decimal between 0 and 100, or some other well defined limit.
+  <LI> <em>ValueList</em> which is used when scores are submitted as letter grades such as A+, B-, C, etc.
+</OL>""" .
+
+po:NumericLimits rdf:type owl:Class ;
+  rdfs:subClassOf po:ResultValueSpec ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:normalMaximum;
+    owl:minCardinality  1;
+    rdfs:comment "The maximum points that a learner may earn without extra credit.  This value contributes to the totalMaximum."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:totalMaximum;
+    owl:minCardinality  1;
+    rdfs:comment """The absolute maximum number of points that a learner may earn including extra credit.
+This value is given by:
+<pre>
+    totalMaximum = normalMaximum + extraCreditMaximum
+</pre>"""
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:extraCreditMaximum;
+    owl:minCardinality  1;
+    rdfs:comment "The maximum number of extra credit points that a learner may earn.  This value contributes to the totalMaximum.  If extra credit is not supported, this value will be zero."
+  ] .
+
+po:ValueList rdf:type owl:Class ;
+  rdfs:subClassOf po:ResultValueSpec ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:orderedValue;
+    owl:minCardinality  1;
+    rdfs:comment "An OrderedValue that defines a letter grade within the ValueList."
+  ] ; 
+  rdfs:comment "ValueList is a container that holds a sequence of OrderedValue objects each of which corresponds to a letter grade.  It defines the set of possible letter grades that may be submitted as a student's score on an assignment.  For example, one ValueList might contain the letter grades <code> (A, B, C, D, F)</code>.  Another ValueList might contain similar letter grades extended with <code>+/-</code> values <code>(A+, A, A-, B+, B, ...)</code>.  There is no restriction on the strings that can be used for letter grades.  For example, a ValueList might contain the values <code>(pass, fail)</code>, or a ValueList might reflect student proficiency <code>(Exceeds Standard, Proficient, In Progress, Minimal Progress)</code>, etc." .
+
+po:OrderedValue rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:grade;
+    owl:minCardinality  1;
+    rdfs:comment "The letter grade, as it should appear in a grade book."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:valueRange;
+    owl:minCardinality  1;
+    rdfs:comment "The range of numeric values associated with this OrderedValue.  In most cases, this is a half-open interval where the minimum value is included in the range, but the maximum value is not included in the range.  However, the OrderedValues at the ends of a ValueList are special cases. "
+  ] ; 
+  rdfs:comment "An OrderedValue represents a single letter grade within a ValueList. Each OrderedValue defines a letter grade that can be used as a score  on an assignment, and it associates that letter grade with a range of numeric values. For example, the letter grade <em>B</em> might be associated with numeric scores in the range 80 to 90.  The numeric range allows a learning application to submit a numeric score which is then mapped to a letter grade for display in the grade book.  Ordinarily, the minimum value is included in the range, but the maximum value belongs to the next OrderedValue.  For example, a score of exactly 90 would map to an <em>A</em> instead of a </em>B</em>.  The last OrderedValue within a ValueList requires special treatment because it includes any value greater than or equal to the minimum value in the range.  In this case, the maximum value represents the <em>normal maximum</em> without extra credit.   Similarly, the first OrderedValue within a ValueList requires special treatment.  It includes any numeric score that is strictly less than the maximum value in the associated ValueRange." .
+
+po:ValueRange rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      po:min;
+    owl:minCardinality  1;
+    rdfs:comment "The minimal value of this ValueRange."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:max;
+    owl:minCardinality  1;
+    rdfs:comment "The maximum value of this ValueRange."
+  ] ; 
+  rdfs:comment "Specifies a numeric range of values between some minimum and maximum value.  Whether the end points are included in the range is determined by the context in which the ValueRange is used.  See the description of the OrderedValue class for details." .
+
+po:Score rdf:type owl:Class ; 
+  rdfs:comment """An abstract class that represents a score that some learner has earned on an assignment.   If the enclosing GradebookItem is associated with NumericLimits, the score must be submitted as a floating point number that is consistent with the specified limits.  
+If the enclosing GradebookItem is associated with a ValueList, then the score may be submitted as a floating point number or a letter grade (string).  As a best practice, floating point numbers are prefered.  Based on the data in the ValueList, the receiving system will map numeric scores to letter grades for display purposes within the grade book and reports.  However, if it is not possible to submit a floating point score, the learning application may submit a string as the score.  In this case, the string must match one of the grades contained in the ValueList.""" .
+
+po:ResultVitality rdf:type owl:Class ; 
+  rdfs:comment "ResultVitality specifies how a reporting system should interpret the AssignmentResult.  " .
+
+po:lastModified rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      po:GradebookItem
+      po:AssignmentResult
+    )
+  ] ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time when this grade book item was last modified (created, updated, or deleted)." .
+
+po:includedInGrade rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "A flag that indicates whether scores on the assignment associated with this gradebook item count toward the student's final grade in the course (or other learning context)." .
+
+po:assignmentAdministration rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range po:AssignmentAdministration ;
+  rdfs:comment "The assignmentAdministration resource specifies how and when a user may launch the assignment." .
+
+po:context rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range pe:CourseSection ;
+  rdfs:comment "The learning context in which the assignment was taken \u2013 typically a course section." .
+
+po:assignment rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range po:Assignment ;
+  rdfs:comment "A container that holds information about the assignment such as the number of points that a learner can earn on the assignment." .
+
+po:itemVitality rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range po:GradebookItemVitality ;
+  rdfs:comment "The status of the GradebookItem.  The status indicates, for example, whether the item contributes to the learner's grade, whether the item has been soft-deleted, etc." .
+
+po:integrationContract rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range lti:ProductFamily ;
+  rdfs:comment """<p>If the GradebookItem is associated with an external Tool, this property indirectly identifies the Tool Proxy that defines the integration contract.  This property points to the so-called ProductFamily to which the Tool belongs.  The associated Tool Proxy is discovered by searching the <code>context</code> for a Tool Proxy Binding that matches a Tool in the specified family.  This level of indirection allows for a Tool to be upgraded to a new version without breaking the grade book integration (or requiring all GradebookItems to be updated).</p>
+<p>
+The association with an LTI Tool allows for links to be established directly from the online gradebook or reporting system to the external Tool.  For example, it would allow an instructor to click on a score in the gradebook and navigate into the learning application to view the student responses to individual questions within an assignment.
+</p>
+<p>
+The integration contract may also specify a formal set of gradebook related capabilities that are enabled.  Alternatively, these capabilities may be specified directly on the GradebookItem.  See the <code>enabledCapability</code> property.
+</p>""" .
+
+po:resultValueSpec rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range po:ResultValueSpec ;
+  rdfs:comment "This resource specifies whether scores should be displayed as numbers or letter grades.  It also places constraints on acceptable values for scores on the assignment.  The GradebookItem stores its own private copy of the ResultValueSpec, which may be a copy of the default ResultValueSpec defined by the underlying assignment object." .
+
+po:enabledCapability rdf:type rdf:Property ;
+  rdfs:domain po:GradebookItem ;
+  rdfs:range lti:Capability ;
+  rdfs:comment """<p>Represents a bit of functionality that should be enabled for this GradebookItem.  For example, one formal Capability might specify that grade data must be routed to the online gradebook, and another Capability might specify that grade data must be routed to an enterprise reporting system.</p>
+<p>
+These capabilities may be negotiated in advance in the form of an integration contract (such as an LTI Tool Proxy), or they may be supplied separately for each GradebookItem through the collection of enabledCapability properties.
+</p>""" .
+
+po:startDateTime rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentAdministration ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time after which learners may begin taking the assignment.  Learners are not allowed to launch the assignment before this time." .
+
+po:endDateTime rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentAdministration ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time after which students are no longer permitted to launch the assignment." .
+
+po:assignmentType rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentAdministration ;
+  rdfs:range po:AssignmentType ;
+  rdfs:comment "Specifies the assignment's type (Quiz, Test, Homework, etc.).  Note that the assignment type may change with each use of the assignment.  In one case, an assignment may be treated as a Quiz in another case it may be treated as a Test or a Homework.  For this reason, the AssignmentType is associated with the AssignmentAdministration rather than the underlying Assignment object itself." .
+
+po:contentLocation rdf:type rdf:Property ;
+  rdfs:domain po:AssignmentAdministration ;
+  rdfs:range po:ContentItem ;
+  rdfs:comment "This is a reference to the pedagogical material from which the learner may acquire the knowledge or skills needed to complete the assignment." .
+
+po:taxon rdf:type rdf:Property ;
+  rdfs:domain po:Assignment ;
+  rdfs:range owl:Thing ;
+  rdfs:comment "A taxon places the assignment within some taxonic hierarchy. This property is typically used to identify learning standards or skills that are assessed by the assignment. " .
+
+po:defaultResultValueSpec rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:Assignment ;
+  rdfs:range po:ResultValueSpec ;
+  rdfs:comment "The default ResultValueSpec associated with this assignment.   The ResultValueSpec specifies whether scores on the assignment should be reported as floating point numbers or letter grades, and it provides constraints on those values.  As the name suggests, the defaultResultValueSpec is merely a default.  When an assignment is used in a learning context like a course section, it is associated with a GradebookItem that has its own resultValueSpec property.  Frequently, the resultValueSpec of the GradebookItem is  copy of the defaultResultValueSpec associated with the Assignment, but it may be different.  For example, extra credit points may be allowed or disallowed on a case-by-case basis.  " .
+
+po:penalty rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The number of points subtracted from the learner's score due to a penalty such as submitting the assignment after the due date." .
+
+po:comments rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Comments about this result submitted by the Instructor or Proctor." .
+
+po:gradebookItem rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:GradebookItem ;
+  rdfs:comment "The gradebookItem that serves as a parent container holding this AssignmentResult ." .
+
+po:candidate rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range pe:Person ;
+  rdfs:comment "The person taking the assignment." .
+
+po:savedReason rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:ResultReason ;
+  rdfs:comment "Specifies the reason why this AssignmentResult entry was saved. For example, this property might indicate that the learner's assignment was manually graded by an instructor, or it might indicate that it was automatically scored by an assessment engine." .
+
+po:resultStatus rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:ResultStatus ;
+  rdfs:comment "The state of the candidate's interaction with the assignment." .
+
+po:totalScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:Score ;
+  rdfs:comment """The total score on the assignment, given by:
+<pre>
+    totalScore = normalScore + extraCreditScore - penalty
+</pre>
+This value does <em>not</em> take into account the effects of curving.
+""" .
+
+po:curvedScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:Score ;
+  rdfs:comment "This is the final score received by the learner after curving has been applied.  If the curvedScore is omitted, then the result has not be curved and the totalScore is the final score." .
+
+po:normalScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:Score ;
+  rdfs:comment "This is the score earned by the learner before adding any extra credit points.  This value contributes to the totalScore." .
+
+po:extraCreditScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:Score ;
+  rdfs:comment "This is the total number of extra credit points earned by the learner.  This value contributes to the totalScore." .
+
+po:resultVitality rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range po:ResultVitality ;
+  rdfs:comment "Specifies how a reporting system or grade book should interpret the AssignmentResult.  In particular, it specifies whether the AssignmentResult contains the effective score that counts towards the learner's grade, or whether the AssignmentResult has been superseded by another attempt by the learner on the assignment, or whether the AssignmentResult has been soft-deleted." .
+
+po:label rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      po:ResultReason
+      po:ResultStatus
+      po:GradebookItemVitality
+    )
+  ] ;
+  rdfs:range lisd:Label.Type ;
+  rdfs:comment "A human-friendly label for the ResultReason." .
+
+po:body rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResultEvent ;
+  rdfs:range po:AssignmentResult ;
+  rdfs:comment "The AssignmentResult that is being created or updated." .
+
+po:normalMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum points that a learner may earn without extra credit.  This value contributes to the totalMaximum." .
+
+po:totalMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment """The absolute maximum number of points that a learner may earn including extra credit.
+This value is given by:
+<pre>
+    totalMaximum = normalMaximum + extraCreditMaximum
+</pre>""" .
+
+po:extraCreditMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum number of extra credit points that a learner may earn.  This value contributes to the totalMaximum.  If extra credit is not supported, this value will be zero." .
+
+po:orderedValue rdf:type rdf:Property ;
+  rdfs:domain po:ValueList ;
+  rdfs:range po:OrderedValue ;
+  rdfs:comment "An OrderedValue that defines a letter grade within the ValueList." .
+
+po:grade rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:OrderedValue ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "The letter grade, as it should appear in a grade book." .
+
+po:valueRange rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:OrderedValue ;
+  rdfs:range po:ValueRange ;
+  rdfs:comment "The range of numeric values associated with this OrderedValue.  In most cases, this is a half-open interval where the minimum value is included in the range, but the maximum value is not included in the range.  However, the OrderedValues at the ends of a ValueList are special cases. " .
+
+po:min rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:ValueRange ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The minimal value of this ValueRange." .
+
+po:max rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:ValueRange ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum value of this ValueRange." .
+
+po:NotAttempted rdf:type po:ResultStatus ;
+  rdfs:comment "The Learner has not yet attempted the assignment.  This status is rarely used, but may be useful in circumstances where it is important to explicitly assert that no attempt was made on the assignment.  The absence of a Result record implies that the Learner has not yet attempted the assignment." .
+
+po:InProgress rdf:type po:ResultStatus ;
+  rdfs:comment "The Learner has begun working on the assignment, but has not yet submitted the assignment." .
+
+po:NeedsGrading rdf:type po:ResultStatus ;
+  rdfs:comment "The Learner has submitted the assignment, but there are items which need to be graded manually." .
+
+po:Incomplete rdf:type po:ResultStatus ;
+  rdfs:comment "The assignment has been submitted or the due date passed, but the submission cannot be scored because it is incomplete." .
+
+po:Complete rdf:type po:ResultStatus ;
+  rdfs:comment "The assignment has been scored, and the due date passed or the assignment was submitted by the student." .
+
+po:Deleted rdf:type po:ItemResultVitality ;
+  rdfs:comment "Signifies that the associated object (AssignmentResult or GradebookItem) has been soft-deleted.  " .
+
+po:Active rdf:type po:GradebookItemVitality ;
+  rdfs:comment "Signifies that the associated GradebookItem is active; i.e. scores on this item contribute to the learner's grade in the learning context." .
+
+po:Effective rdf:type po:ResultVitality ;
+  rdfs:comment "Signifies that the AssignmentResult encapsulates the current, effective score on an assignment.  This designation is useful when multiple attempts are allowed and it is important to identify which AssignmentResult counts toward the final grade.  The AssignmentResult marked as <em>Effective</em> is the one that carries the score that is displayed in the grade book." .
+
+po:Superseded rdf:type po:ResultVitality ;
+  rdfs:comment "Signifies that the AssignmentResult has been superseded by another attempt by the learner on the assignment, or that the effective score is computed by some algorithm (such as an average over all attempts).  " .
+

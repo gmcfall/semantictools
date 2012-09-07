@@ -1,0 +1,6 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix ltiv: <http://www.imsglobal.org/imspurl/lti/v1/variable#> .
+
+ltiv:Variable rdf:type bind:Enum .
+

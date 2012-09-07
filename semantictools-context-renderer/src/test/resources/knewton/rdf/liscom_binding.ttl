@@ -1,0 +1,13 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+
+liscom:DataSource rdf:type bind:Addressable .
+liscom:SourcedObject rdf:type bind:AbstractClass .
+liscom:SourcedObject rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscom:dataSource ;
+    bind:associationType bind:Aggregation
+  ] .
+

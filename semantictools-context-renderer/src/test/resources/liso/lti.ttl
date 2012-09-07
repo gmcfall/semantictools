@@ -1,0 +1,43 @@
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix liso: <http://www.imsglobal.org/imspurl/lis/v2/vocab/outcomes#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> a owl:Ontology  ;
+  rdfs:label "LTI Vocabulary" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lti" .
+
+lti:Property rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:name;
+    owl:minCardinality  1;
+    rdfs:comment "The name of this Property"
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:value;
+    owl:minCardinality  1;
+    rdfs:comment "The value of this Property."
+  ] ; 
+  rdfs:comment "An arbitrary name/value pair that defines a custom property attached to some resource (such as a LineItem, CourseSection, Resource Link, or System)." .
+
+lti:name rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Property ;
+  rdfs:range xsd:token ;
+  rdfs:comment "The name of this Property" .
+
+lti:value rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Property ;
+  rdfs:range xsd:string ;
+  rdfs:comment "The value of this Property." .
+
+lti:Test rdf:type liso:LineItemType .
+
+lti:Quiz rdf:type liso:LineItemType .
+
+lti:Homework rdf:type liso:LineItemType .
+

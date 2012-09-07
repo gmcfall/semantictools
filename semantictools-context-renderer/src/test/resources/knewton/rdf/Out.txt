@@ -1,0 +1,533 @@
+
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/nces/v1/vocab/ceds#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "ceds" .
+
+ceds:OrganizationPersonRole rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:person;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:orgUnit;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ceds:role;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "Represents the membership of a specified person in a specified organization with a specified role (or set of roles)." .
+
+ceds:Person rdf:type owl:Class ;
+  rdfs:subClassOf liscom:SourcedObject ,
+  [ a owl:Restriction ;
+    owl:onProperty      owl:sameAs;
+    owl:onClass         ceds:Person
+  ] ; 
+  rdfs:comment "Represents a single individual (such as a learner or an instructor)." .
+
+ceds:Organization rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:onClass         xsd:normalizedString
+  ] ; 
+  rdfs:comment "Represents an organizational unit, such as an educational institution, a department within an educational institution, a class or course section within a department, etc." .
+
+ceds:Role rdf:type owl:Class ; 
+  rdfs:comment "Represents one possible role for members of some organizational unit." .
+
+ceds:Institution rdf:type owl:Class ;
+  rdfs:subClassOf ceds:Organization .
+
+ceds:person rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Person ;
+  rdfs:comment "The person who is a member of the specified organizational unit." .
+
+ceds:orgUnit rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Organization ;
+  rdfs:comment "The organizational unit to which the Person belongs (Course Section, Department, School District, etc.)" .
+
+ceds:role rdf:type rdf:Property ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Role ;
+  rdfs:comment "The person's role within the specified organizational unit." .
+
+ceds:Teacher rdf:type ceds:Role .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ceds:OrganizationPersonRole rdf:type bind:Addressable .
+ceds:OrganizationPersonRole rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:person ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:orgUnit ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ceds:role ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty psoe:institution ;
+    bind:associationType bind:Aggregation
+  ] .
+ceds:Person rdf:type bind:Addressable .
+ceds:Person rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty owl:sameAs ;
+    bind:associationType bind:Aggregation
+  ] .
+ceds:Organization rdf:type bind:Addressable .
+ceds:Role rdf:type bind:Enum .
+ceds:Institution rdf:type bind:Addressable .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/ed/v1/vocab/psoe#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "psoe" .
+
+psoe:Book rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      psoe:bookCode;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "Represents a physical book or an eBook." .
+
+psoe:institution rdf:type owl:FunctionalProperty ;
+  rdfs:domain ceds:OrganizationPersonRole ;
+  rdfs:range ceds:Institution ;
+  rdfs:comment "The institution to which the organizational unit belongs." .
+
+psoe:bookCode rdf:type owl:FunctionalProperty ;
+  rdfs:domain psoe:Book ;
+  rdfs:range xsd:token ;
+  rdfs:comment "A code that uniquely identifies the book.  This property is unique within the namespace of the publisher." .
+
+psoe:textbook rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range psoe:Book ;
+  rdfs:comment "The textbook used in this course section." .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+
+psoe:Book rdf:type bind:Addressable .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.w3.org/2000/01/rdf-schema#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "rdfs" .
+
+rdfs:Literal rdf:type owl:Class .
+
+rdfs:label rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      ceds:Organization
+      xlc:LearningAid
+    )
+  ] ;
+  rdfs:range  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      xsd:normalizedString
+      xsd:normalizedString
+    )
+  ] ;
+  rdfs:comment "A label suitable for display to end users." .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/ims/lis/v1/vocab/course#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lisc" .
+
+lisc:CourseSection rdf:type owl:Class ;
+  rdfs:subClassOf ceds:Organization ,
+  [ a owl:Restriction ;
+    owl:onProperty      psoe:textbook;
+    owl:maxCardinality  1
+  ] ; 
+  rdfs:comment """A CourseSection is a way to represent a group of people associated with a course or class.  These groups may include everyone in the class or course, or may be subsets of that whole group.  CourseSections may have sub-sections (these are created as separate Group objects linked using the relationship).  Examples of a CourseSection are Lecture, Laboratory, Studio, Seminar, etc.  There may be several instances of a type of CourseSection e.g. multiple lectures.
+Several CourseSections can be associated using a SectionAssociation.""" .
+
+lisc:TimeFrame rdf:type owl:Class ; 
+  rdfs:comment "Defines the period for which a particular activity is permitted." .
+
+lisc:courseTitle rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:string ;
+  rdfs:comment "The title of the course section" .
+
+lisc:resetMasteryAfterEachAttempt rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:boolean .
+
+lisc:masteryLevel rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xsd:float .
+
+lisc:timeFrame rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range lisc:TimeFrame ;
+  rdfs:comment "Specifies the time period during which this course section is active (i.e. the begin and end dates for the section)." .
+
+lisc:masteryInfo rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:MasteryInfo ;
+  rdfs:comment "Defines the mastery level for a particular type of assignment within the course section." .
+
+lisc:learningAid rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:LearningAid .
+
+lisc:begin rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:TimeFrame ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The start date/time of the activity." .
+
+lisc:end rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:TimeFrame ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The end date/time of the activity." .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix psoe: <http://purl.org/pearson/ed/v1/vocab/psoe#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+
+lisc:CourseSection rdf:type bind:Addressable .
+lisc:CourseSection rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty psoe:textbook ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlc:courseOwner ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlc:coversBookPart ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:learningAid ;
+    bind:associationType bind:Aggregation
+  ] .
+lisc:CourseSection rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:timeFrame ;
+    bind:associationType bind:Composition
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lisc:masteryInfo ;
+    bind:associationType bind:Composition
+  ] .
+lisc:TimeFrame rdf:type bind:EmbeddableClass .
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lis/v1/liscom#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "liscom" .
+
+liscom:DataSource rdf:type owl:Class .
+
+liscom:SourcedObject rdf:type owl:Class .
+
+liscom:dataSource rdf:type rdf:Property ;
+  rdfs:domain liscom:SourcedObject ;
+  rdfs:range liscom:DataSource ;
+  rdfs:comment "The source system that generated this object." .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix liscom: <http://www.imsglobal.org/imspurl/lis/v1/liscom#> .
+
+liscom:DataSource rdf:type bind:Addressable .
+liscom:SourcedObject rdf:type bind:AbstractClass .
+liscom:SourcedObject rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscom:dataSource ;
+    bind:associationType bind:Aggregation
+  ] .
+@prefix lism: <http://purl.org/ims/lis/v1/vocab/membership#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/ims/lis/v1/vocab/membership#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lism" .
+
+lism:Learner rdf:type ceds:Role .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix lism: <http://purl.org/ims/lis/v1/vocab/membership#> .
+
+@prefix xlr: <http://purl.org/pearson/xl/v1/role#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/role#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlr" .
+
+xlr:CourseOwner rdf:type ceds:Role .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlr: <http://purl.org/pearson/xl/v1/role#> .
+
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix lisc: <http://purl.org/ims/lis/v1/vocab/course#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xlat: <http://purl.org/pearson/xl/v1/vocab/AssignmentType#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/vocab/course#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlc" .
+
+xlc:BookPart rdf:type owl:Class .
+
+xlc:MasteryInfo rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:assignmentType;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:affectsStudyPlan;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlc:masteryLevel;
+    owl:minCardinality  1
+  ] .
+
+xlc:LearningAid rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:onClass         xsd:normalizedString;
+    owl:minQualifiedCardinality  1
+  ] .
+
+xlc:courseOwner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range ceds:OrganizationPersonRole ;
+  rdfs:comment "The OrganizationPersonRole record that identifies the \"owner\" of this course section." .
+
+xlc:coversBookPart rdf:type rdf:Property ;
+  rdfs:domain lisc:CourseSection ;
+  rdfs:range xlc:BookPart ;
+  rdfs:comment "Specifies a part of the textbook that this course section covers." .
+
+xlc:assignmentType rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xlat:AssignmentType ;
+  rdfs:comment "The type of assignment to which this MasteryInfo record applies." .
+
+xlc:affectsStudyPlan rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "Specifies whether the assignments of the specified type affect the learner's study plan." .
+
+xlc:masteryLevel rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlc:MasteryInfo ;
+  rdfs:range xsd:float ;
+  rdfs:comment "Specifies the score that learners must achieve on assignments of the specified type in order to demonstrate mastery.  This is a value in the range [0, 1]." .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+
+xlc:BookPart rdf:type bind:Addressable .
+xlc:MasteryInfo rdf:type bind:EmbeddableClass .
+xlc:LearningAid rdf:type bind:Addressable .
+@prefix xlat: <http://purl.org/pearson/xl/v1/vocab/AssignmentType#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/vocab/AssignmentType#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlat" .
+
+xlat:AssignmentType rdf:type owl:Class .
+
+xlat:TEST rdf:type xlat:AssignmentType .
+
+xlat:QUIZ-ME rdf:type xlat:AssignmentType .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlat: <http://purl.org/pearson/xl/v1/vocab/AssignmentType#> .
+
+xlat:AssignmentType rdf:type bind:Enum .
+@prefix xlk: <http://purl.org/pearson/xl/v1/vocab/knewton#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/vocab/knewton#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlk" .
+
+xlk:KnewtonRecommendations rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:orgUnit;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:person;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:recommendations;
+    owl:maxCardinality  1
+  ] ; 
+  rdfs:comment "A container that holds the top ten recommendations for a given learner within a given organizational unit (e.g. course section)." .
+
+xlk:Recommendation rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:bookPart;
+    owl:minCardinality  1
+  ] .
+
+xlk:orgUnit rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range ceds:Organization ;
+  rdfs:comment "The organizational unit to which these recommendations apply." .
+
+xlk:person rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range ceds:Person ;
+  rdfs:comment "The learner to whom these recommendations apply." .
+
+_:recommendationsList a owl:Class;
+  owl:intersectionOf (
+    rdf:List
+    [ a owl:Restriction;
+      owl:onProperty rdf:first;
+      owl:allValuesFrom xlk:Recommendation
+    ]
+    [ a owl:Restriction;
+      owl:onProperty rdf:rest;
+      owl:allValuesFrom [
+        a owl:Class;
+        owl:unionOf (
+          _:recommendationsList
+          [ a owl:Class;
+            owl:oneOf ( rdf:nil )
+          ]
+        )
+      ]
+    ]
+  ) .
+
+xlk:recommendations rdf:type rdf:Property ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range _:recommendationsList ;
+  rdfs:comment "The top ten recommendations for the specified user in the specified orgUnit (e.g. course section), in priority order." .
+
+xlk:bookPart rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:Recommendation ;
+  rdfs:range xlc:BookPart ;
+  rdfs:comment "The part of the text book that Knewton recommends for the learner." .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix xlk: <http://purl.org/pearson/xl/v1/vocab/knewton#> .
+
+xlk:KnewtonRecommendations rdf:type bind:Addressable .
+xlk:KnewtonRecommendations rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:orgUnit ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:person ;
+    bind:associationType bind:Aggregation
+  ] ,
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:recommendations ;
+    bind:associationType bind:Aggregation
+  ] .
+xlk:Recommendation rdf:type bind:Addressable .
+xlk:Recommendation rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty xlk:bookPart ;
+    bind:associationType bind:Aggregation
+  ] .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+

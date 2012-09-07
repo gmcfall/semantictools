@@ -1,0 +1,50 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix liso: <http://www.imsglobal.org/imspurl/lis/v2/vocab/outcomes#> .
+
+liso:LineItem rdf:type bind:Addressable .
+liso:LineItem rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:result ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:context ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:lineItemType ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:custom ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:resultValue ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:dataSource ;
+    bind:associationType bind:Aggregation
+  ] .
+liso:Result rdf:type bind:Addressable .
+liso:Result rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:score ;
+    bind:associationType bind:Composition
+  ] .
+liso:LineItemType rdf:type bind:Enum .
+liso:ResultValue rdf:type bind:Addressable .
+liso:DataSource rdf:type bind:Addressable .
+liso:Score rdf:type bind:EmbeddableClass .
+liso:OrderedValue rdf:type bind:Enum .
+liso:ValueList rdf:type bind:EmbeddableClass .
+liso:ValueList rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:orderedValue ;
+    bind:associationType bind:Composition
+  ] .
+liso:ValueRange rdf:type bind:EmbeddableClass .
+

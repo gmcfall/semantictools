@@ -1,0 +1,77 @@
+@prefix xlk: <http://purl.org/pearson/xl/v1/vocab/knewton#> .
+@prefix ceds: <http://purl.org/nces/v1/vocab/ceds#> .
+@prefix xlc: <http://purl.org/pearson/xl/v1/vocab/course#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/xl/v1/vocab/knewton#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "xlk" .
+
+xlk:KnewtonRecommendations rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:orgUnit;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:person;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:recommendations;
+    owl:maxCardinality  1
+  ] ; 
+  rdfs:comment "A container that holds the top ten recommendations for a given learner within a given organizational unit (e.g. course section)." .
+
+xlk:Recommendation rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      xlk:bookPart;
+    owl:minCardinality  1
+  ] .
+
+xlk:orgUnit rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range ceds:Organization ;
+  rdfs:comment "The organizational unit to which these recommendations apply." .
+
+xlk:person rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range ceds:Person ;
+  rdfs:comment "The learner to whom these recommendations apply." .
+
+_:recommendationsList a owl:Class;
+  owl:intersectionOf (
+    rdf:List
+    [ a owl:Restriction;
+      owl:onProperty rdf:first;
+      owl:allValuesFrom xlk:Recommendation
+    ]
+    [ a owl:Restriction;
+      owl:onProperty rdf:rest;
+      owl:allValuesFrom [
+        a owl:Class;
+        owl:unionOf (
+          _:recommendationsList
+          [ a owl:Class;
+            owl:oneOf ( rdf:nil )
+          ]
+        )
+      ]
+    ]
+  ) .
+
+xlk:recommendations rdf:type rdf:Property ;
+  rdfs:domain xlk:KnewtonRecommendations ;
+  rdfs:range _:recommendationsList ;
+  rdfs:comment "The top ten recommendations for the specified user in the specified orgUnit (e.g. course section), in priority order." .
+
+xlk:bookPart rdf:type owl:FunctionalProperty ;
+  rdfs:domain xlk:Recommendation ;
+  rdfs:range xlc:BookPart ;
+  rdfs:comment "The part of the text book that Knewton recommends for the learner." .
+

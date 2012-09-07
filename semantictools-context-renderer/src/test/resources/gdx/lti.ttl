@@ -1,0 +1,18 @@
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> a owl:Ontology  ;
+  rdfs:label "lti" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lti" .
+
+lti:ProductFamily rdf:type owl:Class ; 
+  rdfs:comment "The product family to which the integration partner (a tool belongs)." .
+
+lti:Capability rdf:type owl:Class ; 
+  rdfs:comment "A formal declaration of the ability to implement some portion of an integration contract.  Capabilities are declared by one party of the integration and enabled by another." .
+

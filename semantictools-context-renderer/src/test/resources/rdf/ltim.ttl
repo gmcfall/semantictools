@@ -1,0 +1,132 @@
+@prefix ltim: <http://www.imsglobal.org/imspurl/lti/v2/vocab/message#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.imsglobal.org/imspurl/lti/v2/vocab/message#> a owl:Ontology  ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "ltim" .
+
+ltim:LtiLink rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:title;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:description;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:launch_url;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:secure_launch_url;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:handler;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:placement;
+    owl:minCardinality  1
+  ] .
+
+ltim:Property rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:name;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:value;
+    owl:minCardinality  1
+  ] .
+
+ltim:PropertySet rdf:type owl:Class;
+ .
+
+ltim:PlatformPropertySet rdf:type owl:Class ;
+  rdfs:subClassOf ltim:PropertySet ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:platform;
+    owl:minCardinality  1
+  ] .
+
+ltim:Platform rdf:type owl:Class;
+ .
+
+ltim:LinkPlacement rdf:type owl:Class;
+ .
+
+ltim:Credentials rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:key;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ltim:secret;
+    owl:minCardinality  1
+  ] .
+
+ltim:LinkLevelCredentials rdf:type owl:Class;
+ .
+
+ltim:title rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range xsd:normalizedString .
+
+ltim:description rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range xsd:string .
+
+ltim:launch_url rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range xsd:anyURI .
+
+ltim:secure_launch_url rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range xsd:anyURI .
+
+ltim:handler rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range lti:ResourceType .
+
+ltim:extension rdf:type rdf:Property ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range ltim:PlatformPropertySet .
+
+ltim:placement rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:LtiLink ;
+  rdfs:range ltim:LinkPlacement .
+
+ltim:name rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:Property ;
+  rdfs:range xsd:token .
+
+ltim:value rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:Property ;
+  rdfs:range xsd:string .
+
+ltim:property rdf:type rdf:Property ;
+  rdfs:domain ltim:PropertySet ;
+  rdfs:range ltim:Property .
+
+ltim:platform rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:PlatformPropertySet ;
+  rdfs:range ltim:Platform .
+
+ltim:key rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:Credentials ;
+  rdfs:range xsd:normalizedString .
+
+ltim:secret rdf:type owl:FunctionalProperty ;
+  rdfs:domain ltim:Credentials ;
+  rdfs:range xsd:normalizedString .
+
