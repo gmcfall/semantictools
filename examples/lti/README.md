@@ -14,9 +14,9 @@ plugin to your StarUML installation.
 
 # Understanding the Methodology
  
-Our approach to defining REST services is based on the principles of Linked Data 
-which [Tim Berners-Lee] (http://www.w3.org/DesignIssues/LinkedData.html)
-summarized with four basic ideas :
+Our approach to defining REST services is based on the principles of
+[Linked Data] (http://www.w3.org/DesignIssues/LinkedData.html)
+which Tim Berners-Lee summarized with four basic ideas :
 
 1.  Use URIs as names for things
 2.  Use HTTP URIs so that people can look up those names
