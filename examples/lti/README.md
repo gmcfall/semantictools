@@ -65,6 +65,10 @@ To produce the documentation for the LTI project, do the following...
     cd examples/lti  
     mvn generate-sources  
     
+The output can be found at
+
+    target/generated-sources/rdf
+
 But we are getting ahead of ourself.  We need to backup and describe the other 
 assets within the `examples/lti` project.
 
