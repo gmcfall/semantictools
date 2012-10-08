@@ -1,6 +1,8 @@
 package org.semantictools.plugin;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -51,10 +53,23 @@ public class DocumentationPlugin extends AbstractMojo {
    */
   private boolean publish;
   
+  /**
+   * The endpoint to which documentation will be published.  This parameter
+   * is meaningful only if publish=true.
+   * 
+   * @parameter expression="http://semantic-tools.appspot.com/admin/upload.do"
+   */
+  private String publishEndpoint;
+  
   public void execute() throws MojoExecutionException, MojoFailureException {
 
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    String version = dateFormat.format(new Date());
     
     DocumentationGenerator generator = new DocumentationGenerator(rdfDir, outputDir, publish);
+    generator.setUploadEndpoint(publishEndpoint);
+    generator.setVersion(version);
+    
     try {
       generator.run();
     } catch (Exception e) {
