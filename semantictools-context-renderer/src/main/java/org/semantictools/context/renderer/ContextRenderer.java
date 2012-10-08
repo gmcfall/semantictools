@@ -10,7 +10,6 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -400,6 +399,7 @@ public class ContextRenderer {
       
     }
 
+    @SuppressWarnings("deprecation")
     private void drawText(String text, Rect box, Padding padding, Font font, Color color, Color bgColor) {
      
       int x = box.getX() + padding.getPadLeft();
@@ -440,6 +440,7 @@ public class ContextRenderer {
     
     
     
+    @SuppressWarnings("deprecation")
     LayoutEngine(DiagramSpec spec) {
       this.spec = spec;
       BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);

@@ -17,7 +17,9 @@ import javax.imageio.ImageIO;
 
 import org.semantictools.context.renderer.HtmlPrinter;
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.ReferenceManager;
+import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.frame.api.LinkManager;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.Datatype;
@@ -27,7 +29,6 @@ import org.semantictools.frame.model.NamedIndividual;
 import org.semantictools.frame.model.OntologyInfo;
 import org.semantictools.frame.model.RdfType;
 import org.semantictools.index.api.LinkedDataIndex;
-import org.semantictools.index.model.MediaTypeReference;
 import org.semantictools.uml.graphics.ClassDiagram;
 import org.semantictools.uml.model.UmlAssociation;
 import org.semantictools.uml.model.UmlAssociationEnd;
@@ -82,7 +83,11 @@ public class UmlPrinter extends HtmlPrinter {
       if (info == null) continue;
       init(info);
       switch (info.getType()) {
-      case RDF: printOntology(ontURI); break;
+      case RDF: 
+        if (info.hasClasses()) {
+          printOntology(ontURI); 
+        }
+        break;
       case XSD: printXmlSchema(info); break;
       }
       
@@ -231,6 +236,8 @@ public class UmlPrinter extends HtmlPrinter {
 
   private void copyFile(InputStream stream, File cssFile) throws IOException  {
    
+    File parent = cssFile.getParentFile();
+    parent.mkdirs();
     FileOutputStream out = new FileOutputStream(cssFile);
     try {
       byte[] buffer = new byte[1024];
@@ -427,33 +434,56 @@ public class UmlPrinter extends HtmlPrinter {
   private void printMediaTypes(UmlClass umlClass) {
     if (mediaTypeOracle == null) return;
     
-    List<MediaTypeReference> list = mediaTypeOracle.listMediaTypesForClass(umlClass.getURI());
-    if (list.isEmpty()) return;
     
+    
+    List<ServiceDocumentation> list = mediaTypeOracle.getServiceDocumentationForClass(umlClass.getURI());
+    if (list==null || list.isEmpty()) return;
+
 
     beginDiv("list-heading");
-    print("Known Representations:");
+    print("REST Services:");
     endDiv();
     println("<UL>");
     pushIndent();
-    for (MediaTypeReference ref : list) {
-      String name = ref.getMediaTypeName();
-      String uri = linkManager.relativize(ref.getMediaTypeURI());
-      String serviceURI = linkManager.relativize(ref.getServiceAPI());
+    
+    for (int i=0; i<list.size(); i++) {
       
+      ServiceDocumentation doc = list.get(i);
+      String serviceLabel = (list.size()==1) ? "Service Documentation" :
+        "Service #" + (i+1) + " Documentation";
+
+      String serviceHref = linkManager.relativize(doc.getServiceDocumentationFile());
       indent();
-      println("<LI><code>");
-      print(name);
-      print("</code> (");
-      printAnchor(uri, "Media Type");
-      if (serviceURI != null) {
-        print(", ");
-        printAnchor(serviceURI, "REST API");
-      }
-      println(")");
+      print("<LI>");
+      printAnchor(serviceHref, serviceLabel);
+      println();
+      pushIndent();
+      printMediaTypes(doc.listContextProperties());
+      popIndent();
+      
+     
     }
     popIndent();    
     println("</UL>");
+    
+  }
+
+  private void printMediaTypes(List<ContextProperties> list) {
+    indent();
+    print("<DIV");
+    printAttr("class", "running-list");
+    println(">");
+    pushIndent();
+    for (ContextProperties context : list) {
+      String href = linkManager.relativize(context.getMediaTypeDocFile());
+      String mediaType = context.getMediaType();
+      indent();
+      print("<DIV>");
+      printAnchor(href, mediaType);
+      println("</DIV>");
+    }
+    popIndent();
+    println("</DIV>");
     
   }
 
@@ -661,6 +691,10 @@ public class UmlPrinter extends HtmlPrinter {
     for (Field field : list) {
       
       RdfType fieldType = field.getRdfType();
+      
+      if (fieldType.canAsListType()) {
+        fieldType = fieldType.asListType().getElementType();
+      }
       
       String link = typeManager.isStandard(fieldType.getNamespace()) ? fieldType.getLocalName() :
         linkManager.getTypeLink(fieldType);

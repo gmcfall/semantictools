@@ -95,6 +95,18 @@ public class UmlFileManager extends LinkManager {
     
   }
   
+  /**
+   * Returns the URI for the documentation of the specified RDF type, relative
+   * to the given source file.
+   */
+  public String getTypeRelativePath(File sourceFile, RdfType type) {
+    File ontologyFile = createOntologyAllFile(type.getNamespace());
+   
+    LinkManager linkManager = new LinkManager(sourceFile);
+    String uri = linkManager.relativize(ontologyFile) + "#" + getTypeId(type);
+    return uri;
+  }
+  
   public String getTypeLink(RdfType type) {
     return "<A href=\"" + getTypeHref(type) + "\">" + type.getLocalName() + "</A>";
   }

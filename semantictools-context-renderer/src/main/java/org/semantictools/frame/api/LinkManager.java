@@ -1,10 +1,22 @@
 package org.semantictools.frame.api;
 
+import java.io.File;
+
 public class LinkManager {
   
   private String baseURI;
   
   public LinkManager() {}
+  
+  public LinkManager(String baseURI) {
+    this.baseURI = baseURI;
+  }
+  
+  public LinkManager(File baseFile) {
+    this(toUnixStyle(baseFile));
+  }
+  
+  
   
   public void setBaseURI(String baseURI) {
     this.baseURI = baseURI;
@@ -12,6 +24,18 @@ public class LinkManager {
   
   public String getBaseURI() {
     return baseURI;
+  }
+  
+  /**
+   * Replace backslashes with forward slashes.
+   */
+  static private String toUnixStyle(File file) {
+    return file.toString().replace('\\', '/');
+  }
+  
+  public String relativize(File file) {
+    String path = toUnixStyle(file);
+    return relativize(path);
   }
 
   /**
@@ -35,16 +59,15 @@ public class LinkManager {
     }
     
     int slash = this.baseURI.lastIndexOf('/');
-    int count = this.baseURI.endsWith("/") ? -1 : 0;
+    int count = 0;
     
     while (slash > 0) {
-      count++;
       String prefix = this.baseURI.substring(0, slash+1);
       if (uri.startsWith(prefix)) {
         return generateRelative(prefix, count, slash, uri);
       }
       slash = this.baseURI.lastIndexOf('/', slash-1);
-      
+      count++;
     }
     
     return uri;

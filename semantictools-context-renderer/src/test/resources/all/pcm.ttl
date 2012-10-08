@@ -1,0 +1,110 @@
+@prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
+@prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
+@prefix pcd: <http://purl.org/pearson/content/v1/xsd/datatypes#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix topic: <http://purl.org/pearson/topics/> .
+@prefix lrmi: <http://schema.org/> .
+@prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/content/v1/vocab/metadata#> a owl:Ontology  ;
+  rdfs:label "Pearson Content" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "pcm" .
+
+pcm:Envelope rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pcm:metadata;
+    owl:minCardinality  1;
+    rdfs:comment "The metadata for the resource."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pcm:body;
+    owl:minCardinality  1;
+    rdfs:comment "The concrete representation of the resource that is described by the metadata within the envelope."
+  ] .
+
+pcm:DublinCoreResource rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      dc:created;
+    owl:allValuesFrom  xsd:dateTime;
+    owl:maxCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      dc:description;
+    owl:allValuesFrom  xsd:string;
+    owl:maxCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      dc:title;
+    owl:maxCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      dc:subject;
+    owl:allValuesFrom  topic:Topic
+  ] .
+
+pcm:Metadata rdf:type owl:Class ;
+  rdfs:subClassOf 
+    pcm:LearningResource ,
+    pcm:DublinCoreResource ,
+    pcm:ManagedResource .
+
+pcm:LearningResource rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:timeRequired;
+    owl:maxCardinality  1;
+    rdfs:comment "Approximate or typical time it takes to work with or through this learning resource for the typical intended target audience."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:educationalAlignment;
+    rdfs:comment "The competency, learning standard, skill and/or text complexity that the work is aligned to."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:intendedEndUserRole;
+    owl:allValuesFrom  pe:Role;
+    rdfs:comment "The role of the individual or group for which the work in question was produced."
+  ] .
+
+pcm:ManagedResource rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pcm:format;
+    owl:minCardinality  1;
+    rdfs:comment "The media type for the resource expressed as a string. This property is conceptually similar to the property with the same name from the Dublin Core. The only difference is the way in which values are represented.  In the Pearson vocabulary, a media type is expressed as a string.  In the Dublin Core, a media type is expressed as a non-literal value (i.e. a resource identified by a URI)."
+  ] ; 
+  rdfs:comment "A resource described by metadata from the Pearson corporate vocabulary." .
+
+pcm:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:ActivitySequence
+      paf:SequenceNode
+      pcm:ManagedResource
+    )
+  ] ;
+  rdfs:range pcd:GUID.Type .
+
+pcm:metadata rdf:type owl:FunctionalProperty ;
+  rdfs:domain pcm:Envelope ;
+  rdfs:range pcm:Metadata ;
+  rdfs:comment "The metadata for the resource." .
+
+pcm:body rdf:type owl:FunctionalProperty ;
+  rdfs:domain pcm:Envelope ;
+  rdfs:range owl:Thing ;
+  rdfs:comment "The concrete representation of the resource that is described by the metadata within the envelope." .
+
+pcm:format rdf:type rdf:Property ;
+  rdfs:domain pcm:ManagedResource ;
+  rdfs:range xsd:string ;
+  rdfs:comment "The media type for the resource expressed as a string. This property is conceptually similar to the property with the same name from the Dublin Core. The only difference is the way in which values are represented.  In the Pearson vocabulary, a media type is expressed as a string.  In the Dublin Core, a media type is expressed as a non-literal value (i.e. a resource identified by a URI)." .
+

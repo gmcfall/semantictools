@@ -34,7 +34,7 @@ public class ListType implements RdfType {
 
   @Override
   public String getUri() {
-    return null;
+    return ontClass.getURI();
   }
 
   @Override

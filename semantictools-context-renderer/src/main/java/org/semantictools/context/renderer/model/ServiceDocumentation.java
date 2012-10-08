@@ -1,5 +1,6 @@
 package org.semantictools.context.renderer.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,19 +8,31 @@ import java.util.Map;
 
 public class ServiceDocumentation implements ReferenceManager {
 
-  private ContextProperties contextProperties;
-  private String mediaType;
-  private String mediaTypeRef;
+  
+  private List<ContextProperties> contextPropertiesList = new ArrayList<ContextProperties>();
+
+  private File serviceDocumentationFile;
+  private String rdfTypeURI;
   private String postResponseMediaType;
   private String postResponseMediaTypeRef;
   
   private String title;
   private String subtitle;
   private String status;
+  private String date;
+  private boolean versionHistory;
   private String abstactText;
   private String introduction;
   private String representationHeading;
   private String representationText;
+  private String urlTemplateText;
+  private boolean allowArbitraryFormat;
+  private boolean allowHtmlFormat;
+  private String htmlFormatDocumentation;
+  private String defaultMediaType;
+  private String postProcessingRules;
+  private boolean contentNegotiation;
+  
   private MethodDocumentation postDocumentation;
   private MethodDocumentation getDocumentation;
   private MethodDocumentation putDocumentation;
@@ -31,14 +44,133 @@ public class ServiceDocumentation implements ReferenceManager {
   
   private String cssHref;
   private Map<String, String> referenceMap = new HashMap<String, String>();
-  
-  public String getMediaType() {
-    return mediaType;
+  private Map<String, String> mediaTypeUriMap = new HashMap<String, String>();
+
+  public File getServiceDocumentationFile() {
+    return serviceDocumentationFile;
   }
-  public void setMediaType(String mediaType) {
-    this.mediaType = mediaType;
+  public void setServiceDocumentationFile(File serviceDocumentationFile) {
+    this.serviceDocumentationFile = serviceDocumentationFile;
+  }
+
+  /**
+   * Specifies whether the documentation for the service should contain a link
+   * to the version history of the specification.
+   */
+  public void setHistoryLink(boolean value) {
+    versionHistory = value;
   }
   
+  /**
+   * Returns true if the documentation for the service should contain a link
+   * to the version history of the specification.
+   */
+  public boolean hasHistoryLink() {
+    return versionHistory;
+  }
+  
+  /**
+   * Returns true if the REST Service supports content negotiation.
+   */
+  public boolean isContentNegotiation() {
+    return contentNegotiation;
+  }
+
+  /**
+   * Specifies whether the REST Service supports content negotiation.
+   */
+  public void setContentNegotiation(boolean contentNegotiation) {
+    this.contentNegotiation = contentNegotiation;
+  }
+  public String getDefaultMediaType() {
+    return defaultMediaType;
+  }
+  public void setDefaultMediaType(String defaultMediaType) {
+    this.defaultMediaType = defaultMediaType;
+  }
+  public String getPostProcessingRules() {
+    return postProcessingRules;
+  }
+  public void setPostProcessingRules(String postProcessingRules) {
+    this.postProcessingRules = postProcessingRules;
+  }
+  public String getRdfTypeURI() {
+    if (rdfTypeURI == null && !contextPropertiesList.isEmpty()) {
+      rdfTypeURI = contextPropertiesList.get(0).getRdfTypeURI();
+    }
+    return rdfTypeURI;
+  }
+  public void setRdfTypeURI(String rdfTypeURI) {
+    this.rdfTypeURI = rdfTypeURI;
+  }
+  
+  public Map<String,String> getMediaTypeUriMap() {
+    return mediaTypeUriMap;
+  }
+  
+  public boolean hasMultipleFormats() {
+    int count = contextPropertiesList.size() + mediaTypeUriMap.size() + (allowHtmlFormat?1:0);
+    return count > 1;
+  }
+  
+  
+  /**
+   * Returns true if the REST API supports a user-friendly HTML representation
+   * of the resource.
+   */
+  public boolean isAllowHtmlFormat() {
+    return allowHtmlFormat;
+  }
+  public void setAllowHtmlFormat(boolean allowHtmlFormat) {
+    this.allowHtmlFormat = allowHtmlFormat;
+  }
+  
+  
+  public String getDate() {
+    return date;
+  }
+  public void setDate(String date) {
+    this.date = date;
+  }
+  /**
+   * Returns the text that describes the text/html representation of the resource.
+   */
+  public String getHtmlFormatDocumentation() {
+    return htmlFormatDocumentation;
+  }
+
+  /**
+   * Sets the text that describes the text/html representation of the resource.
+   */
+  public void setHtmlFormatDocumentation(String text) {
+    this.htmlFormatDocumentation = text;
+  }
+  /**
+   * Returns true if the REST API supports arbitrary formats for resources, 
+   * and false otherwise.  If this value is true, then a client may POST
+   * a resource in any format, and GET the resource back in the given format
+   * through content negotiation.
+   */
+  public boolean isAllowArbitraryFormat() {
+    return allowArbitraryFormat;
+  }
+  
+  
+  public String getUrlTemplateText() {
+    return urlTemplateText;
+  }
+  public void setUrlTemplateText(String urlTemplateText) {
+    this.urlTemplateText = urlTemplateText;
+  }
+  /**
+   * Specifies whether the REST API supports arbitrary formats for resources.
+   * If this value is true, then a client may POST
+   * a resource in any format, and GET the resource back in the given format
+   * through content negotiation.
+   */
+  public void setAllowArbitraryFormat(boolean allowArbitraryFormat) {
+    this.allowArbitraryFormat = allowArbitraryFormat;
+  }
   public String getTitle() {
     return title;
   }
@@ -90,12 +222,14 @@ public class ServiceDocumentation implements ReferenceManager {
   public void putReference(String key, String value) {
     referenceMap.put(key, value);
   }
-  public ContextProperties getContextProperties() {
-    return contextProperties;
+  
+  public void add(ContextProperties context) {
+    contextPropertiesList.add(context);
   }
-  public void setContextProperties(ContextProperties contextProperties) {
-    this.contextProperties = contextProperties;
+  public List<ContextProperties> listContextProperties() {
+    return contextPropertiesList;
   }
+  
   public String getCssHref() {
     return cssHref;
   }
@@ -113,12 +247,6 @@ public class ServiceDocumentation implements ReferenceManager {
   }
   public void setRepresentationText(String representationText) {
     this.representationText = representationText;
-  }
-  public String getMediaTypeRef() {
-    return mediaTypeRef;
-  }
-  public void setMediaTypeRef(String mediaTypeRef) {
-    this.mediaTypeRef = mediaTypeRef;
   }
   public MethodDocumentation getPostDocumentation() {
     return postDocumentation;

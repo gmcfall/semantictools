@@ -5,6 +5,7 @@ public class OntologyInfo {
   private String prefix;
   private String label;
   private OntologyType type = OntologyType.RDF;
+  private boolean hasClasses;
   
   public OntologyInfo() {}
   
@@ -46,6 +47,21 @@ public class OntologyInfo {
   public void setType(OntologyType type) {
     this.type = type;
   }
+
+
+  /**
+   * Returns true if this Ontology defines any RDF classes and false otherwise.
+   */
+  public boolean hasClasses() {
+    return hasClasses;
+  }
+
+
+  public void setHasClasses(boolean hasClasses) {
+    this.hasClasses = hasClasses;
+  }
+
+
   
   
   

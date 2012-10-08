@@ -1,0 +1,42 @@
+{
+  "@context" : "http://purl.org/pearson/paf/v1/ctx/core/RichActivitySequence",
+  "@type" : "ActivitySequence",
+  "@id" : "http://content.api.pearson.com/resources/activity/8861354903938758638260",
+  "guid" : "8861354903938758638260",
+  "user" : "http://idm.api.pearson.com/resources/identities/59292747585605473",
+  "learningContext" : "http://ecollege.com/resources/sections/252684305693276",
+  "overallActivity" : {
+     "@type" : "StructuredAssignment",
+     "@id" : "http://content.api.pearson.com/resources/activity/51434494373634373",
+     "versionHistory" : "http://content.api.pearson.com/resources/VersionHistory/424384729",
+     "title" : "Chapter 3 Quiz",  
+     "extraCreditMaximum" : 5,
+     "normalMaximum" : 30,
+     "assignmentContents" : {
+       "childActivity" : [ 
+         { "activityTitle" : "Section 1",
+           "activityFormat" : "application/vnd.pearson.paf.v1.ActivityContainer+json",
+           "activity" : "http://content.api.pearson.com/resources/activity/54937502720927364",
+           "childActivity" : [
+             { "activityFormat" : "application/vnd.pearson.qti.v2.asi+xml",
+               "activity" : "http://content.api.pearson.com/resources/activity/3937356253848474",
+               "activityTitle" : "Question 1",
+               "credit" : "ForCredit",
+               "extraCreditMaximum" : 5,
+               "normalMaximum" : 20
+             },
+             { "activityFormat" : "application/vnd.pearson.qti.v2.asi+xml",
+               "activity" : "http://content.api.pearson.com/resources/activity/59037905673623785",
+               "activityTitle" : "Question 2",
+               "credit" : "ForCredit",
+               "normalMaximum" : 10
+             }
+           ]
+         },
+         { "activityTitle" : "Section 2",
+           "..." : "..."
+         }
+       ]
+     }
+   }
+}

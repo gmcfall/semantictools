@@ -36,6 +36,10 @@ public class PrintEngine {
       print(value);
       print("\"");
     }
+    
+    protected void print(int n) {
+      context.getWriter().print(n);
+    }
 
 	protected void println() {
 		context.getWriter().println();

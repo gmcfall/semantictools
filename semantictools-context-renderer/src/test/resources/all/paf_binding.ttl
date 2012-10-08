@@ -1,0 +1,91 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
+
+paf:Activity rdf:type bind:Addressable .
+paf:Activity rdf:type bind:AbstractClass .
+paf:ActivityContainer rdf:type bind:Addressable .
+paf:ActivityContainer rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:childActivity ;
+    bind:associationType bind:Composition
+  ] .
+paf:ActivityBinding rdf:type bind:EmbeddableClass .
+paf:ActivityBinding rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:activity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:credit ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:StructuredAssignment rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:assignmentContents ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:VersionHistory rdf:type bind:Addressable .
+paf:VersionHistory rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:activityVersion ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:masterActivity ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:Credit rdf:type bind:Enum .
+paf:ActivitySequence rdf:type bind:Addressable .
+paf:ActivitySequence rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:node ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:user ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:learningContext ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:overallActivity ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:SequenceNode rdf:type bind:Addressable .
+paf:SequenceNode rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:activity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:player ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:activityState ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:nodeResult ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:binding ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:ActivityState rdf:type bind:Addressable .
+paf:NodeResult rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:systemResponse ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:ActivityResult rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:attempt ;
+    bind:associationType bind:Aggregation
+  ] .
+

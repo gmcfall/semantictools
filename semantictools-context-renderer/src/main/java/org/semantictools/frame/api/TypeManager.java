@@ -1,5 +1,8 @@
 package org.semantictools.frame.api;
 
+import static org.semantictools.frame.model.OntologyType.RDF;
+import static org.semantictools.frame.model.OntologyType.XSD;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import static org.semantictools.frame.model.OntologyType.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -23,42 +25,108 @@ import org.semantictools.frame.model.OntologyType;
 import org.semantictools.frame.model.RdfType;
 import org.xml.sax.SAXException;
 
+import com.hp.hpl.jena.datatypes.xsd.impl.XMLLiteralType;
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.Ontology;
+import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class TypeManager {
   
-  private static OntologyInfo XMLSCHEMA = new OntologyInfo("xs", "http://www.w3.org/2001/XMLSchema#", XSD);
-  private static OntologyInfo OWL = new OntologyInfo("owl", "http://www.w3.org/2002/07/owl#", RDF);
-  private static OntologyInfo RDFS = new OntologyInfo("rdfs", "http://www.w3.org/2000/01/rdf-schema#", RDF);
+  private static OntologyInfo XSD_INFO = new OntologyInfo("xs", "http://www.w3.org/2001/XMLSchema#", XSD);
+  private static OntologyInfo OWL_INFO = new OntologyInfo("owl", "http://www.w3.org/2002/07/owl#", RDF);
+  private static OntologyInfo RDFS_INFO = new OntologyInfo("rdfs", "http://www.w3.org/2000/01/rdf-schema#", RDF);
+  private static OntologyInfo XDT_INFO = new OntologyInfo("xdt", "http://www.w3.org/2004/10/xpath-datatypes#", XSD);
+  private static OntologyInfo BIND = new OntologyInfo("bind", "http://purl.org/semantictools/v1/vocab/bind#", RDF);
   
   private Map<String, Frame> uri2Frame = new HashMap<String, Frame>();
   private Map<String, Datatype> uri2Datatype = new HashMap<String, Datatype>();
   private Map<String, OntologyInfo> uri2Ontology = new HashMap<String, OntologyInfo>();
-  private Map<String, ListType> uri2ListType = new HashMap<String, ListType>();
+  private Map<String, ListType> elemURI2ListType = new HashMap<String, ListType>();
+  private Map<String, ListType> listURI2ListType = new HashMap<String, ListType>();
   private Set<String> standard = new HashSet<String>();
+  private Set<String> standardDatatype = new HashSet<String>();
+  private Set<String> standardLiteralType = new HashSet<String>();
   
   private OntModel ontModel;
   
   public TypeManager() {
     ontModel = ModelFactory.createOntologyModel();
-    addStandard(XMLSCHEMA);
-    addStandard(OWL);
-    addStandard(RDFS);
+    addStandard(XSD_INFO);
+    addStandard(OWL_INFO);
+    addStandard(RDFS_INFO);
+    addStandard(XDT_INFO);
+    addStandard(BIND);
+    addDayTimeDuration();
     addOwlThing();
     addResource();
+    addStandardLiteralTypes();
   }
   
+  private void addStandardLiteralTypes() {
+    standardLiteralType.add(RDFS.Literal.getURI());
+    standardLiteralType.add(RDFS.Datatype.getURI());
+    standardLiteralType.add(XMLLiteralType.theXMLLiteralType.getURI());
+  }
+  
+  public boolean isStandardLiteralType(String typeURI) {
+    return standardLiteralType.contains(typeURI);
+  }
+
+  private void addDayTimeDuration() {
+   
+    Datatype duration = getDatatypeByUri(com.hp.hpl.jena.vocabulary.XSD.duration.getURI());
+    Datatype dayTimeDuration = new Datatype();
+    dayTimeDuration.setLocalName("dayTimeDuration");
+    dayTimeDuration.setUri(XDT_INFO.getUri() + "dayTimeDuration");
+    dayTimeDuration.setBase(duration);
+    add(dayTimeDuration);
+  }
+  
+  public void analyzeOntologies() {
+    List<OntClass> classList = ontModel.listClasses().toList();
+    for (OntClass type : classList) {
+      String namespace = type.getNameSpace();
+      OntologyInfo info = getOntologyByUri(namespace);
+      if (info != null) {
+        info.setHasClasses(true);
+      }
+    }
+  }
+
+  
+  public String getXsdBaseURI(Datatype type) {
+    if (com.hp.hpl.jena.vocabulary.RDFS.Literal.getURI().equals(type.getUri())) {
+      return com.hp.hpl.jena.vocabulary.XSD.xstring.getURI();
+    }
+    String xsdURI = com.hp.hpl.jena.vocabulary.XSD.getURI();
+    while (type != null) {
+      if (type.getUri().startsWith(xsdURI)) {
+        return type.getUri();
+      }
+      type = type.getBase();
+    } 
+    return null;
+  }
+
   public boolean isStandard(String ontologyURI) {
     return standard.contains(ontologyURI);
   }
   
+  public boolean isStandardDatatype(String namespaceURI) {
+    return standardDatatype.contains(namespaceURI);
+  }
+  
   private void addStandard(OntologyInfo info) {
     add(info);
+    if (info.getType() == OntologyType.XSD) {
+      standardDatatype.add(info.getUri());
+    }
     standard.add(info.getUri());
   }
   
@@ -145,13 +213,40 @@ public class TypeManager {
     return namespaceURI;
   }
   
+  /**
+   * Returns the OntClass that specifies the type of elements contained within a 
+   * List of type listType.  If the given listType is not a subclass of rdf:List,
+   * then this method returns null.
+   * @param listType  The owl:Class that is to be analyzed as a List.
+   * @return  The OntClass for the elements within the specified type of list, or null
+   * if the listType is not a subclass of rdf:List.
+   */
+  public OntClass getElementType(OntClass listType) {
+    List<OntClass> superList = listType.listSuperClasses(true).toList();
+    for (OntClass superType : superList) {
+      if (superType.isRestriction()) {
+        Restriction restriction = superType.asRestriction();
+        if (restriction.isAllValuesFromRestriction() && restriction.onProperty(com.hp.hpl.jena.vocabulary.RDF.first)) {
+          AllValuesFromRestriction allValues = restriction.asAllValuesFromRestriction();
+          return allValues.getAllValuesFrom().as(OntClass.class);
+        }
+      }
+    }
+    return null;
+  }
+  
 
   public void add(ListType listType) {
-    uri2ListType.put(listType.getElementType().getUri(), listType);
+    listURI2ListType.put(listType.getUri(), listType);
+    elemURI2ListType.put(listType.getElementType().getUri(), listType);
   }
   
   public ListType getListTypeByElementUri(String uri) {
-    return uri2ListType.get(uri);
+    return elemURI2ListType.get(uri);
+  }
+  
+  public ListType getListTypeByListUri(String uri) {
+    return listURI2ListType.get(uri);
   }
   
   public void add(OntologyInfo info) {
@@ -189,13 +284,36 @@ public class TypeManager {
   
   public Datatype getDatatypeByUri(String uri) {
     Datatype type = uri2Datatype.get(uri);
-    if (type == null && (  uri.startsWith(XMLSCHEMA.getUri()) || uri.startsWith(RDFS.getUri())  )) {
-      type = new Datatype();
-      type.setUri(uri);
-      type.setLocalName(getLocalName(uri));
-      
-      add(type);
+    if (type == null) {
+      String namespace = getNamespace(uri);
+      if (type == null && (  isStandardDatatype(namespace) || uri.startsWith(RDFS_INFO.getUri())  )) {
+        type = new Datatype();
+        type.setUri(uri);
+        type.setLocalName(getLocalName(uri));
+        if (!namespace.equals(XSD_INFO) && !namespace.equals(RDF)) {
+          OntClass ontClass = ontModel.getOntClass(uri);
+          if (ontClass != null) {
+            List<OntClass> superList = ontClass.listSuperClasses().toList();
+            for (OntClass superClass : superList) {
+              String superNamespace = superClass.getNameSpace();
+              if (isStandard(superNamespace) && !isStandardDatatype(superNamespace)) {
+                continue;
+              }
+              if (superClass != null) {
+                Datatype base = getDatatypeByUri(superClass.getURI());
+                if (base != null) {
+                  type.setBase(base);
+                }
+              }
+            }
+          }
+        }
+       
+        
+        add(type);
+      }
     }
+    
     return type;
   }
   

@@ -162,7 +162,43 @@ OL.uncondensed LI {
 	margin-left: 2em;
 }
 
+.list-heading {
+  font-weight: bold;
+  color: #336699;
+}
+
+.running-list {
+  margin-left: 2em;
+  margin-bottom: 1em;
+  font-family: courier;
+}
+
 .qualifier {
 	font-style: italic;
 	font-size: 70%;
+}
+
+.status {
+  position: fixed;
+  display: block;
+  top: 0px;
+  left: 0px;
+  width: 300px;
+  height: 30px;
+  text-align: right;
+  padding-top: 2px;
+  padding-right: 2em;
+  background-color: red;
+  color: white;
+  font-size: 20px;
+  transform-origin: left top;
+  transform: rotate(-90deg) translate(-100%, 0%);
+  -ms-transform-origin: left top;
+  -ms-transform: rotate(90deg);
+  -webkit-transform-origin: left top;
+  -webkit-transform: rotate(-90deg) translate(-100%, 0%);
+  -moz-transform-origin: left top;
+  -moz-transform: rotate(-90deg) translate(-100%, 0%);
+  -o-transform-origin: left top;
+  -o-transform: rotate(-90deg) translate(-100%, 0%);
 }

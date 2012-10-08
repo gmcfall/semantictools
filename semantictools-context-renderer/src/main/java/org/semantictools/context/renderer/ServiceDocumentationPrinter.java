@@ -1,12 +1,11 @@
 package org.semantictools.context.renderer;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 import org.semantictools.context.renderer.model.HttpHeaderInfo;
 import org.semantictools.context.renderer.model.HttpMethod;
-import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.MethodDocumentation;
+import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 
 public class ServiceDocumentationPrinter extends HtmlPrinter {
@@ -22,15 +21,18 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     init(doc);
     
     beginHTML();
+    printStatus();
     printTitle();
     printSubtitle();
-    printStatus();
+    printStatusDate();
+    printVersionHistoryLink();
     printEditors();
     printAuthors();
     printAbstract();
     printTocMarker();
     printIntroduction();
     printRepresentation();
+    printUrlTemplates();
     printServiceMethods();
     printReferences();
     endHTML();
@@ -40,6 +42,40 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     return popText();
   }
 
+
+  private void printVersionHistoryLink() {
+
+    if (doc.hasHistoryLink()) {
+      indent().print("<DIV");
+      printAttr("class", "contributorLabel");
+      println(">See Also: <a href=\"index.html?history\">Version History</a></DIV>");
+    }
+    
+    
+  }
+
+  private void printStatus() {
+    String status = doc.getStatus();
+    if (status == null) return;
+    
+    print("<div ");
+    printAttr("class", "status");
+    print(">");
+    print(status);
+    println("</div>");
+    
+  }
+
+  private void printUrlTemplates() {
+    String text = doc.getUrlTemplateText();
+    if (text == null) return;
+    
+    Heading heading = createHeading("URL Templates");
+    beginHeading(heading);
+    print(text);
+    endHeading();
+    
+  }
 
   private void printServiceMethods() {
     Heading heading = createHeading("Service Methods");
@@ -68,7 +104,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for GET Request", "getHeader", null);
       assignNumber(requestHeadersCaption);
-      indent().print("<LI>The request must contain the HTTP Headers listed in ");
+      indent().print("<LI>The request must contain the HTTP headers as specified in ");
       printLink(requestHeadersCaption);
       println(".</LI>");
       
@@ -237,6 +273,11 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     printParagraph("&nbsp;");
     printResponse(method, "POST");
     
+    String rules = doc.getPostProcessingRules();
+    if (rules != null) {
+      print(rules);
+    }
+    
 //    
 //    Caption responseCaption = new Caption(CaptionType.Table, "Possible responses from a POST method", "postResponse", null);
 //    assignNumber(responseCaption);
@@ -301,6 +342,11 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     print(heading);
     print(doc.getRepresentationText());
     
+    String htmlFormat = doc.getHtmlFormatDocumentation();
+    if (htmlFormat != null) {
+      print(htmlFormat);
+    }
+    
     
   }
 
@@ -359,13 +405,26 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
   }
 
-  private void printStatus() {
+  private void printStatusDate() {
     String status = doc.getStatus();
-    if (status == null) return;
+    String date = doc.getDate();
+    
+    if (status == null && date==null) return;
+
+    StringBuilder text = new StringBuilder();
+    if (status != null) {
+      text.append(status);
+    }
+    if (date != null) {
+      if (status != null) {
+        text.append(' ');
+      }
+      text.append(date);
+    }
     print("<DIV");
     printAttr("class", "subtitle");
     print(">");
-    print(status);
+    print(text.toString());
     println("</DIV>");
     
     

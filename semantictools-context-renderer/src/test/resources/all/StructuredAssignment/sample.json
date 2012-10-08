@@ -1,0 +1,27 @@
+{
+  "@context" : "http://purl.org/pearson/paf/v1/ctx/core/StructuredAssignment",
+  "@type" : "StructuredAssignment",
+  "@id" : "http://content.api.pearson.com/resources/activity/51434494373634373",
+  "versionHistory" : "http://content.api.pearson.com/resources/VersionHistory/424384726485846339",
+  "title" : "Chapter 3 Quiz",  
+  "extraCreditMaximum" : 5,
+  "normalMaximum" : 30,
+  "assignmentContents" : {
+    "childActivity" : [ 
+      { "activityFormat" : "application/vnd.pearson.qti.v1.itempresentation+json",
+        "activity" : "http://content.api.pearson.com/resources/activity/3937356253848474",
+        "activityTitle" : "Question 1",
+        "credit" : "ForCredit",
+        "extraCreditMaximum" : 5,
+        "normalMaximum" : 20
+      },
+      { "activityFormat" : "application/vnd.pearson.qti.v1.itempresentation+json",
+        "activity" : "http://content.api.pearson.com/resources/activity/59037905673623785",
+        "activityTitle" : "Question 2",
+        "credit" : "ForCredit",
+        "normalMaximum" : 10
+      }
+    ]
+  }
+
+}

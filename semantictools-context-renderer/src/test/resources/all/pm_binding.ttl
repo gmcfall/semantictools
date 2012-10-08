@@ -1,0 +1,23 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
+
+pm:MessageHeader rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pm:action ;
+    bind:associationType bind:Composition
+  ] .
+pm:Message rdf:type bind:AbstractClass .
+pm:Message rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pm:metadata ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pm:body ;
+    bind:associationType bind:Composition
+  ] .
+
+pm:HttpAction rdf:type bind:Enum .
+

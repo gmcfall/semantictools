@@ -1,0 +1,120 @@
+@prefix lrmi: <http://schema.org/> .
+@prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
+@prefix xdt: <http://www.w3.org/2004/10/xpath-datatypes#> .
+@prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://schema.org/> a owl:Ontology  ;
+  rdfs:label "Learning Resource Metadata Initiative" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lrmi" .
+
+lrmi:AlignmentObject rdf:type owl:Class ;
+  rdfs:subClassOf lrmi:Thing ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:alignmentType;
+    rdfs:comment "A category of alignment between the learning resource and the framework node. Recommended values include: \u2018assesses\u2019, \u2018teaches\u2019, \u2018requires\u2019, \u2018textComplexity\u2019, \u2018readingLevel\u2019, \u2018educationalSubject\u2019, and \u2018educationLevel\u2019."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:targetDescription;
+    rdfs:comment "The description of a node in an established educational framework."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:targetName;
+    rdfs:comment "The name of a node in an established educational framework."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:targetURL;
+    rdfs:comment "The URL of a node in an established educational framework."
+  ] ; 
+  rdfs:comment "An intangible item that describes an alignment between a learning resource and a node in an educational framework." .
+
+lrmi:Thing rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:description;
+    owl:minCardinality  1;
+    rdfs:comment "A short description of the item."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:image;
+    owl:minCardinality  1;
+    rdfs:comment "The URL of an image of the item"
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:name;
+    owl:minCardinality  1;
+    rdfs:comment "The name of the item."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lrmi:url;
+    owl:minCardinality  1;
+    rdfs:comment "URL of the item."
+  ] ; 
+  rdfs:comment "The most generic type of item." .
+
+lrmi:DataType rdf:type owl:Class .
+
+lrmi:Text rdf:type owl:Class .
+
+lrmi:URL rdf:type owl:Class .
+
+lrmi:alignmentType rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:AlignmentObject ;
+  rdfs:range lrmi:Text ;
+  rdfs:comment "A category of alignment between the learning resource and the framework node. Recommended values include: \u2018assesses\u2019, \u2018teaches\u2019, \u2018requires\u2019, \u2018textComplexity\u2019, \u2018readingLevel\u2019, \u2018educationalSubject\u2019, and \u2018educationLevel\u2019." .
+
+lrmi:targetDescription rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:AlignmentObject ;
+  rdfs:range lrmi:Text ;
+  rdfs:comment "The description of a node in an established educational framework." .
+
+lrmi:targetName rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:AlignmentObject ;
+  rdfs:range lrmi:Text ;
+  rdfs:comment "The name of a node in an established educational framework." .
+
+lrmi:targetURL rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:AlignmentObject ;
+  rdfs:range lrmi:URL ;
+  rdfs:comment "The URL of a node in an established educational framework." .
+
+lrmi:description rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:Thing ;
+  rdfs:range lrmi:Text ;
+  rdfs:comment "A short description of the item." .
+
+lrmi:image rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:Thing ;
+  rdfs:range lrmi:URL ;
+  rdfs:comment "The URL of an image of the item" .
+
+lrmi:name rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:Thing ;
+  rdfs:range lrmi:Text ;
+  rdfs:comment "The name of the item." .
+
+lrmi:url rdf:type owl:FunctionalProperty ;
+  rdfs:domain lrmi:Thing ;
+  rdfs:range lrmi:URL ;
+  rdfs:comment "URL of the item." .
+
+lrmi:timeRequired rdf:type rdf:Property ;
+  rdfs:domain pcm:LearningResource ;
+  rdfs:range xdt:dayTimeDuration ;
+  rdfs:comment "Approximate or typical time it takes to work with or through this learning resource for the typical intended target audience." .
+
+lrmi:educationalAlignment rdf:type rdf:Property ;
+  rdfs:domain pcm:LearningResource ;
+  rdfs:range lrmi:AlignmentObject ;
+  rdfs:comment "The competency, learning standard, skill and/or text complexity that the work is aligned to." .
+
+lrmi:intendedEndUserRole rdf:type rdf:Property ;
+  rdfs:domain pcm:LearningResource ;
+  rdfs:range pe:Role ;
+  rdfs:comment "The role of the individual or group for which the work in question was produced." .
+

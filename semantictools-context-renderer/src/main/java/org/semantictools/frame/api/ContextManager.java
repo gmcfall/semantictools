@@ -8,11 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
+import org.semantictools.context.renderer.MediaTypeFileManager;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.FrameConstraints;
-
-import java.util.StringTokenizer;
+import org.semantictools.context.renderer.model.SampleJson;
 
 public class ContextManager {
   
@@ -20,24 +21,41 @@ public class ContextManager {
 
   private static final String RDFTYPE = "rdfType";
   private static final String RDFTYPE_REF = "rdfTypeRef";
+  private static final String RDF_PROPERTY = "rdfProperty";
   private static final String MEDIATYPE = "mediaType";
   private static final String MEDIATYPEURI = "mediaTypeURI";
   private static final String CONTEXTURI = "contextURI";
   private static final String CONTEXTREF = "contextRef";
+  private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
   private static final String IDREF = "idref";
+  private static final String MIXED_VALUE = "mixedValue";
   private static final String STATUS = "status";
+  private static final String DATE = "date";
   private static final String ABSTRACT = "abstract";
   private static final String EDITORS = "editors";
   private static final String AUTHORS = "authors";
   private static final String TITLE = "title";
+  private static final String EXCLUDE_TYPE = "excludeType";
   private static final String INTRODUCTION = "introduction";
   private static final String INCLUDES_SUFFIX = ".includes";
   private static final String EXCLUDES_SUFFIX = ".excludes";
   private static final String PURL_DOMAIN = "purlDomain";
   private static final String EXPANDED_VALUE = "expandedValue";
+  private static final String CAPTION_SUFFIX = ".caption";
   
+  private MediaTypeFileManager fileManager;
   private Map<String, ContextProperties> contextMap = new HashMap<String, ContextProperties>();
   
+  
+  
+  public ContextManager(MediaTypeFileManager fileManager) {
+    this.fileManager = fileManager;
+  }
+  
+  public MediaTypeFileManager getMediaTypeFileManager() {
+    return fileManager;
+  }
+
   /**
    * Loads ContextProperties from a properties file.
    * The file must contain properties of the following form:
@@ -128,6 +146,8 @@ public class ContextManager {
         sink.setContextURI(value);
       } else if (IDREF.equals(key)) {
         setIdref(sink, value);
+      } else if (MIXED_VALUE.equals(key)) {
+        setMixedValue(sink, value);
       } else if (MEDIATYPE.equals(key)) {
         sink.setMediaType(value);
       } else if (MEDIATYPEURI.equals(key)) {
@@ -136,12 +156,18 @@ public class ContextManager {
         sink.setRdfTypeURI(value);
       } else if (RDFTYPE_REF.equals(key)) {
         sink.setRdfTypeRef(value);
+      } else if (RDF_PROPERTY.equals(key)) {
+        sink.setRdfProperty(value);
       } else if (CONTEXTREF.equals(key)) {
         sink.setContextRef(value);
       } else if (STATUS.equals(key)) {
         sink.setStatus(value);
+      } else if (DATE.equals(key)) {
+        sink.setDate(value);
       } else if (ABSTRACT.equals(key)) {
         sink.setAbstactText(value);
+      } else if (ENABLE_VERSION_HISTORY.equals(key)) {
+        sink.setHistoryLink("true".equalsIgnoreCase(value));
       } else if (EDITORS.equals(key)) {
         setEditors(sink, value);
       } else if (AUTHORS.equals(key)) {
@@ -150,10 +176,14 @@ public class ContextManager {
         sink.setIntroduction(value);
       } else if (TITLE.equals(key)) {
         sink.setTitle(value);
+      } else if (EXCLUDE_TYPE.equals(key)) {
+        setExcludedTypes(sink, value);        
       } else if (key.endsWith(INCLUDES_SUFFIX)) {
         addIncludesConstraint(sink, key, value);
       } else if (key.endsWith(EXCLUDES_SUFFIX)) {
         addExcludesConstraint(sink, key, value);
+      } else if (key.endsWith(CAPTION_SUFFIX)) {
+        addCaption(sink, key, value);
       } else if (PURL_DOMAIN.equals(key)) {
         sink.setPurlDomain(value);
       } else if (EXPANDED_VALUE.equals(key)) {
@@ -165,6 +195,30 @@ public class ContextManager {
     
   }
 
+
+  private void setExcludedTypes(ContextProperties sink, String value) {
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.getExcludedTypes().add(tokenizer.nextToken());
+    }
+    
+  }
+
+  private void addCaption(ContextProperties sink, String key, String value) {
+    int dot = key.lastIndexOf('.');
+    String fileName = key.substring(0, dot);
+    for (SampleJson sample : sink.getSampleJsonList()) {
+      if (fileName.equals(sample.getFileName())) {
+        sample.setFileName(value);
+        return;
+      }
+    }
+    SampleJson sample = new SampleJson();
+    sample.setFileName(fileName);
+    sample.setCaption(value);
+    sink.getSampleJsonList().add(sample);
+    
+  }
 
   private void setExpandedValue(ContextProperties sink, String value) {
     StringTokenizer tokens = new StringTokenizer(value, " \t\r\n");
@@ -205,17 +259,64 @@ public class ContextManager {
 
   private void setDefaults(ContextProperties sink) {
     setTitle(sink);
+    setMediaTypeDocFile(sink);
+    setJsonLdContextReference(sink);
+    
     
   }
 
-  private String getLocalName(String uri) {
-
-    int hash = uri.lastIndexOf('#');
-    int slash = uri.lastIndexOf('/');
-    int delim = Math.max(hash, slash);
+  private void setJsonLdContextReference(ContextProperties sink) {
+    String contextRef = sink.getContextRef();
+    if (contextRef == null) return;
+    contextRef = contextRef.replace(" ", "&nbsp;");
     
-    String localName = uri.substring(delim+1);
-    return localName;
+    if (sink.getReference(contextRef) != null) return;
+    
+    StringBuilder builder = new StringBuilder();
+    List<String> authors = sink.getAuthors();
+    String comma = "";
+    for (String author : authors) {
+      builder.append(comma);
+      int mark = author.indexOf(',');
+      if (mark>0) {
+        author = author.substring(0, mark).trim();
+      }
+      builder.append(author);
+      comma = ", ";
+    }
+    builder.append("| ");
+    String rdfTypeURI = sink.getRdfTypeURI();
+    String typeName = TypeManager.getLocalName(rdfTypeURI);
+    String title = "JSON-LD Context for " + typeName + " Resources";
+    builder.append(title);
+    builder.append("| ");
+    String status = sink.getStatus();
+    if (status != null) {
+      builder.append(status);
+    }
+    String date = sink.getDate();
+    if (date != null) {
+      if (status != null) {
+        builder.append(", ");
+      }
+      builder.append(date);
+    }
+    builder.append("| ");
+    builder.append("URL: ");
+    String contextURL = sink.getContextURI();
+    builder.append(contextURL);
+    
+    sink.putReference(contextRef, builder.toString());
+    
+  }
+
+  private void setMediaTypeDocFile(ContextProperties sink) {
+    File file = fileManager.getIndexFile(sink.getMediaType());
+    sink.setMediaTypeDocFile(file);
+  }
+
+  private String getLocalName(String uri) {
+    return TypeManager.getLocalName(uri);
   }
   
   private void setTitle(ContextProperties sink) {
@@ -289,6 +390,16 @@ public class ContextManager {
     }
     error.append("  ");
     error.append(propertyName);
+    
+  }
+
+
+  private void setMixedValue(ContextProperties sink, String value) {
+    StringTokenizer tokens = new StringTokenizer(value, " \t\r\n");
+    while (tokens.hasMoreTokens()) {
+      String propertyURI = tokens.nextToken();
+      sink.addMixed(propertyURI);
+    }
     
   }
 

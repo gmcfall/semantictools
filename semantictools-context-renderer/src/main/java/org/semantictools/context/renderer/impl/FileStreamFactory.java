@@ -27,7 +27,7 @@ public class FileStreamFactory implements StreamFactory {
 
   @Override
   public OutputStream createOutputStream(String path) throws IOException {
-    File file = new File(outputDir, path);
+    File file = getOutputFile(path);
     file.getParentFile().mkdirs();
     return new FileOutputStream(file);
   }
@@ -39,6 +39,11 @@ public class FileStreamFactory implements StreamFactory {
     if (!file.exists()) return null;
     
     return new FileInputStream(file);
+  }
+
+  @Override
+  public File getOutputFile(String path) {
+    return new File(outputDir, path);
   }
 
 }

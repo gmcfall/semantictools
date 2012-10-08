@@ -13,13 +13,23 @@ public class NodeUtil {
   /**
    * Returns a TreeNode for a datatype that is not declared in the specified JsonContext
    */
-  public static TreeNode createDefaultTypeNode(JsonContext context, String typeURI) {
+  public static TreeNode createDefaultTypeNode(TypeManager typeManager, JsonContext context, String typeURI) {
 
+    if (typeManager.isStandardLiteralType(typeURI)) {
+      // For abstract data types (rdfs:Literal, rdfs:Datatype, rdf:XMLLiteral)
+      // use xsd:string for the data type in bindings.
+      typeURI = XSD.xstring.getURI();
+    }
+    
     String namespaceURI = TypeManager.getNamespace(typeURI);
     TermInfo namespaceTerm = context.getTermInfoByURI(namespaceURI);
     if (namespaceTerm == null) {
       throw new TermNotFoundException(namespaceURI);          
     }
+
+    TreeNode node = new TreeNode();
+    
+    
     
     String localName = TypeManager.getLocalName(typeURI);
     
@@ -27,9 +37,8 @@ public class NodeUtil {
     String typeName = 
         (XSD.getURI().equals(namespaceURI) || OWL.getURI().equals(namespaceURI)) ?
         prefix + ":" + localName : localName;
-    String typeHref = "#" + prefix + "." + localName;
+    String typeHref = typeManager.isStandardDatatype(namespaceURI) ? null : "#" + prefix + "." + localName;
 
-    TreeNode node = new TreeNode();
     node.setTypeName(typeName);
     node.setTypeHref(typeHref);
     node.setTypeURI(typeURI);

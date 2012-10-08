@@ -4,5 +4,6 @@ public enum ObjectPresentation {
   NONE,
   SIMPLE_NAME,
   URI_REFERENCE,
-  EXPANDED_VALUE
+  EXPANDED_VALUE,
+  MIXED_VALUE
 }

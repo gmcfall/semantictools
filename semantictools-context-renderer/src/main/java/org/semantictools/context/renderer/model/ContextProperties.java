@@ -9,28 +9,38 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.semantictools.frame.api.TypeManager;
+
 /**
  * This container holds properties used to generate the JSON-LD context for some data type.
  * @author Greg McFall
  *
  */
-public class ContextProperties implements ReferenceManager {
+public class ContextProperties implements ReferenceManager, Comparable<ContextProperties> {
   private File sourceFile;
   private String rdfTypeURI;
   private String rdfTypeRef;
+  private String rdfProperty;
   private String contextURI;
   private String contextRef;
   private String mediaType;
   private String mediaTypeURI;
+  private String mediaTypeRef;
   private String purlDomain;
+  private boolean historyLink;
+  private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
+  private Set<String> mixedSet = new HashSet<String>();
   private String title;
   private String status;
+  private String date;
   private String abstactText;
   private String introduction;
   private List<String> editors = new ArrayList<String>();
   private List<String> authors = new ArrayList<String>();
+  private Set<String> excludedTypes = new HashSet<String>();
   private Set<String> expandedValues = new HashSet<String>();
+  private List<SampleJson> sampleJsonList = new ArrayList<SampleJson>();
   private Map<String, String> referenceMap = null;
   private Map<String, FrameConstraints> uri2FrameConstraints = new HashMap<String, FrameConstraints>();
   private Properties rawProperties;
@@ -40,6 +50,89 @@ public class ContextProperties implements ReferenceManager {
     this.rawProperties = rawProperties;
   }
   
+  /**
+   * Specifies whether the documentation for the media type should contain a link
+   * to the version history of the specification.
+   */
+  public void setHistoryLink(boolean value) {
+    historyLink = value;
+  }
+  
+  /**
+   * Returns true if the documentation for the media type should contain a link
+   * to the version history of the specification.
+   * @return
+   */
+  public boolean hasHistoryLink() {
+    return historyLink;
+  }
+  
+  /**
+   * Returns the local name for one property whose value is described by the media type.
+   * This must be the name of a property belonging to the class identified by the rdfTypeURI.
+   * If omitted, then the media type describes an entire instance of the specified RDF type, not
+   * just one distinguished property.
+   */
+  public String getRdfProperty() {
+    return rdfProperty;
+  }
+
+
+  /**
+   * Sets the local name for one property whose value is described by the media type.
+   * This must be the name of a property belonging to the class identified by the rdfTypeURI.
+   * If omitted, then the media type describes an entire instance of the specified RDF type, not
+   * just one distinguished property.
+   */
+  public void setRdfProperty(String rdfPropertyName) {
+    this.rdfProperty = rdfPropertyName;
+  }
+
+
+  public File getMediaTypeDocFile() {
+    return mediaTypeDocFile;
+  }
+  
+  public Set<String> getExcludedTypes() {
+    return excludedTypes;
+  }
+
+
+  public void setMediaTypeDocFile(File mediaTypeDocFile) {
+    this.mediaTypeDocFile = mediaTypeDocFile;
+  }
+
+
+  public String getDate() {
+    return date;
+  }
+
+
+  public void setDate(String date) {
+    this.date = date;
+  }
+
+
+  /**
+   * Returns the citation reference to the media type referenced by this ContextProperties object.
+   * By default, the return value has the form [{rdfTypeLocalName}-media-type], but this default
+   * may be overridden by calling setMediaTypeRef(..).
+   */
+  public String getMediaTypeRef() {
+    if (mediaTypeRef == null) {
+      return "[" + TypeManager.getLocalName(rdfTypeURI) + "-media-type]";
+    }
+    return mediaTypeRef;
+  }
+
+
+
+  public void setMediaTypeRef(String mediaTypeRef) {
+    this.mediaTypeRef = mediaTypeRef;
+  }
+
+
+
   public String getProperty(String name) {
     return rawProperties.getProperty(name);
   }
@@ -49,6 +142,10 @@ public class ContextProperties implements ReferenceManager {
   }
 
 
+
+  public List<SampleJson> getSampleJsonList() {
+    return sampleJsonList;
+  }
 
   /**
    * The source file that contains the definition of this ContextProperties object.
@@ -215,8 +312,22 @@ public class ContextProperties implements ReferenceManager {
   public boolean isIdRef(String propertyURI) {
     return idRefList.contains(propertyURI);
   }
-
-
+  
+  /**
+   * Add a property that has a mixed representation; i.e. values can be either
+   * a URI reference or an embedded resource.
+   */
+  public void addMixed(String propertyURI) {
+    mixedSet.add(propertyURI);
+  }
+  
+  /**
+   * Returns true if the specified property has a mixed representation; i.e.
+   * values can be either a URI reference or an embedded resource.
+   */
+  public boolean isMixed(String propertyURI) {
+    return mixedSet.contains(propertyURI);
+  }
 
   public String getRdfTypeRef() {
     return rdfTypeRef;
@@ -268,6 +379,11 @@ public class ContextProperties implements ReferenceManager {
    */
   public void setPurlDomain(String purlDomain) {
     this.purlDomain = purlDomain;
+  }
+
+  @Override
+  public int compareTo(ContextProperties other) {
+    return mediaType.compareTo(other.mediaType);
   }
 
 

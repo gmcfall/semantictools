@@ -3,14 +3,24 @@ package org.semantictools.index.api;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.semantictools.context.renderer.HtmlPrinter;
+import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.frame.api.LinkManager;
-import org.semantictools.index.model.MediaTypeReference;
 import org.semantictools.index.model.SchemaReference;
-import org.semantictools.uml.api.UmlFileManager;
+import org.semantictools.index.model.ServiceDocumentationList;
 
+/**
+ * Prints an index to all of the documentation artifacts including ontologies,
+ * data types, rest services.
+ * 
+ * @author Greg McFall
+ *
+ */
 public class LinkedDataIndexPrinter extends HtmlPrinter {
   
   private LinkedDataIndex index;
@@ -33,8 +43,8 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
     pushIndent();
     printOntologies();
     printDatatypes();
+    printServices();
     printMediaTypes();
-    
     popIndent();    
     endHTML();
     
@@ -44,6 +54,31 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
 
 
 
+
+  private void printMediaTypes() {
+    List<ContextProperties> list = index.listAllMediaTypes();
+    Collections.sort(list);
+    
+    indent();
+    println("<H2>Media Types</H2>");
+    indent();
+    println("<UL>");
+    pushIndent();
+    for (ContextProperties context : list) {
+
+      String mediaType = context.getMediaType();
+      String mediaTypeHref = linkManager.relativize(context.getMediaTypeDocFile());
+      print("<LI>");
+      printAnchor(mediaTypeHref, mediaType);
+      println();
+      
+    }
+    
+    popIndent();
+    indent();
+    println("</UL>");
+    
+  }
 
   private void printDatatypes() {
 
@@ -71,6 +106,7 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
   private void printOntologies() {
     
     List<SchemaReference> list = index.listOntologies();
+    Collections.sort(list);
     
     indent();
     println("<H2>Ontologies</H2>");
@@ -105,36 +141,77 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
     
   }
 
-  private void printMediaTypes() {
-    
-    List<MediaTypeReference> list = index.listAllMediaTypes();
-    if (list.isEmpty()) return;
+  private void printServices() {
+
+    List<ServiceDocumentationList> megaList = index.listServices();
+    if (megaList.isEmpty()) return;
     
     indent();
-    println("<H2>Data Bindings</H2>");
+    println("<H2>REST Services</H2>");
     indent();
     println("<UL>");
     pushIndent();
-    for (MediaTypeReference r : list) {
-      String mediaType = r.getMediaTypeName();
-      String mediaTypeURI = linkManager.relativize(r.getMediaTypeURI());
-      String serviceURI = linkManager.relativize(r.getServiceAPI());
-      
-      indent();
-      print("<LI><code>");
-      print(mediaType);
-      print(" (");
-      printAnchor(mediaTypeURI, "Media Type");
-      if (serviceURI != null) {
-        print(", ");
-        printAnchor(serviceURI, "REST API");
+    
+    Collections.sort(megaList, new Comparator<ServiceDocumentationList>() {
+      @Override
+      public int compare(ServiceDocumentationList a,  ServiceDocumentationList b) {
+        return a.getRdfTypeLocalName().compareTo(b.getRdfTypeLocalName());
       }
-      println(")");
+    });
+    
+    
+    for (ServiceDocumentationList list : megaList) {
+      switch (list.size()) {
+      case 0 : 
+        // Do nothing
+        break;
+        
+      case 1:
+        printServiceDocumentation(list.getRdfTypeLocalName(), list.get(0));
+        break;
+        
+      default :
+        printMultipleServicesForType(list);
+        break;
+      }
       
     }
+    
+    
     popIndent();
     println("</UL>");
     
+    
+  }
+
+
+  private void printServiceDocumentation(String rdfTypeLocalName,  ServiceDocumentation serviceDocumentation) {
+    print("<LI> ");
+    String href = linkManager.relativize(serviceDocumentation.getServiceDocumentationFile());
+    printAnchor(href, rdfTypeLocalName + " Service");
+    println();
+//    pushIndent();
+//    print("<DIV ");
+//    printAttr("class", "mediatype");
+//    println(">");
+//    pushIndent();
+//    for (ContextProperties context : serviceDocumentation.listContextProperties()) {
+//      String mediaType = context.getMediaType();
+//      String mediaTypeHref = linkManager.relativize(context.getMediaTypeDocFile());
+//      print("<DIV>");
+//      printAnchor(mediaTypeHref, mediaType);
+//      println("</DIV>");
+//    }
+//    
+//    popIndent();
+//    println("</DIV>");
+    
+    popIndent();
+  }
+  
+
+  private void printMultipleServicesForType(ServiceDocumentationList list) {
+    // TODO Auto-generated method stub
     
   }
 

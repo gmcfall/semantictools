@@ -1,0 +1,20 @@
+{
+  "@context" : "http://purl.org/pearson/qti/v1/ctx/metadata/metadata",
+  "@type" : "Metadata",
+  "@id" : "http://content.pearson.com/resources/content/3314583736548363",
+  "guid" : "3314583736548363",
+  "title" : "Echoic Memory Lifetime",
+  "description" : "Tests whether the student knows how long echoic memory lasts.",
+  "contentTypeTier1" : "Assessment",
+  "contentTypeTier2" : ["AssessmentItem"],
+  "subject" : [ "Psychology" ],
+  "intendedEndUserRole" : [ "Student" ],
+  "format" : [ 
+    "application/vnd.pearson.ims.v1p2.qti+xml",
+    "application/vnd.pearson.mastering.v3.item+xml"
+  ],
+  "timeRequired" : "PT20S",
+  "created" : "2012-09-21T11:09:43-04:00",
+  "timeRequired" : "PT1H49M",
+  "educationalAlignment" : [ "http://purl.org/pearson/objectives/38372547345645" ]
+}

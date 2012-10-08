@@ -53,8 +53,9 @@ public class JsonManager {
   }
   
   public void add(ObjectNode node) {
-    String type = node.get("@type").asText();
-    if (type != null) {
+    JsonNode typeNode = node.get("@type");
+    if (typeNode != null) {
+      String type = typeNode.asText();
       type = context.rewrite(type);
       crawl(type, node);
     }

@@ -1,0 +1,16 @@
+@prefix topic: <http://purl.org/pearson/topics/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/topics/> a owl:Ontology  ;
+  rdfs:label "Pearson Taxonomy" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "topic" .
+
+topic:Topic rdf:type owl:Class .
+
+topic:Psychology rdf:type topic:Topic .
+

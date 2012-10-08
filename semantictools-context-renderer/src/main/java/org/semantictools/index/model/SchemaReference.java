@@ -10,7 +10,7 @@ import java.io.File;
  * @author Greg McFall
  * 
  */
-public class SchemaReference {
+public class SchemaReference implements Comparable<SchemaReference>{
   private String schemaLabel;
   private File schemaDoc;
 
@@ -29,6 +29,12 @@ public class SchemaReference {
 
   public String getSchemaDocPath() {
     return schemaDoc.toString().replace("\\", "/");
+  }
+
+  @Override
+  public int compareTo(SchemaReference other) {
+    
+    return schemaLabel.compareTo(other.schemaLabel);
   }
 
 }

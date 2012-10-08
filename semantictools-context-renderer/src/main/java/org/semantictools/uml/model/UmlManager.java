@@ -14,8 +14,6 @@ import org.semantictools.frame.model.Frame;
 import org.semantictools.frame.model.InverseProperty;
 import org.semantictools.frame.model.RdfType;
 
-import com.hp.hpl.jena.ontology.OntProperty;
-
 public class UmlManager {
   private TypeManager typeManager;
   
@@ -118,7 +116,14 @@ public class UmlManager {
       
       Field inverseField = field.getInverseField();
       
+      UmlClass otherClass = null;
       if (fieldType.canAsFrame()) {
+        otherClass = getUmlClassByURI(fieldType.getUri());
+      } else if (fieldType.canAsListType()) {
+        otherClass = getUmlClassByURI(fieldType.asListType().getElementType().getUri());
+      }
+      
+      if (otherClass != null) {
         
         InverseProperty inverse = field.getInverseProperty();
         
@@ -126,10 +131,6 @@ public class UmlManager {
           inverseField.getEncapsulation();
         
         Encapsulation encapsulation = field.getEncapsulation();
-        
-        UmlClass otherClass = getUmlClassByURI(fieldType.getUri());
-        
-        
         
         if (encapsulation == Encapsulation.NONE && inverseEncapsulation != Encapsulation.NONE) {
           //

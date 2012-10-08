@@ -1,0 +1,10 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+
+pe:CourseSection rdf:type bind:Addressable .
+pe:Person rdf:type bind:Addressable .
+pe:Role rdf:type bind:Enum .
+pe:LearningContext rdf:type bind:Addressable .
+

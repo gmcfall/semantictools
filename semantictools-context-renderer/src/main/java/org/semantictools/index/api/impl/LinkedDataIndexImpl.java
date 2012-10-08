@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.semantictools.context.renderer.model.ContextProperties;
-import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.frame.api.ContextManager;
 import org.semantictools.frame.api.ServiceDocumentationManager;
 import org.semantictools.frame.api.TypeManager;
@@ -15,6 +14,7 @@ import org.semantictools.frame.model.OntologyType;
 import org.semantictools.index.api.LinkedDataIndex;
 import org.semantictools.index.model.MediaTypeReference;
 import org.semantictools.index.model.SchemaReference;
+import org.semantictools.index.model.ServiceDocumentationList;
 import org.semantictools.uml.api.UmlFileManager;
 
 public class LinkedDataIndexImpl implements LinkedDataIndex {
@@ -57,26 +57,19 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
     String path = p.getMediaType().replace('.', '/') + "/index.html";
     File file = new File(mediatypeDir, path);
     String uri = file.toString().replace('\\', '/');
+   
     
-    String serviceURI = null;
-    ServiceDocumentation service = serviceDocumentManager.getServiceDocumentationByMediaType(p.getMediaType());
-    if (service != null) {
-      int slash = uri.lastIndexOf('/');
-      serviceURI = uri.substring(0, slash) + "/service.html";
-    }
-    return new MediaTypeReference(p.getMediaType(), uri, serviceURI);
+   
+   
+    return new MediaTypeReference(p.getRdfTypeURI(), p.getMediaType(), uri);
     
   }
 
 
 
   @Override
-  public List<MediaTypeReference> listAllMediaTypes() {
-    List<MediaTypeReference> result = new ArrayList<MediaTypeReference>();
-    for (ContextProperties p : contextManager.listContextProperties()) {
-      result.add(createReferences(p));
-    }
-    return result;
+  public List<ContextProperties> listAllMediaTypes() {
+    return contextManager.listContextProperties();
   }
 
 
@@ -100,7 +93,7 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
       String ontURI = sequence.next().getUri();
       if (typeManager.isStandard(ontURI)) continue;
       OntologyInfo info = typeManager.getOntologyByUri(ontURI);
-      if (info == null) continue;
+      if (info == null || (type==OntologyType.RDF && !info.hasClasses())) continue;
       if (info.getType() == type) {
         umlFileManager.setOntology(info.getUri());
         
@@ -114,6 +107,22 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
     return result;
     
   }
+
+
+
+  @Override
+  public List<ServiceDocumentationList> listServices() {
+    return serviceDocumentManager.getServiceDocumentationLists();
+  }
+
+
+
+  @Override
+  public ServiceDocumentationList getServiceDocumentationForClass(String rdfClassURI) {
+    return serviceDocumentManager.getServiceDocumentationByRdfType(rdfClassURI);
+  }
+
+
 
 
 

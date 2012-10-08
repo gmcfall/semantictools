@@ -144,6 +144,18 @@ public class Frame implements Comparable<Frame>, RdfType {
     return list;
   }
   
+  /**
+   * Returns true if this frame has any fields either declared directly or
+   * declared by a supertype.
+   */
+  public boolean hasFields() {
+    if (!declaredFields.isEmpty()) return true;
+    for (Frame superType : supertypeList) {
+      if (superType.hasFields()) return true;
+    }
+    return false;
+  }
+  
   
 
   private void addSuperFields(Map<String, Field> fieldMap, List<Field> list,  Frame frame) {

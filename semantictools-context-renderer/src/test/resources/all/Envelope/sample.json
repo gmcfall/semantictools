@@ -1,0 +1,65 @@
+{
+  "@context" : "http://purl.org/pearson/content/v1/ctx/metadata/envelope",
+  "@type" : "Envelope",
+  "@id" : "http://server.example.com/resources/Envelope/49369",
+  "metadata" : {
+    "@id" : "http://content.pearson.com/resources/content/3314539383736452352",
+    "title" : "Dendrites definition",
+    "guid" : "3314539383736452352",
+    "description" : "Tests whether the student knows the definition of a dendrite",
+    "contentTypeTier1" : "Assessment",
+    "contentTypeTier2" : [ "AssessmentItem" ],
+    "subject" : [ "Psychology" ],
+    "intendedEndUserRole" : [ "Student" ],
+    "format" : [ 
+      "application/vnd.pearson.qti.v1p2.asi+xml",
+      "application/vnd.pearson.qti.v1.itempresentation+json",
+      "text/html"
+    ],
+    "timeRequired" : "PT20S",
+    "created" : "2012-09-21T11:09:43-04:00",
+    "timeRequired" : "PT1H49M",
+    "educationalAlignment" : [ "http://purl.org/pearson/objectives/183725473384362" ]
+  },
+  "body" : {
+    "@context" : "http://purl.org/pearson/qti/v1/ctx/asi/item",
+    "@type" : "item",
+    "ident" : "3314539383736452352",
+    "title" : "Dendrites definition",
+   
+    "presentation" : {
+      "presentationFlow" : {
+        "flowContent" : [ 
+         
+          { "@type" : "flow",
+            "flowContent" : [
+               { "@type" : "response_str",
+                 "ident" : "FIB01",
+                 "rcardinality" : "Single",
+                 "interaction" : {
+                   "@type" : "render_fib",
+                   "fibtype" : "String",
+                   "prompt" : "Box",
+                   "maxchars" : 30,
+                   "interactionContent" : [
+                     { "@type" : "response_label",
+                       "ident" : "A"
+                     }
+                   ]
+                 }
+               },
+               { "@type" : "material",
+                 "matcontent" : [
+                   { "@type" : "mattext",
+                     "textValue" : " is a neuron fiber that receives incoming signals."
+                   }
+                 ]
+               }
+            ]          
+          }
+        ]
+      }
+    }
+  }
+   
+}

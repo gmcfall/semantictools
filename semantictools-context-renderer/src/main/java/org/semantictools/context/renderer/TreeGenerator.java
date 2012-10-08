@@ -28,36 +28,107 @@ public class TreeGenerator {
   private JsonContext context;
   private ContextProperties contextProperties;
   private int maxDepth;
+  private Set<String> memory;
+  private TypeManager typeManager;
   
   
-  public TreeGenerator(JsonContext context, ContextProperties properties) {
+  public TreeGenerator(TypeManager typeManager, JsonContext context, ContextProperties properties) {
+    this.typeManager = typeManager;
     this.context = context;
     contextProperties = properties;
   }
+  
+  public TreeNode generateRoot(Frame frame, String propertyName, int depth) {
+    if (propertyName == null) {
+      return generateRoot(frame, depth);
+    }
+    
+    TermInfo term = context.getTermInfoByShortName(propertyName);
+    if (term == null) {
+      throw new TermNotFoundException(propertyName);
+    }
+
+    Field field = getField(frame, propertyName);
+    if (field == null) {
+      throw new FieldNotFoundException(frame.getLocalName(), propertyName);
+    }
+    
+    
+    RdfType type = field.getRdfType();
+    if ((type.canAsDatatype() || type.canAsEnumeration()) && field.getMaxCardinality()==1) {
+      throw new RuntimeException(
+        "Cannot define a JSON-LD representation where the top node is a literal or an enumeration as required by " +
+        frame.getLocalName() + "." + propertyName);
+    }
+    
+    if (type.canAsFrame() && field.getMaxCardinality()==1) {
+      return generateRoot(type.asFrame(), depth);
+    }
+    
+    
+    TreeNode root = new TreeNode();
+    root.setTypeName("");
+    addContextNode(root);
+    TreeNode graph = new TreeNode();
+    root.add(graph);
+    graph.setLocalName("@graph");
+    graph.setMaxCardinality(-1);
+    
+    setType(graph, field);
+    if (type.canAsFrame()) {
+      memory = new HashSet<String>();
+      addProperties(graph, type.asFrame(), depth);
+      memory = null;
+    }
+    
+    
+    return root;
+  }
+
+  private Field getField(Frame frame, String propertyName) {
+    List<Field> list = frame.listAllFields();
+    for (Field field : list) {
+      if (field.getLocalName().equals(propertyName)) {
+        return field;
+      }
+    }
+    return null;
+  }
 
   public TreeNode generateRoot(Frame frame, int depth) {
+    memory = new HashSet<String>();
     this.maxDepth = depth;
     TreeNode root = createBasicFrameNode(frame);
     addContextNode(root);
     addTypeNode(root, frame, 1);
     
     addProperties(root, frame, 0);
-    
+    memory = null;
     return root;
   }
   
   public TreeNode generateNode(Frame frame, int depth) {
+    memory = new HashSet<String>();
     maxDepth = depth;
     TreeNode root = createBasicFrameNode(frame);    
-    addProperties(root, frame, 0);
+    if (frame.hasFields()) {
+      addProperties(root, frame, 0);
+    } 
+    memory = null;
     
     return root;
   }
   
- 
-
   private void addProperties(TreeNode parent, Frame frame, int depth) {
-    if (maxDepth>=0 && depth >= maxDepth) return;
+   if (maxDepth>=0 && depth >= maxDepth) return;
+      
+    String frameURI = frame.getUri();
+    if (memory.contains(frameURI)) {
+      return;
+    }
+    memory.add(frameURI);
+   
+    
     depth++;
     
     addIdProperty(parent, frame);
@@ -84,8 +155,17 @@ public class TreeGenerator {
     }
     
   }
+  
+
 
   public TreeNode generateNode(Field field) {
+    memory = new HashSet<String>();
+    TreeNode result = doGenerateNode(field);
+    memory = null;
+    return result;
+  }
+
+  private TreeNode doGenerateNode(Field field) {
 
     String uri = field.getURI();
     TermInfo term = context.getTermInfoByURI(uri);
@@ -117,8 +197,10 @@ public class TreeGenerator {
     
     
     
-    
-    if (
+    if (contextProperties.isMixed(uri)) {
+      node.setObjectPresentation(ObjectPresentation.MIXED_VALUE);
+      
+    } else if (
         term.hasObjectValue() &&
         "@id".equals(term.getObjectValue().getType()) &&
         frame != null &&
@@ -194,7 +276,7 @@ public class TreeGenerator {
   private void addField(TreeNode parent, Field field, int depth) {
     
     
-    TreeNode node = generateNode(field);
+    TreeNode node = doGenerateNode(field);
     if (node == null) {
       return;
     }
@@ -221,6 +303,7 @@ public class TreeGenerator {
     
   }
   
+ 
 
   private void addSubtypes(TreeNode node, Frame frame, int depth) {
     
@@ -253,11 +336,25 @@ public class TreeGenerator {
     if (maxDepth>=0 && depth>=maxDepth) return;
     
     if (!frame.isAbstract())  list.add(0, frame);
-    
+
+    node.setBranchStyle(BranchStyle.OBLIQUE);
     for (Frame sub : list) {
+      if (contextProperties.getExcludedTypes().contains(sub.getUri())) {
+        continue;
+      }
+        
       TreeNode child = createBasicFrameNode(sub);
       node.add(child);
-      addProperties(child, sub, depth);
+      
+
+      TermInfo info = context.getTermInfoByURI(sub.getUri());
+      if (info == null) {
+        throw new TermNotFoundException(sub.getUri());
+      }
+      String typeName = info.getTermName();
+      String href = "#" + typeName;
+      child.setTypeHref(href);
+      addProperties(child, sub, depth+1);
     }
     
     
@@ -312,7 +409,7 @@ public class TreeGenerator {
     
       if (term == null) {
         
-       TreeNode tmp = NodeUtil.createDefaultTypeNode(context, typeURI);
+       TreeNode tmp = NodeUtil.createDefaultTypeNode(typeManager, context, typeURI);
        typeName = tmp.getTypeName();
        typeHref = tmp.getTypeHref();
         
@@ -320,7 +417,9 @@ public class TreeGenerator {
       
       
         typeName = term.getTermName();
-        typeHref = "#" + typeName;
+        if (!field.getRdfType().canAsDatatype()) {
+          typeHref = "#" + typeName;
+        }
       }
       
     }

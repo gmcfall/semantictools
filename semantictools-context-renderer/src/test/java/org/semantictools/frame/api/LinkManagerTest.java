@@ -19,6 +19,15 @@ public class LinkManagerTest {
     assertEquals("#ToolProxy", relative);
     
   }
+
+  @Test
+  public void testRelativeURL() {
+    LinkManager manager = new LinkManager("alpha/beta/delta/epsilon");
+    String relative = manager.relativize("alpha/beta/one/two");
+    
+    assertEquals("../../one/two", relative);
+  }
+
   
   @Test
   public void testRelativeUp() {

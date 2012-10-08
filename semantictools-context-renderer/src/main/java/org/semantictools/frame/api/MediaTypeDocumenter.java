@@ -6,8 +6,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
@@ -17,14 +15,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.semantictools.context.renderer.ContextHtmlPrinter;
 import org.semantictools.context.renderer.MediaTypeFileManager;
 import org.semantictools.context.renderer.MediaTypeIndexPrinter;
-import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.StreamFactory;
 import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.impl.DiagramGeneratorImpl;
 import org.semantictools.context.renderer.impl.FileStreamFactory;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.JsonContext;
-import org.semantictools.context.renderer.model.ServiceDocumentation;
+import org.semantictools.uml.api.UmlFileManager;
 import org.semantictools.web.upload.AppspotUploadClient;
 import org.xml.sax.SAXException;
 
@@ -37,29 +34,26 @@ public class MediaTypeDocumenter {
   private TypeManager typeManager;
   private ContextManager contextManager;
   private MediaTypeFileManager fileManager;
-  private ServiceDocumentationManager serviceDocManager;
-  private ServiceDocumentationPrinter serviceDocPrinter;
   private GeneratorProperties generatorProperties;
   private ContextProperties currentContext;
   private AppspotUploadClient uploadClient;
+  private UmlFileManager umlFileManager;
   private boolean publish = false;
   
   
-  public MediaTypeDocumenter() {
+  public MediaTypeDocumenter(
+      ContextManager contextManager,
+      UmlFileManager umlFileManager
+  ) {
+    this.fileManager = contextManager.getMediaTypeFileManager();
+    this.contextManager = contextManager;
+    this.umlFileManager = umlFileManager;
     typeManager = new TypeManager();
-    contextManager = new ContextManager();
-    fileManager = new MediaTypeFileManager();
-    serviceDocManager = new ServiceDocumentationManager(contextManager);
-    serviceDocPrinter = new ServiceDocumentationPrinter(new MyURLRewriter());
     uploadClient = new AppspotUploadClient();
   }
   
   public AppspotUploadClient getUploadClient() {
     return uploadClient;
-  }
-  
-  public ServiceDocumentationManager getServiceDocumentManager() {
-    return serviceDocManager;
   }
   
   public ContextManager getContextManager() {
@@ -102,10 +96,8 @@ public class MediaTypeDocumenter {
   }
   
   public void loadAll(File directory) throws IOException, ParserConfigurationException, SAXException, ContextPropertiesSyntaxException {
-    loadSchemas(directory);
-   
+    loadSchemas(directory);   
     scan(directory);
-    serviceDocManager.scan(directory);
   }
   
   private void scan(File directory) throws ContextPropertiesSyntaxException, IOException {
@@ -178,6 +170,8 @@ public class MediaTypeDocumenter {
 
   private void copyFile(InputStream stream, File cssFile) throws IOException  {
    
+    File parent = cssFile.getParentFile();
+    parent.mkdirs();
     FileOutputStream out = new FileOutputStream(cssFile);
     try {
       byte[] buffer = new byte[1024];
@@ -224,12 +218,12 @@ public class MediaTypeDocumenter {
     
     StreamFactory streamFactory = new FileStreamFactory(inputDir, baseDir);
     DiagramGeneratorImpl diagramManager = new DiagramGeneratorImpl(streamFactory);
-    ContextHtmlPrinter contextPrinter = new ContextHtmlPrinter(generatorProperties, typeManager, fileManager, streamFactory, diagramManager);
+    ContextHtmlPrinter contextPrinter = new ContextHtmlPrinter(
+        generatorProperties, typeManager, fileManager, streamFactory, diagramManager, umlFileManager);
     contextPrinter.setIncludeOverviewDiagram(true);
     contextPrinter.setIncludeClassDiagrams(true);
     contextPrinter.printHtml(context, properties);
     
-    printServiceDocumentation(streamFactory, properties);
     if (publish) {
       uploadClient.upload(baseDir, properties);
     }
@@ -237,24 +231,7 @@ public class MediaTypeDocumenter {
     
   }
 
-  private void printServiceDocumentation(StreamFactory streamFactory,
-      ContextProperties properties) throws IOException {
-    
-    String mediaType = properties.getMediaType();
-    ServiceDocumentation doc = serviceDocManager.getServiceDocumentationByMediaType(mediaType);
-    if (doc == null) return;
-    doc.setCssHref( fileManager.pathToStyleSheet(mediaType));
-    String text = serviceDocPrinter.print(doc);
-    
-    OutputStream out = streamFactory.createOutputStream(fileManager.getServiceDocumentationFileName());
-    OutputStreamWriter writer = new OutputStreamWriter(out);
-    try {
-      writer.write(text);
-      writer.flush();
-    } finally {
-      writer.close();      
-    }
-  }
+  
   
   
 

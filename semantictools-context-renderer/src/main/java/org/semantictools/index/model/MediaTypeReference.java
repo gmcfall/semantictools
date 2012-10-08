@@ -6,14 +6,14 @@ public class MediaTypeReference {
   
   private String mediaTypeName;
   private String mediaTypeURI;
-  private String serviceAPI;
+  private String rdfTypeURI;
   
   
   
-  public MediaTypeReference(String mediaTypeName, String mediaTypeURI, String serviceAPI) {
+  public MediaTypeReference(String rdfTypeURI, String mediaTypeName, String mediaTypeURI) {
     this.mediaTypeName = mediaTypeName;
     this.mediaTypeURI = mediaTypeURI;
-    this.serviceAPI = serviceAPI;
+    this.rdfTypeURI = rdfTypeURI;
   }
   
   public String getMediaTypeName() {
@@ -29,13 +29,15 @@ public class MediaTypeReference {
     this.mediaTypeURI = mediaTypeURI;
   }
 
-  public String getServiceAPI() {
-    return serviceAPI;
+  public String getRdfTypeURI() {
+    return rdfTypeURI;
   }
 
-  public void setServiceAPI(String serviceAPI) {
-    this.serviceAPI = serviceAPI;
+  public void setRdfTypeURI(String rdfTypeURI) {
+    this.rdfTypeURI = rdfTypeURI;
   }
+
+  
   
   
 }

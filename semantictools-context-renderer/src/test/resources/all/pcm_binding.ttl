@@ -1,0 +1,46 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix lrmi: <http://schema.org/> .
+@prefix pmeta: <http://purl.org/pearson/metadata/> .
+
+pcm:Envelope rdf:type bind:Addressable .
+pcm:Envelope rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pcm:metadata ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pcm:body ;
+    bind:associationType bind:Aggregation
+  ] .
+pcm:DublinCoreResource rdf:type bind:Addressable .
+pcm:DublinCoreResource rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty dc:subject ;
+    bind:associationType bind:Aggregation
+  ] .
+pcm:Metadata rdf:type bind:Addressable .
+pcm:LearningResource rdf:type bind:Addressable .
+pcm:LearningResource rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lrmi:educationalAlignment ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lrmi:intendedEndUserRole ;
+    bind:associationType bind:Aggregation
+  ] .
+pcm:ManagedResource rdf:type bind:Addressable .
+pcm:ManagedResource rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pmeta:contentTypeTier1 ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pmeta:contentTypeTier2 ;
+    bind:associationType bind:Aggregation
+  ] .
+

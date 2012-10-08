@@ -166,8 +166,11 @@ public class Field {
   public String getComment() {
     if (comment == null) {
       comment = property.getComment(null);
+      if (comment == null) {
+        comment = "";
+      }
     }
-    return (comment == null) ? "" : comment;
+    return comment;
   }
   
   public void setComment(String comment) {
@@ -189,6 +192,11 @@ public class Field {
       if (rdfType == null) {
         rdfType = manager.getDatatypeByUri(type.getURI());
       }
+      
+      if (rdfType == null) {
+        rdfType = manager.getListTypeByListUri(type.getURI());
+      }
+     
     }
     return rdfType;
   }

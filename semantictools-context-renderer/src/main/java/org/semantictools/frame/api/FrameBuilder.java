@@ -168,6 +168,11 @@ public class FrameBuilder {
 //      }
       
       if (range == null) {
+        Resource value = property.getPropertyResourceValue(RDFS.range);
+        if (value == null) {
+          logger.warn("Ignoring field " + resource.getLocalName() + " on class " + frame.getLocalName() + ": the range is not defined.");
+          return;
+        }
         range = property.getPropertyResourceValue(RDFS.range).as(OntResource.class);
       }
       
@@ -206,8 +211,12 @@ public class FrameBuilder {
 
 
   private void addFields(OntProperty p) {
+    OntResource domainResource = p.getDomain();
+    if (domainResource == null) {
+      return;
+    }
     
-    OntClass domain = p.getDomain().as(OntClass.class);
+    OntClass domain = domainResource.as(OntClass.class);
     List<OntResource> domainList = listUnionMembers(p, domain);
     if (domainList.isEmpty()) {
       domainList.add(domain);
@@ -244,6 +253,7 @@ public class FrameBuilder {
     range = p.getRange();
     if (range == null) {
       logger.warn("Ignoring property " + p.getLocalName() + " on class " + type.getLocalName() + ": range not defined");
+      return;
     }
     if (restriction != null) {
       Resource onClass = restriction.getPropertyResourceValue(OWL2.onClass);
@@ -280,6 +290,11 @@ public class FrameBuilder {
     } else {
     
       field = new Field(frame, p, range, minCardinality, maxCardinality);
+      
+      if (field.getRdfType() == null) {
+        logger.warn("Faild to create RdfType for field " + field.getLocalName());
+      }
+      
     }
 
     Resource rawInverse = p.getPropertyResourceValue(OWL.inverseOf);
@@ -463,6 +478,7 @@ public class FrameBuilder {
     
     for (OntClass type : list) {
       Frame frame = createFrame(type);
+      if (frame == null) continue;
       setRestCategory(frame);
       setAbstract(frame);
     }
@@ -499,7 +515,13 @@ public class FrameBuilder {
   }
 
   private Frame createFrame(OntClass type) {
-    
+    if (manager.isStandardDatatype(type.getNameSpace())) {
+      manager.getDatatypeByUri(type.getURI());
+      return null;
+    }
+    if (manager.isStandard(type.getNameSpace())) {
+      return null;
+    }
     String uri = type.getURI();
     if (uri == null) {
       throw new RuntimeException("URI of type is not defined");
@@ -507,6 +529,19 @@ public class FrameBuilder {
     Frame frame = manager.getFrameByUri(uri);
     if (frame != null) {
       return frame;
+    }
+    
+    
+    OntClass elemType = manager.getElementType(type);
+    if (elemType != null) {
+      String elemURI = elemType.getURI();
+      ListType listType = manager.getListTypeByElementUri(elemURI);
+      if (listType == null) {
+        RdfType elemRdfType = manager.getTypeByURI(elemURI);
+        listType = new ListType(type, elemRdfType);
+        manager.add(listType);
+      }
+      return null;
     }
     
     List<OntResource> individuals = getEnumeratedIndividuals(type);

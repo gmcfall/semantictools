@@ -209,6 +209,7 @@ public class DatatypeReader {
         type.setFractionDigits(fractionDigits);
         type.setMaxExclusive(maxExclusive);
         type.setMaxInclusive(maxInclusive);
+        type.setMinInclusive(minInclusive);
         type.setMinExclusive(minExclusive);
         type.setMaxExclusive(maxExclusive);
         type.setMinLength(minLength);

@@ -47,6 +47,12 @@ public class MethodDocumentation {
   public List<ResponseInfo> getStatusCodes() {
     return statusCodes;
   }
+  public boolean containsHeader(String headerName) {
+    for (HttpHeaderInfo info : requestHeaders) {
+      if (info.getHeaderName().equals(headerName)) return true;
+    }
+    return false;
+  }
   
   
   

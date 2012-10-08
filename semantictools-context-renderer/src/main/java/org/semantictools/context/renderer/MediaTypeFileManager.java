@@ -1,5 +1,7 @@
 package org.semantictools.context.renderer;
 
+import java.io.File;
+
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.frame.model.Frame;
 
@@ -13,7 +15,23 @@ import com.ibm.icu.util.StringTokenizer;
  */
 public class MediaTypeFileManager {
   
+  private File mediaTypeDir;
+  
     
+  public MediaTypeFileManager(File mediaTypeDir) {
+    this.mediaTypeDir = mediaTypeDir;
+  }
+  
+  public File getIndexFile(String mediaType) {
+    String path = pathToMediaTypeDir(mediaType) + "/" + getIndexFileName();
+    return new File(mediaTypeDir, path);
+  }
+  
+  
+  /**
+   * Returns the path to the media type directory, relative to the root directory
+   * passed to the constructor of this MediaTypeFileManager.
+   */
   public String pathToMediaTypeDir(String mediaType) {
     return mediaType.replace('.', '/');
   }

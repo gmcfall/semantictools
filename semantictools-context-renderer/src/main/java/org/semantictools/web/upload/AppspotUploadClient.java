@@ -13,6 +13,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.frame.api.LinkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,68 @@ public class AppspotUploadClient {
 //  private static final String SERVLET_URL = "http://127.0.0.1:8888/admin/upload.do";
   private static final String CONTENT_TYPE = "contentType";
   private static final String PATH = "path";
+  private static final String VERSION = "version";
   private static final String FILE_UPLOAD = "fileUpload";
   
+  private String servletURL = SERVLET_URL;
+  private String version;
+  
+    
+  public void uploadAll(File baseDir) throws IOException {
+    LinkManager linkManager = new LinkManager(baseDir);
+    uploadFiles(linkManager, baseDir);
+    
+  }
+  
+  
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  public String getEndpointURL() {
+    return servletURL;
+  }
+
+  public void setEndpointURL(String endpointURL) {
+    this.servletURL = endpointURL;
+  }
+
+
+
+
+  private void uploadFiles(LinkManager linkManager, File dir) throws IOException {
+    File[] array = dir.listFiles();
+    for (File file : array) {
+      if (file.isDirectory()) {
+        uploadFiles(linkManager, file);
+      } else {
+        String fileName = file.getName();
+        int dot = fileName.lastIndexOf('.');
+        if (dot < 0) continue;
+        String suffix = fileName.substring(dot+1);
+        String contentType = getContentType(suffix);
+        if (contentType == null) continue;
+        
+        String path = linkManager.relativize(file);
+        upload(contentType, path, file);
+      }
+    }
+    
+  }
+  
+  private String getContentType(String suffix) {
+    return 
+      "png".equals(suffix) ? "image/png" :
+      "html".equals(suffix) ? "text/html" :
+      "css".equals(suffix) ? "text/css" :
+      "json".equals(suffix) ? "application/json" :
+      null;
+  }
+
   public void upload(File baseDir, ContextProperties contextProperties) throws IOException {
     
     
@@ -92,7 +153,7 @@ public class AppspotUploadClient {
     }
     
     HttpClient client = new DefaultHttpClient();
-    HttpPost post = new HttpPost(SERVLET_URL);
+    HttpPost post = new HttpPost(servletURL);
     post.setHeader("CONTENT-TYPE", "multipart/form-data; boundary=xxxBOUNDARYxxx");
     MultipartEntity entity = new MultipartEntity(
         HttpMultipartMode.BROWSER_COMPATIBLE, "xxxBOUNDARYxxx", Charset.forName("UTF-8"));
@@ -101,6 +162,9 @@ public class AppspotUploadClient {
     
     entity.addPart(CONTENT_TYPE, new StringBody(contentType));
     entity.addPart(PATH, new StringBody(path));
+    if (version != null) {
+      entity.addPart(VERSION, new StringBody(version));
+    }
     entity.addPart(FILE_UPLOAD, body);
     
     post.setEntity(entity);

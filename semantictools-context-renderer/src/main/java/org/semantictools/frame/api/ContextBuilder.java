@@ -25,6 +25,7 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class ContextBuilder {
   private OntModel model;
@@ -92,11 +93,14 @@ public class ContextBuilder {
 
   private void addType(ContextProperties properties, JsonContext context, RdfType rdfType, boolean stubbed) {
 
+    String typeURI = rdfType.getUri();
+    if (properties.getExcludedTypes().contains(typeURI)) {
+      return;
+    }
     if (rdfType.canAsListType()) {
       rdfType = rdfType.asListType().getElementType();
     }
     
-    String typeURI = rdfType.getUri();
         
     if (isStandard(typeURI)) return;
 
@@ -230,6 +234,7 @@ public class ContextBuilder {
       
       if (!properties.getExpandedValues().contains(propertyURI)) {
         String propertyTypeURI = rdfType.getUri();
+        
         String typeIRI = iriRef(context, rdfType.getNamespace(), rdfType.getLocalName(), propertyTypeURI);
         value = new TermValue();
         value.setId(iriValue);
@@ -343,6 +348,10 @@ public class ContextBuilder {
 
 
   private String iriRef(JsonContext context, String namespaceURI, String localName, String uri) {
+    if (typeManager.isStandardLiteralType(uri)) {
+      namespaceURI = XSD.getURI();
+      localName = XSD.xstring.getLocalName();
+    }
     String prefix = getPrefix(context, namespaceURI);
     if (prefix == null) {
       return uri;

@@ -32,6 +32,9 @@ public class ResponseInfo {
   public final static ResponseInfo INTERNAL_SERVER_ERROR = new ResponseInfo(500, "Internal Service Error", 
       "The server encountered an unexpected condition which prevented it from fulfilling the request.");
   
+  public final static ResponseInfo NOT_ACCEPTABLE = new ResponseInfo(406, "Not Acceptable",
+      "The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request.");
+  
   private int code;
   private String label;
   private String description;

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://purl.org/pearson/content/v1/xsd/datatypes#"
+  targetNamespace="http://purl.org/pearson/content/v1/xsd/datatypes#"
+  elementFormDefault="qualified">
+  <xsd:annotation>
+    <xsd:appinfo>
+      <label>Pearson Metadata types</label>
+      <prefix>pcd</prefix>
+    </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:simpleType id="GUID.Type" name="GUID.Type">
+    <xsd:restriction base="xsd:normalizedString">
+      <xsd:pattern value="\S*"/>
+      <xsd:maxLength value="256"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>
+

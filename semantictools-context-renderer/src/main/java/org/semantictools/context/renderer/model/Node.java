@@ -72,6 +72,11 @@ public class Node {
     nameQualifier = "#sn";
   }
   
+  public void applyMixedValue() {
+    nameText = "#mixed  " + nameText;
+    nameQualifier = "#mixed";
+  }
+  
   public void applyExpandedValue() {
     nameText = "#ev  " + nameText;
     nameQualifier = "#ev";

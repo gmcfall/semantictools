@@ -1,0 +1,17 @@
+{
+  "@context" : "http://purl.org/pearson/core/v1/ctx/outcomes/AssignmentResultDeletedEvent",
+  "@type" : "AssignmentResultEvent",
+
+  "header" : {
+    "version" : "1.0",
+    "sourceId" : "urn:udson:pearson.com/xl",
+    "destinationId" : "urn:udson:pearson.com/eclg",
+    "msgId" : "4a65e87c-af60-4b65-b764-c0901820d2f8",
+    "timestamp" : "2012-04-13T09:15:49-04:00"
+  },
+  
+  "body" : {
+    "@id" : "http://www.mathxl.com/resources/AssignmentResult/f2a87f98-1f95-4507-a3a9-8f326ec9c5f4",
+    "lastModified" : "2012-04-13T09:15:49-04:00"
+  }
+}

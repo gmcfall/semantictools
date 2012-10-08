@@ -5,15 +5,20 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.semantictools.context.renderer.MediaTypeFileManager;
+import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.ServiceFileManager;
 import org.semantictools.frame.api.ContextManager;
 import org.semantictools.frame.api.MediaTypeDocumenter;
+import org.semantictools.frame.api.ServiceDocumentationManager;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.index.api.LinkedDataIndexPrinter;
 import org.semantictools.index.api.impl.LinkedDataIndexImpl;
 import org.semantictools.uml.api.UmlFileManager;
 import org.semantictools.uml.api.UmlPrinter;
 import org.semantictools.uml.model.UmlManager;
+import org.semantictools.web.upload.AppspotUploadClient;
 import org.xml.sax.SAXException;
 
 /**
@@ -29,6 +34,8 @@ public class DocumentationGenerator {
   private File rdfDir;
   private File pubDir;
   private boolean publish = false;
+  private String uploadEndpoint=null;
+  private String version=null;
   
   
   /**
@@ -42,6 +49,27 @@ public class DocumentationGenerator {
     this.pubDir = targetDir;
     this.publish = publish;
   }
+  
+
+  public String getVersion() {
+    return version;
+  }
+
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+
+  public String getUploadEndpoint() {
+    return uploadEndpoint;
+  }
+
+
+  public void setUploadEndpoint(String uploadEndpoint) {
+    this.uploadEndpoint = uploadEndpoint;
+  }
+
 
   public void run() throws IOException, ParserConfigurationException, SAXException  {
 
@@ -51,9 +79,12 @@ public class DocumentationGenerator {
     UmlManager manager;
     LinkedDataIndexPrinter indexPrinter;
     
+    
     File umlDir = new File(pubDir, "uml");
     File mediaTypeDir = new File(pubDir, "mediatype");
-    
+    File umlCss = new File(umlDir, "uml.css");
+
+    UmlFileManager umlFileManager = new UmlFileManager(umlDir);
     
     TypeManager typeManager = new TypeManager();
     typeManager.loadDir(rdfDir);
@@ -68,34 +99,41 @@ public class DocumentationGenerator {
       }
     };
     
-    UmlFileManager fileManager = new UmlFileManager(umlDir);
-    
-    
-
-    MediaTypeDocumenter documenter = new MediaTypeDocumenter();
-    documenter.setPublish(publish);
+    ServiceFileManager serviceFileManager = new ServiceFileManager(umlDir, umlCss);
+    MediaTypeFileManager mediatypeFileManager = new MediaTypeFileManager(mediaTypeDir);
+    ContextManager contextManager = new ContextManager(mediatypeFileManager);
+    MediaTypeDocumenter documenter = new MediaTypeDocumenter(contextManager, umlFileManager);
     documenter.loadAll(rdfDir);
+    typeManager.analyzeOntologies();
     documenter.produceAllDocumentation(mediaTypeDir);
     
-    ContextManager contextManager = documenter.getContextManager();
+    ServiceDocumentationPrinter servicePrinter = new ServiceDocumentationPrinter(rewriter);
+    ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(contextManager, serviceFileManager, servicePrinter);
+    serviceManager.scan(rdfDir);
+    serviceManager.writeAll();
     
     LinkedDataIndexImpl oracle = new LinkedDataIndexImpl(
         mediaTypeDir, 
         typeManager,
         contextManager, 
-        documenter.getServiceDocumentManager(),
-        fileManager);
+        serviceManager,
+        umlFileManager);
     
-    printer = new UmlPrinter(rewriter, manager, fileManager, oracle);
+    
+    printer = new UmlPrinter(rewriter, manager, umlFileManager, oracle);
     indexPrinter = new LinkedDataIndexPrinter(pubDir, oracle);
     
-    if (publish) {
-      printer.setUploadClient(documenter.getUploadClient());
-    }
-    
-
     printer.printAll();
     indexPrinter.printIndex();
+    
+    if (publish) {
+      AppspotUploadClient uploader = new AppspotUploadClient();
+      if (uploadEndpoint != null) {
+        uploader.setEndpointURL(uploadEndpoint);
+      }
+      uploader.setVersion(version);
+      uploader.uploadAll(pubDir);
+    }
     
     
     

@@ -344,7 +344,7 @@ public class JsonSampleGenerator {
     JsonNode node = null;
 
     String uri = datatype.getUri();
-    String baseURI = getBaseURI(datatype);
+    String baseURI = typeManager.getXsdBaseURI(datatype);
     
     if (baseURI == null) {
       throw new UnsupportedDatatypeException(uri);
@@ -503,17 +503,6 @@ public class JsonSampleGenerator {
     }
     return text;
     
-  }
-
-  private String getBaseURI(Datatype datatype) {
-    String xsdURI = XSD.getURI();
-    while (datatype != null) {
-      if (datatype.getUri().startsWith(xsdURI)) {
-        return datatype.getUri();
-      }
-      datatype = datatype.getBase();
-    }
-    return null;
   }
 
   private void addIdProperty(Branch branch) {

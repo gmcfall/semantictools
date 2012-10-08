@@ -1,0 +1,453 @@
+@prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix pcd: <http://purl.org/pearson/content/v1/xsd/datatypes#> .
+@prefix xdt: <http://www.w3.org/2004/10/xpath-datatypes#> .
+@prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/paf/v1/vocab/core#> a owl:Ontology  ;
+  rdfs:label "Pearson Activity Framework" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "paf" .
+
+paf:Activity rdf:type owl:Class ;
+  rdfs:subClassOf paf:ScoreConstraints ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:versionHistory;
+    rdfs:comment "The VersionHistory to which this Activity belongs."
+  ] ; 
+  rdfs:comment "An Activity is a set of one or more interactions that affect the user's learning path or learning outcomes.  The most common type of Activity is an assignment such as a test, quiz or homework.  But there also less intrusive " .
+
+paf:ActivityContainer rdf:type owl:Class ;
+  rdfs:subClassOf paf:Activity ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:childActivity;
+    owl:minCardinality  1;
+    rdfs:comment "A reified association between this ActivityContainer and a child Activity within the container."
+  ] ; 
+  rdfs:comment """A container that holds a collection of Activities.  The ActivityContainer does not reference child activities directly.  Rather, the child activities are referenced indirectly through <code>ActivityBinding</code> resources.  The ActivityBinding points to the child activity, but it also decorates it with additional information.  A child activity nested within an ActivityContainer may be anotherActivityContainer; this is the principal way in which hierarchical activities are defined.
+<p>The concept of an <code>ActivityContainer</code> is semantically equivalent to an <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_infov2p1pd2.html#element10511\">assessmentSection</a> in the QTI specification.</p>""" .
+
+paf:ActivityBinding rdf:type owl:Class ;
+  rdfs:subClassOf paf:ScoreConstraints ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:activityFormat;
+    rdfs:comment "The preferred format that should be used when rendering the associated activity.  The value is useful if the activity has more than one format."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:activityTitle;
+    rdfs:comment "A title for the referenced activity.  This value overrides any default title defined directly by the underlying activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:activity;
+    owl:minCardinality  1;
+    rdfs:comment "The activity referenced by this ActivityBinding.  "
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:credit;
+    rdfs:comment "Specifies whether the scores on the activity should contribute to the overall score within the containing assignment."
+  ] ; 
+  rdfs:comment """An <code>ActivityBinding</code> reifies the relationship between an ActivityContainer and child activities within that container.  It associates the activity with the parent container but also decorates the activity with additional properties that are relevant within the scope of the container.  For example, the properties inherited from <code>ScoreConstraints</code> (normalMaximum and extraCreditMaxium) override the default values for these same properties that may be defined directly on the child Activity. 
+<p>The concept of an ActivityBinding is semantically equivalent to an <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_infov2p1pd2.html#element10519\">assessmentItemRef</a> in the QTI standard.</p>""" .
+
+paf:ScoreConstraints rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:normalMaximum;
+    rdfs:comment "The maximum number of points that the student can earn on the activity without extra credit.  The absolute maximum number of points possible is given by the sum of <code>normalMaximum</code> and <code>extraCreditMaximum</code>."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:extraCreditMaximum;
+    rdfs:comment "The maximum number of extra credit points that the student can earn on the activity. The absolute maximum number of points possible is given by the sum of <code>normalMaximum</code> and <code>extraCreditMaximum</code>."
+  ] ; 
+  rdfs:comment "A container that specifies constraints on the scores for an activity." .
+
+paf:StructuredAssignment rdf:type owl:Class ;
+  rdfs:subClassOf paf:Assignment ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:title;
+    owl:minCardinality  1;
+    rdfs:comment "A title for the assignment, suitable for display to end users."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:assignmentContents;
+    owl:minCardinality  1;
+    rdfs:comment "The root container that holds the items within this <code>StructuredAssignment</code>"
+  ] ; 
+  rdfs:comment "A <code>StructuredAssignment</code> is an Assignment which organizes the child activities (also known as assessment items), within container (also known as assessment sections)." .
+
+paf:VersionHistory rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:masterActivity;
+    owl:minCardinality  1;
+    rdfs:comment "One distinguished activity that serves as a prototypical example of all the activities within the VersionHistory."
+  ] ; 
+  rdfs:comment """A <code>VersionHistory</code> is a collection which aggregates all the various revisions of some Activity.  <p> Instructors and course designers frequently create new variants of an Activity by copying some source Activity and then making minor changes.  This practice is especially common with <code>Assignment</code> resources. An Instructor might start with some source Assignment and then create a new variant that differs only in the number of points assigned to certain items.  The two assignments (the original and the new one with a modified point distribution) are substantially the same resource but they are not identical. </p>
+<p>Technically, you can think of a VersionHistory as an <em><a href=\"http://en.wikipedia.org/wiki/Equivalence_class\">equivalence class</a></em>.  It is a collection of activities which, roughly speaking, are equivalent to each other.  This concept is important when reporting on outcomes for cohorts larger than a single course section.</p>
+<p>The VersionHistory concept is also useful in LTI integrations.  When creating a link to an Activity one might naively define a custom launch parameter which identifies the particular Activity of interest.  However, this practice can be dangerous. If the course section containing the link is copied, the new course section will end up containing a link to an assignment in the original course section.  One way to avoid this problem is to define a launch parameter which points to the VersionHistory instead of a particular instance of the Activity.  At runtime, when handling a launch request, the system must lookup the appropriate variant of the Activity that is available within the current learning context.</p>""" .
+
+paf:Assignment rdf:type owl:Class ;
+  rdfs:subClassOf paf:Activity ; 
+  rdfs:comment "An Assignment is a collection of one or more activities that can be assigned to students as a single unit.  Assignments may be scheduled through an AssignmentAdministration, and outcomes may be recorded in a grade book." .
+
+paf:Credit rdf:type owl:Class .
+
+paf:ActivitySequence rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pcm:guid;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:node;
+    rdfs:comment "A node within this ActivitySequence."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:user;
+    owl:minCardinality  1;
+    rdfs:comment "The user who is (or was) engaged in the sequence of activities."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:learningContext;
+    owl:minCardinality  1;
+    rdfs:comment "The context in which the learning activities take place."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:overallActivity;
+    owl:minCardinality  1;
+    rdfs:comment "The overall activity with which this ActivitySequence is associated.  Typically, the overall activity will be an <code>Assignment</code>, but in theory other kinds of Activities are possible."
+  ] ; 
+  rdfs:comment "An <code>ActivitySequence</code> is a resource that records information about the stepwise progression of user engagement with sub-activities within some larger, encompassing activity.  Each step in the sequence is represented by a <code>SequenceNode</code>.  Typically, the overall activity is some kind of <code>Assignment</code> (test, quiz, homework, etc.), but the concept of an ActivitySequence is more general.  It can record information about user progression through any kind of learning activity." .
+
+paf:SequenceNode rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pcm:guid;
+    owl:minCardinality  1;
+    rdfs:comment "A globally unique identifier for the ActivitySequence."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:nodeIndex;
+    owl:minCardinality  1;
+    rdfs:comment "The position of this node within the sequence.  The first node has nodeIndex=1, the second node has nodeIndex=2, and so on."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:startTime;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:parentSequence;
+    owl:minCardinality  1;
+    rdfs:comment "The parent <code>ActivitySequence</code> within which this <code>SequenceNode</code> is found."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:activity;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:player;
+    rdfs:comment "The ActivityPlayer used to render the activity associated with this SequenceNode."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:activityState;
+    rdfs:comment "A resource that stores state information about the user's engagement with the activity associated with this <code>SequenceNode</code>."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:nodeResult;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:binding;
+    rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity."
+  ] ; 
+  rdfs:comment """A <code>SequenceNode</code> represents one step in an <code>ActivitySequence</code>.  Each node records state information about the user's engagement with some activity at that step within the sequence.
+<p> While the overall sequence is associated with a composite activity like a test or quiz, the nodes correspond to individual items within the assignment.  However, the order of the nodes does not necessarily reflect the natural order of items in the assignment.  Rather, the order of the nodes reflects the order in which the user attacked the individual items.</p>""" .
+
+paf:ActivityPlayer rdf:type owl:Class ; 
+  rdfs:comment "A \"widget\" that is capable of rendering the user interface for an activity.  The word \"widget\" is placed in quotes because an <code>ActivityPlayer</code> does not implement the W3C <a href=\"http://www.w3.org/TR/widgets-apis/\">Widget Interface</a>.  Conceptually, however, an ActivityPlayer is similar to a W3C widget." .
+
+paf:ActivityState rdf:type owl:Class ; 
+  rdfs:comment "The abstract base class for state that records information about the learner's interaction with the activity.  Typicallly for each kind of Activity one defines a corresponding subclass of ActivityState that is appropriate for that activity.  For example, the <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_resultv2p1pd2.html#element10816\">itemResult</a> element within the IMS QTI standard is an example of ActivityState for QTI items." .
+
+paf:NodeResult rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:correct;
+    rdfs:comment "A boolean value which specifies whether the user responded to the activity correctly during the engagement represented by the <em>owner</em> node."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:itemScore;
+    rdfs:comment "The score that the Learner earned based on his or her response to the activity durnig the engagement represented by the <em>owner</em> node."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:ownerNode;
+    owl:minCardinality  1;
+    rdfs:comment "The <em>SequenceNode</em> that records a time when the user was engaged with the activity and provided a response which is captured as <code>activityState</code>.  This <code>NodeResult</code> records the result from that particular engagement."
+  ] ; 
+  rdfs:comment "<code>NodeResult</code> encapsulates the output from processing the learner's response to a activity during one particular engagement with the activity.  That engagement is captured by a <code>SequenceNode</code> which is identified as the <em>owner</em> of the <code>NodeResult</code>." .
+
+paf:SystemResponse rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:guid;
+    owl:minCardinality  1;
+    rdfs:comment "A globally unique identifier for this <code>SystemResponse</code>"
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:htmlResponse;
+    owl:minCardinality  1;
+    rdfs:comment "An HTML fragment that contains the system's feedback to the learner."
+  ] ; 
+  rdfs:comment "A response produced by the system to provide feedback to a learner who has engaged with an activity." .
+
+paf:ActivityResult rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:startTime;
+    rdfs:comment "The time when the user first started interacting with the activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:endTime;
+    rdfs:comment "The time when the learner last interacted with the activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:duration;
+    rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of <code>ActivityResult</code> is the sum of the durations recorded by the nodes."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:numLearningAidsUsed;
+    rdfs:comment "The total number of learning aids that the Learner used while responding to the activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:correctOnFirstTry;
+    rdfs:comment "A boolean value which indicates whether the learner responded to the activity correctly on the first try."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:incorrectSubmissionCount;
+    rdfs:comment "The total number of times that the learner submitted an incorrect response to the activity.  "
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:attempt;
+    rdfs:comment "A node that contributes to the overall <code>ActivityResult</code>.  Each node encapulates information about one <em>session</em> when the user interacted with the activity."
+  ] ; 
+  rdfs:comment "<code>ActivityResult</code> summarizes the results aggregated from all of a given learner's interactions with a specific activity; it rolls up the results from all the various attempts by the learner to respond to the given activity.  Each attempt is represented by a node in an ActivitySequence.  " .
+
+paf:ActivityBindingList rdfs:subClassOf
+  rdf:List,
+  [ rdf:type owl:Restriction ;
+    owl:onProperty rdf:first ;
+    owl:allValuesFrom paf:ActivityBinding ;
+  ] ,
+  [ rdf:type owl:Restriction ;
+    owl:onProperty rdf:rest ;
+    owl:allValuesFrom [
+      owl:unionOf (
+        [ owl:oneOf ( rdf:nil ) ]
+        paf:ActivityBindingList
+      )
+    ]
+  ] .
+
+paf:versionHistory rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:Activity ;
+  rdfs:range paf:VersionHistory ;
+  owl:inverseOf paf:activityVersion ;
+  rdfs:comment "The VersionHistory to which this Activity belongs." .
+
+paf:childActivity rdf:type rdf:Property ;
+  rdfs:domain paf:ActivityContainer ;
+  rdfs:range paf:ActivityBindingList ;
+  rdfs:comment "A reified association between this ActivityContainer and a child Activity within the container." .
+
+paf:activityFormat rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "The preferred format that should be used when rendering the associated activity.  The value is useful if the activity has more than one format." .
+
+paf:activityTitle rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range xsd:string ;
+  rdfs:comment "A title for the referenced activity.  This value overrides any default title defined directly by the underlying activity." .
+
+paf:activity rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:ActivityBinding
+      paf:SequenceNode
+    )
+  ] ;
+  rdfs:range paf:Activity ;
+  rdfs:comment "The activity referenced by this ActivityBinding.  " .
+
+paf:credit rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range paf:Credit ;
+  rdfs:comment "Specifies whether the scores on the activity should contribute to the overall score within the containing assignment." .
+
+paf:normalMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ScoreConstraints ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum number of points that the student can earn on the activity without extra credit.  The absolute maximum number of points possible is given by the sum of <code>normalMaximum</code> and <code>extraCreditMaximum</code>." .
+
+paf:extraCreditMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ScoreConstraints ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum number of extra credit points that the student can earn on the activity. The absolute maximum number of points possible is given by the sum of <code>normalMaximum</code> and <code>extraCreditMaximum</code>." .
+
+paf:title rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:StructuredAssignment ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A title for the assignment, suitable for display to end users." .
+
+paf:assignmentContents rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:StructuredAssignment ;
+  rdfs:range paf:ActivityContainer ;
+  rdfs:comment "The root container that holds the items within this <code>StructuredAssignment</code>" .
+
+paf:activityVersion rdf:type rdf:Property ;
+  rdfs:domain paf:VersionHistory ;
+  rdfs:range paf:Activity ;
+  owl:inverseOf paf:versionHistory .
+
+paf:masterActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:VersionHistory ;
+  rdfs:range paf:Activity ;
+  rdfs:comment "One distinguished activity that serves as a prototypical example of all the activities within the VersionHistory." .
+
+paf:node rdf:type rdf:Property ;
+  rdfs:domain paf:ActivitySequence ;
+  rdfs:range paf:SequenceNode ;
+  owl:inverseOf paf:parentSequence ;
+  rdfs:comment "A node within this ActivitySequence." .
+
+paf:user rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivitySequence ;
+  rdfs:range pe:Person ;
+  rdfs:comment "The user who is (or was) engaged in the sequence of activities." .
+
+paf:learningContext rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivitySequence ;
+  rdfs:range pe:LearningContext ;
+  rdfs:comment "The context in which the learning activities take place." .
+
+paf:overallActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivitySequence ;
+  rdfs:range paf:Activity ;
+  rdfs:comment "The overall activity with which this ActivitySequence is associated.  Typically, the overall activity will be an <code>Assignment</code>, but in theory other kinds of Activities are possible." .
+
+paf:nodeIndex rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The position of this node within the sequence.  The first node has nodeIndex=1, the second node has nodeIndex=2, and so on." .
+
+paf:startTime rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:SequenceNode
+      paf:ActivityResult
+    )
+  ] ;
+  rdfs:range xsd:dateTime .
+
+paf:endTime rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:SequenceNode
+      paf:ActivityResult
+    )
+  ] ;
+  rdfs:range xsd:dateTime .
+
+paf:parentSequence rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:ActivitySequence ;
+  owl:inverseOf paf:node ;
+  rdfs:comment "The parent <code>ActivitySequence</code> within which this <code>SequenceNode</code> is found." .
+
+paf:player rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:ActivityPlayer ;
+  rdfs:comment "The ActivityPlayer used to render the activity associated with this SequenceNode." .
+
+paf:activityState rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:ActivityState ;
+  rdfs:comment "A resource that stores state information about the user's engagement with the activity associated with this <code>SequenceNode</code>." .
+
+paf:nodeResult rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:NodeResult ;
+  owl:inverseOf paf:ownerNode .
+
+paf:binding rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:ActivityBinding ;
+  rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity." .
+
+paf:correct rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "A boolean value which specifies whether the user responded to the activity correctly during the engagement represented by the <em>owner</em> node." .
+
+paf:itemScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The score that the Learner earned based on his or her response to the activity durnig the engagement represented by the <em>owner</em> node." .
+
+paf:ownerNode rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range paf:SequenceNode ;
+  owl:inverseOf paf:nodeResult ;
+  rdfs:comment "The <em>SequenceNode</em> that records a time when the user was engaged with the activity and provided a response which is captured as <code>activityState</code>.  This <code>NodeResult</code> records the result from that particular engagement." .
+
+paf:systemResponse rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range paf:SystemResponse .
+
+paf:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SystemResponse ;
+  rdfs:range pcd:GUID.Type ;
+  rdfs:comment "A globally unique identifier for this <code>SystemResponse</code>" .
+
+paf:htmlResponse rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SystemResponse ;
+  rdfs:range xsd:string ;
+  rdfs:comment "An HTML fragment that contains the system's feedback to the learner." .
+
+paf:duration rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xdt:dayTimeDuration ;
+  rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of <code>ActivityResult</code> is the sum of the durations recorded by the nodes." .
+
+paf:numLearningAidsUsed rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The total number of learning aids that the Learner used while responding to the activity." .
+
+paf:correctOnFirstTry rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "A boolean value which indicates whether the learner responded to the activity correctly on the first try." .
+
+paf:incorrectSubmissionCount rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The total number of times that the learner submitted an incorrect response to the activity.  " .
+
+paf:attempt rdf:type rdf:Property ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range paf:SequenceNode ;
+  rdfs:comment "A node that contributes to the overall <code>ActivityResult</code>.  Each node encapulates information about one <em>session</em> when the user interacted with the activity." .
+
+paf:ForPractice rdf:type paf:Credit .
+
+paf:ForCredit rdf:type paf:Credit .
+

@@ -22,7 +22,6 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.OntologyInfo;
 

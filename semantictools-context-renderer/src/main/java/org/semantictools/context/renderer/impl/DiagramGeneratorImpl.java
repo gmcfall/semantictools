@@ -97,6 +97,10 @@ public class DiagramGeneratorImpl implements DiagramGenerator {
         sink.applyIriRef();
         break;
         
+      case MIXED_VALUE :
+        sink.applyMixedValue();
+        break;
+        
       case EXPANDED_VALUE :
         sink.applyExpandedValue();
         break;

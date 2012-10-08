@@ -17,7 +17,6 @@ import org.semantictools.graphics.HorizontalPanel;
 import org.semantictools.graphics.Label;
 import org.semantictools.graphics.Rect;
 import org.semantictools.graphics.Style;
-import org.semantictools.graphics.Transformer;
 import org.semantictools.graphics.VerticalPanel;
 import org.semantictools.graphics.Widget;
 import org.semantictools.graphics.WidgetTransformer;
