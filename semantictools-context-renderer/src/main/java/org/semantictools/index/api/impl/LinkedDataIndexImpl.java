@@ -12,7 +12,6 @@ import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.OntologyInfo;
 import org.semantictools.frame.model.OntologyType;
 import org.semantictools.index.api.LinkedDataIndex;
-import org.semantictools.index.model.MediaTypeReference;
 import org.semantictools.index.model.SchemaReference;
 import org.semantictools.index.model.ServiceDocumentationList;
 import org.semantictools.uml.api.UmlFileManager;
@@ -21,13 +20,11 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
   
   private ContextManager contextManager;
   private ServiceDocumentationManager serviceDocumentManager;
-  private File mediatypeDir;
   private UmlFileManager umlFileManager;
   private TypeManager typeManager;
   
 
   public LinkedDataIndexImpl(
-      File mediatypeDir, 
       TypeManager typeManager,
       ContextManager contextManager, 
       ServiceDocumentationManager sman,
@@ -35,7 +32,6 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
     
     this.typeManager = typeManager;
     this.contextManager = contextManager;
-    this.mediatypeDir = mediatypeDir;
     this.serviceDocumentManager = sman;
     this.umlFileManager = umlFileManager;
   }
@@ -43,28 +39,11 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
 
 
   @Override
-  public List<MediaTypeReference> listMediaTypesForClass(String rdfClassURI) {
-    List<MediaTypeReference> list = new ArrayList<MediaTypeReference>();
-    List<ContextProperties> pList = contextManager.listContextPropertiesForClass(rdfClassURI);
-    for (ContextProperties p : pList) {
-      list.add(createReferences(p));
-    }
-    
+  public List<ContextProperties> listMediaTypesForClass(String rdfClassURI) {
+    List<ContextProperties> list = contextManager.listContextPropertiesForClass(rdfClassURI);
     return list;
   }
   
-  private MediaTypeReference createReferences(ContextProperties p) {
-    String path = p.getMediaType().replace('.', '/') + "/index.html";
-    File file = new File(mediatypeDir, path);
-    String uri = file.toString().replace('\\', '/');
-   
-    
-   
-   
-    return new MediaTypeReference(p.getRdfTypeURI(), p.getMediaType(), uri);
-    
-  }
-
 
 
   @Override

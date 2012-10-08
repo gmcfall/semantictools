@@ -383,8 +383,8 @@ public class UmlPrinter extends HtmlPrinter {
     printClassDiagram(umlClass);
     printSupertypes(umlClass);
     printSubtypes(umlClass);
-    printMediaTypes(umlClass);
     printClassUses(umlClass);
+    printMediaTypes(umlClass);
     printDescription(umlClass);
     printPropertyTable(umlClass);
     printInheritedProperties(umlClass);
@@ -435,13 +435,18 @@ public class UmlPrinter extends HtmlPrinter {
     if (mediaTypeOracle == null) return;
     
     
-    
+    List<ContextProperties> mediaTypeList = mediaTypeOracle.listMediaTypesForClass(umlClass.getURI());
     List<ServiceDocumentation> list = mediaTypeOracle.getServiceDocumentationForClass(umlClass.getURI());
-    if (list==null || list.isEmpty()) return;
+    if (list == null) {
+      list = new ArrayList<ServiceDocumentation>();
+    }
+    
+    int count = mediaTypeList.size() + list.size();
+    if (count==0) return;
 
 
     beginDiv("list-heading");
-    print("REST Services:");
+    print("See Also:");
     endDiv();
     println("<UL>");
     pushIndent();
@@ -449,43 +454,25 @@ public class UmlPrinter extends HtmlPrinter {
     for (int i=0; i<list.size(); i++) {
       
       ServiceDocumentation doc = list.get(i);
-      String serviceLabel = (list.size()==1) ? "Service Documentation" :
-        "Service #" + (i+1) + " Documentation";
+      String title = doc.getTitle();
 
       String serviceHref = linkManager.relativize(doc.getServiceDocumentationFile());
       indent();
       print("<LI>");
-      printAnchor(serviceHref, serviceLabel);
-      println();
-      pushIndent();
-      printMediaTypes(doc.listContextProperties());
-      popIndent();
-      
-     
+      printAnchor(serviceHref, title);
+    }
+    for (ContextProperties context : mediaTypeList) {
+      String mediaType = context.getMediaType();
+      String href = linkManager.relativize(context.getMediaTypeDocFile());
+      indent();
+      print("<LI>");
+      printAnchor(href, mediaType);
     }
     popIndent();    
     println("</UL>");
     
   }
 
-  private void printMediaTypes(List<ContextProperties> list) {
-    indent();
-    print("<DIV");
-    printAttr("class", "running-list");
-    println(">");
-    pushIndent();
-    for (ContextProperties context : list) {
-      String href = linkManager.relativize(context.getMediaTypeDocFile());
-      String mediaType = context.getMediaType();
-      indent();
-      print("<DIV>");
-      printAnchor(href, mediaType);
-      println("</DIV>");
-    }
-    popIndent();
-    println("</DIV>");
-    
-  }
 
   private void printDescription(UmlClass umlClass) {
 

@@ -113,7 +113,6 @@ public class DocumentationGenerator {
     serviceManager.writeAll();
     
     LinkedDataIndexImpl oracle = new LinkedDataIndexImpl(
-        mediaTypeDir, 
         typeManager,
         contextManager, 
         serviceManager,
