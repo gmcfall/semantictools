@@ -61,6 +61,12 @@ public class DocumentationPlugin extends AbstractMojo {
    */
   private String publishEndpoint;
   
+  /**
+   * The name of the top-level index file.  The default value is "index.html".
+   * @parameter expression="index.html"
+   */
+  private String indexFileName;
+  
   public void execute() throws MojoExecutionException, MojoFailureException {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -69,6 +75,7 @@ public class DocumentationPlugin extends AbstractMojo {
     DocumentationGenerator generator = new DocumentationGenerator(rdfDir, outputDir, publish);
     generator.setUploadEndpoint(publishEndpoint);
     generator.setVersion(version);
+    generator.setIndexFileName(indexFileName);
     
     try {
       generator.run();
