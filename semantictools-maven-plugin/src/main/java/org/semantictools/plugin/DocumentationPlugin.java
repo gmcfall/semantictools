@@ -67,14 +67,35 @@ public class DocumentationPlugin extends AbstractMojo {
    */
   private String indexFileName;
   
+  /**
+   * The version identifier for resources that are published.  This should be a
+   * date in the format "yyyy-MM-dd".  By default, the current date is used.
+   * 
+   * @parameter expression="yyyy-MM-dd"
+   */
+  private String version;
+  
+  /**
+   * A flag which controls whether a new set of documentation should be generated.
+   * When generate=true, the plugin will generate a new set of documentation,
+   * otherwise it will proceed directly to the publish phase.  This value is true by
+   * default.
+   * 
+   * @parameter expression="true"
+   */
+  private boolean generate;
+  
   public void execute() throws MojoExecutionException, MojoFailureException {
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    String version = dateFormat.format(new Date());
+    if ("yyyy-MM-dd".equals(version)) {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      version = dateFormat.format(new Date());
+    }
     
     DocumentationGenerator generator = new DocumentationGenerator(rdfDir, outputDir, publish);
     generator.setUploadEndpoint(publishEndpoint);
     generator.setVersion(version);
+    generator.setGenerate(generate);
     generator.setIndexFileName(indexFileName);
     
     try {
