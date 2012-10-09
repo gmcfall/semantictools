@@ -5,7 +5,7 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-context-renderer</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2</version>
+	<version>1.3</version>
 	<name>SemanticTools Context Renderer</name>
 	
 	<properties>

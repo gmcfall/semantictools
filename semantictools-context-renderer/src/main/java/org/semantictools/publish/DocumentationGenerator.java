@@ -36,6 +36,7 @@ public class DocumentationGenerator {
   private boolean publish = false;
   private String uploadEndpoint=null;
   private String version=null;
+  private String indexFileName = "index.html";
   
   
   /**
@@ -50,6 +51,19 @@ public class DocumentationGenerator {
     this.publish = publish;
   }
   
+  
+
+  public String getIndexFileName() {
+    return indexFileName;
+  }
+
+
+
+  public void setIndexFileName(String indexFileName) {
+    this.indexFileName = indexFileName;
+  }
+
+
 
   public String getVersion() {
     return version;
@@ -118,9 +132,9 @@ public class DocumentationGenerator {
         serviceManager,
         umlFileManager);
     
-    
+    File indexFile = new File(pubDir, indexFileName);
     printer = new UmlPrinter(rewriter, manager, umlFileManager, oracle);
-    indexPrinter = new LinkedDataIndexPrinter(pubDir, oracle);
+    indexPrinter = new LinkedDataIndexPrinter(indexFile, oracle);
     
     printer.printAll();
     indexPrinter.printIndex();

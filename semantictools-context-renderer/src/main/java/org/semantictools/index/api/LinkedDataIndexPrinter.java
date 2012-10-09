@@ -25,11 +25,13 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
   
   private LinkedDataIndex index;
   private LinkManager linkManager;
-  private File pubDir;
+  private File indexFile;
   
-  public LinkedDataIndexPrinter(File pubDir, LinkedDataIndex index) {
+  
+  public LinkedDataIndexPrinter(File indexFile, LinkedDataIndex index) {
     super();
-    this.pubDir = pubDir;
+    this.indexFile = indexFile;
+    File pubDir = indexFile.getParentFile();
     this.index = index;
     linkManager = new LinkManager();
     linkManager.setBaseURI(pubDir.toString().replace("\\", "/") + "/");
@@ -129,8 +131,7 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
 
   private void writeFile() throws IOException {
     
-    File outFile = new File(pubDir, "index.html");
-    FileWriter writer = new FileWriter(outFile);
+    FileWriter writer = new FileWriter(indexFile);
     try {
       String text = popText();
       writer.write(text);

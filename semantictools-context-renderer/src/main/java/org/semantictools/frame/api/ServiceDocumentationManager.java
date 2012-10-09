@@ -41,7 +41,6 @@ public class ServiceDocumentationManager {
   private static final String GET_REQUEST_HEADERS = "GET.requestHeaders";
   private static final String DEFAULT_MEDIA_TYPE = "GET.default.mediaType";
   private static final String GET_REQUEST_BODY = "GET.requestBody";
-  private static final String GET_RESPONSE = "GET.response";
   private static final String POST_RESPONSE_MEDIATYPE = "POST.response.mediaType";
   private static final String URL_TEMPLATES = "urlTemplates";
   private static final String HTML_FORMAT_DOCUMENTATION = "htmlFormatDocumentation";
@@ -145,8 +144,6 @@ public class ServiceDocumentationManager {
         setGetRequestBody(sink, value);        
       } else if (GET_REQUEST_HEADERS.equals(key)) {
         setGetRequestHeaders(sink, value);
-      } else if (GET_RESPONSE.equals(key)) {
-        setGetResponse(sink, value);
       } else if (POST_RESPONSE_MEDIATYPE.equals(key)) {
         setPostResponseMediaType(sink, value);
       } else if (URL_TEMPLATES.equals(key)) {
@@ -216,18 +213,6 @@ public class ServiceDocumentationManager {
     
   }
 
-  private void setGetResponse(ServiceDocumentation sink, String value) {
-
-    MethodDocumentation method = sink.getGetDocumentation();
-    if (method == null) {
-      method = new MethodDocumentation();
-      sink.setGetDocumentation(method);
-    }
-    if ("default".equals(value)) {
-      setGetResponseDefault(sink);
-    }
-    
-  }
 
   private void setGetRequestHeaders(ServiceDocumentation sink, String value) {
 
@@ -369,6 +354,7 @@ public class ServiceDocumentationManager {
     setGetDoc(doc, typeName);
     setPutDoc(doc, typeName);
     setDeleteDoc(doc, typeName);
+    setGetResponseDefault(doc);
     addMediaTypeCitation(doc);
   }
   

@@ -13,16 +13,18 @@ public class DocumentationTest {
   public void test() throws Exception {
 
     boolean publish = false;
-    File rdfDir = new File("src/test/resources/all");
-    File pubDir = new File("target/all");
+    File rdfDir = new File("src/test/resources/lti");
+    File pubDir = new File("target/lti");
 //    String endpointURL = "http://127.0.0.1:8888/admin/upload.do";
     String endpointURL = "http://semantic-tools.appspot.com/admin/upload.do";
+    String indexFile = "lti.html";
     
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     String version = dateFormat.format(new Date());
     
     DocumentationGenerator generator = new DocumentationGenerator(rdfDir, pubDir, publish);
+    generator.setIndexFileName(indexFile);
     generator.setVersion(version);
     generator.setUploadEndpoint(endpointURL);
     generator.run();
