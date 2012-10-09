@@ -37,6 +37,7 @@ public class DocumentationGenerator {
   private String uploadEndpoint=null;
   private String version=null;
   private String indexFileName = "index.html";
+  private boolean generate = true;
   
   
   /**
@@ -52,6 +53,24 @@ public class DocumentationGenerator {
   }
   
   
+  /**
+   * Returns true if this DocumentationGenerator is configured to generate documentation, and
+   * false if it is configured merely to publish documentation that was previously generated.
+   */
+  public boolean isGenerate() {
+    return generate;
+  }
+
+
+  /**
+   * Specify whether this DocumentationGenerator should produce documentation files (generate=true)
+   * or if it should skip the production phase and go directly to the publish phase (generate=false).
+   */
+  public void setGenerate(boolean generate) {
+    this.generate = generate;
+  }
+
+
 
   public String getIndexFileName() {
     return indexFileName;
@@ -119,12 +138,16 @@ public class DocumentationGenerator {
     MediaTypeDocumenter documenter = new MediaTypeDocumenter(contextManager, umlFileManager);
     documenter.loadAll(rdfDir);
     typeManager.analyzeOntologies();
-    documenter.produceAllDocumentation(mediaTypeDir);
+    if (generate) {
+      documenter.produceAllDocumentation(mediaTypeDir);
+    }
     
     ServiceDocumentationPrinter servicePrinter = new ServiceDocumentationPrinter(rewriter);
     ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(contextManager, serviceFileManager, servicePrinter);
     serviceManager.scan(rdfDir);
-    serviceManager.writeAll();
+    if (generate) {
+      serviceManager.writeAll();
+    }
     
     LinkedDataIndexImpl oracle = new LinkedDataIndexImpl(
         typeManager,
@@ -134,10 +157,11 @@ public class DocumentationGenerator {
     
     File indexFile = new File(pubDir, indexFileName);
     printer = new UmlPrinter(rewriter, manager, umlFileManager, oracle);
-    indexPrinter = new LinkedDataIndexPrinter(indexFile, oracle);
-    
-    printer.printAll();
-    indexPrinter.printIndex();
+    if (generate) {
+      indexPrinter = new LinkedDataIndexPrinter(indexFile, oracle);
+      printer.printAll();
+      indexPrinter.printIndex();
+    }
     
     if (publish) {
       AppspotUploadClient uploader = new AppspotUploadClient();

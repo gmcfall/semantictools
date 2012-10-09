@@ -17,7 +17,7 @@ public class DocumentationTest {
     File pubDir = new File("target/lti");
 //    String endpointURL = "http://127.0.0.1:8888/admin/upload.do";
     String endpointURL = "http://semantic-tools.appspot.com/admin/upload.do";
-    String indexFile = "lti.html";
+    String indexFile = "index.html";
     
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

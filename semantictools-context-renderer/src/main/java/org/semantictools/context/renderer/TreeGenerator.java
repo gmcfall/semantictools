@@ -148,7 +148,11 @@ public class TreeGenerator {
       node.setDescription("The URI that identifies this <code>" + parentType + "</code> instance.");
       node.setLocalName("@id");
       node.setMaxCardinality(1);
-      node.setMinCardinality(0);
+      if (contextProperties.requiresId(frame.getUri())) {
+        node.setMinCardinality(1);
+      } else {
+        node.setMinCardinality(0);
+      } 
       node.setTypeName("xs:anyURI");
       
       parent.add(node);

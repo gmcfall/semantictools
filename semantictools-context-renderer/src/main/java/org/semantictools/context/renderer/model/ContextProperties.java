@@ -31,6 +31,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
+  private Set<String> requiresId = new HashSet<String>();
   private String title;
   private String status;
   private String date;
@@ -50,6 +51,24 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.rawProperties = rawProperties;
   }
   
+  
+  /**
+   * Returns the set of URI values for classes whose "@id" property
+   * is required.  (By default, "@id" properties are optional.)
+   */
+  public Set<String> getRequiresId() {
+    return requiresId;
+  }
+  
+  /**
+   * Returns true if the "@id" property is required for instances of the 
+   * specified RDF type.
+   */
+  public boolean requiresId(String rdfTypeURI) {
+    return requiresId.contains(rdfTypeURI);
+  }
+
+
   /**
    * Specifies whether the documentation for the media type should contain a link
    * to the version history of the specification.

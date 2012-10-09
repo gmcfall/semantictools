@@ -28,6 +28,7 @@ public class ContextManager {
   private static final String CONTEXTREF = "contextRef";
   private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
   private static final String IDREF = "idref";
+  private static final String REQUIRES_ID = "requiresId";
   private static final String MIXED_VALUE = "mixedValue";
   private static final String STATUS = "status";
   private static final String DATE = "date";
@@ -146,6 +147,8 @@ public class ContextManager {
         sink.setContextURI(value);
       } else if (IDREF.equals(key)) {
         setIdref(sink, value);
+      } else if (REQUIRES_ID.equals(key)) {
+        setRequiresId(sink, value);
       } else if (MIXED_VALUE.equals(key)) {
         setMixedValue(sink, value);
       } else if (MEDIATYPE.equals(key)) {
@@ -195,6 +198,15 @@ public class ContextManager {
     
   }
 
+
+  private void setRequiresId(ContextProperties sink, String value) {
+
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.getRequiresId().add(tokenizer.nextToken());
+    }
+    
+  }
 
   private void setExcludedTypes(ContextProperties sink, String value) {
     StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
