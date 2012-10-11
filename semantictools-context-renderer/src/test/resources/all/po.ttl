@@ -3,6 +3,7 @@
 @prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
 @prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
 @prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
@@ -193,6 +194,10 @@ This value does <em>not</em> take into account the effects of curving.
     owl:onProperty      po:resultVitality;
     owl:minCardinality  1;
     rdfs:comment "Specifies how a reporting system or grade book should interpret the AssignmentResult.  In particular, it specifies whether the AssignmentResult contains the effective score that counts towards the learner's grade, or whether the AssignmentResult has been superseded by another attempt by the learner on the assignment, or whether the AssignmentResult has been soft-deleted."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      po:itemResult;
+    rdfs:comment "A summary of the results aggregated from all of the learner's interactions with a specific item within the assignment."
   ] ; 
   rdfs:comment "This container holds information about the result of a learner's interaction with an assignment.  Among other data, it contains the learner's score on the assignment." .
 
@@ -463,6 +468,15 @@ po:resultVitality rdf:type owl:FunctionalProperty ;
   rdfs:domain po:AssignmentResult ;
   rdfs:range po:ResultVitality ;
   rdfs:comment "Specifies how a reporting system or grade book should interpret the AssignmentResult.  In particular, it specifies whether the AssignmentResult contains the effective score that counts towards the learner's grade, or whether the AssignmentResult has been superseded by another attempt by the learner on the assignment, or whether the AssignmentResult has been soft-deleted." .
+
+po:sequence rdf:type owl:FunctionalProperty ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range paf:ActivitySequence .
+
+po:itemResult rdf:type rdf:Property ;
+  rdfs:domain po:AssignmentResult ;
+  rdfs:range paf:ActivityResult ;
+  rdfs:comment "A summary of the results aggregated from all of the learner's interactions with a specific item within the assignment." .
 
 po:label rdf:type owl:FunctionalProperty ;
   rdfs:domain  [

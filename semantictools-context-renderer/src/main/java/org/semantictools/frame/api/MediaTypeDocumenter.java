@@ -20,6 +20,7 @@ import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.impl.DiagramGeneratorImpl;
 import org.semantictools.context.renderer.impl.FileStreamFactory;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.uml.api.UmlFileManager;
 import org.semantictools.web.upload.AppspotUploadClient;
@@ -35,6 +36,7 @@ public class MediaTypeDocumenter {
   private ContextManager contextManager;
   private MediaTypeFileManager fileManager;
   private GeneratorProperties generatorProperties;
+  private GlobalProperties global;
   private ContextProperties currentContext;
   private AppspotUploadClient uploadClient;
   private UmlFileManager umlFileManager;
@@ -43,11 +45,13 @@ public class MediaTypeDocumenter {
   
   public MediaTypeDocumenter(
       ContextManager contextManager,
-      UmlFileManager umlFileManager
+      UmlFileManager umlFileManager,
+      GlobalProperties global
   ) {
     this.fileManager = contextManager.getMediaTypeFileManager();
     this.contextManager = contextManager;
     this.umlFileManager = umlFileManager;
+    this.global = global;
     typeManager = new TypeManager();
     uploadClient = new AppspotUploadClient();
   }
@@ -143,6 +147,8 @@ public class MediaTypeDocumenter {
   public void produceAllDocumentation(File outDir) throws IOException {
     List<ContextProperties> list = contextManager.listContextProperties();
     for (ContextProperties p : list) {
+      String ontologyURI = TypeManager.getNamespace(p.getRdfTypeURI());
+      if (global.isIgnoredOntology(ontologyURI)) continue;
       produceDocumentation(p, outDir);
     }
     copyMediaTypeStylesheet(outDir);

@@ -98,6 +98,14 @@ po:AssignmentResult rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty po:resultVitality ;
     bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:sequence ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty po:itemResult ;
+    bind:associationType bind:Aggregation
   ] .
 po:ResultReason rdf:type bind:Enum .
 po:AssignmentResultEvent rdf:type bind:Addressable .

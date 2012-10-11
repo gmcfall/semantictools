@@ -5,9 +5,11 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.semantictools.context.renderer.GlobalPropertiesReader;
 import org.semantictools.context.renderer.MediaTypeFileManager;
 import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ServiceFileManager;
 import org.semantictools.frame.api.ContextManager;
 import org.semantictools.frame.api.MediaTypeDocumenter;
@@ -107,9 +109,9 @@ public class DocumentationGenerator {
   public void run() throws IOException, ParserConfigurationException, SAXException  {
 
 
-    UmlPrinter printer;
+    UmlPrinter umlPrinter;
     URLRewriter rewriter;
-    UmlManager manager;
+    UmlManager umlManager;
     LinkedDataIndexPrinter indexPrinter;
     
     
@@ -117,12 +119,14 @@ public class DocumentationGenerator {
     File mediaTypeDir = new File(pubDir, "mediatype");
     File umlCss = new File(umlDir, "uml.css");
 
+    GlobalPropertiesReader globalReader = new GlobalPropertiesReader();
+    GlobalProperties global = globalReader.scan(rdfDir);
     UmlFileManager umlFileManager = new UmlFileManager(umlDir);
     
     TypeManager typeManager = new TypeManager();
     typeManager.loadDir(rdfDir);
     typeManager.processOntologies();
-    manager = new UmlManager(typeManager);
+    umlManager = new UmlManager(typeManager);
     
     rewriter = new URLRewriter() {
       
@@ -135,7 +139,7 @@ public class DocumentationGenerator {
     ServiceFileManager serviceFileManager = new ServiceFileManager(umlDir, umlCss);
     MediaTypeFileManager mediatypeFileManager = new MediaTypeFileManager(mediaTypeDir);
     ContextManager contextManager = new ContextManager(mediatypeFileManager);
-    MediaTypeDocumenter documenter = new MediaTypeDocumenter(contextManager, umlFileManager);
+    MediaTypeDocumenter documenter = new MediaTypeDocumenter(contextManager, umlFileManager, global);
     documenter.loadAll(rdfDir);
     typeManager.analyzeOntologies();
     if (generate) {
@@ -156,10 +160,10 @@ public class DocumentationGenerator {
         umlFileManager);
     
     File indexFile = new File(pubDir, indexFileName);
-    printer = new UmlPrinter(rewriter, manager, umlFileManager, oracle);
+    umlPrinter = new UmlPrinter(global, rewriter, umlManager, umlFileManager, oracle);
     if (generate) {
       indexPrinter = new LinkedDataIndexPrinter(indexFile, oracle);
-      printer.printAll();
+      umlPrinter.printAll();
       indexPrinter.printIndex();
     }
     

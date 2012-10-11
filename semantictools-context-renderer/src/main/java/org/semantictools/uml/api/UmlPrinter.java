@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 import org.semantictools.context.renderer.HtmlPrinter;
 import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.frame.api.LinkManager;
@@ -50,9 +51,16 @@ public class UmlPrinter extends HtmlPrinter {
   private LinkedDataIndex mediaTypeOracle;
   private AppspotUploadClient uploadClient;
   private LinkManager uploadLinkManager;
+  private GlobalProperties global;
   
-  public UmlPrinter(URLRewriter rewriter, UmlManager umlManager, UmlFileManager linkManager, LinkedDataIndex oracle) {
+  public UmlPrinter(
+      GlobalProperties global,
+      URLRewriter rewriter, 
+      UmlManager umlManager, 
+      UmlFileManager linkManager, 
+      LinkedDataIndex oracle) {
     super(rewriter);
+    this.global = global;
     this.umlManager = umlManager;
     this.linkManager = linkManager;
     this.mediaTypeOracle = oracle;
@@ -78,6 +86,7 @@ public class UmlPrinter extends HtmlPrinter {
     Iterator<OntologyInfo> sequence = umlManager.getTypeManager().listOntologies().iterator();
     while (sequence.hasNext()) {
       String ontURI = sequence.next().getUri();
+      if (global.isIgnoredOntology(ontURI)) continue;
       if (umlManager.getTypeManager().isStandard(ontURI)) continue;
       OntologyInfo info = umlManager.getTypeManager().getOntologyByUri(ontURI);
       if (info == null) continue;

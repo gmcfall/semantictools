@@ -217,11 +217,15 @@ paf:ActivityResult rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:duration;
-    rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of <code>ActivityResult</code> is the sum of the durations recorded by the nodes."
+    rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of the <code>ActivityResult</code> is the sum of the durations recorded by the individual nodes."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:numLearningAidsUsed;
     rdfs:comment "The total number of learning aids that the Learner used while responding to the activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:numAttempts;
+    rdfs:comment "The number of times that the user worked on the activity.  This is equal to the number of <code>SequenceNode</code>s associated with the <code>ActivityResult</code>."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:correctOnFirstTry;
@@ -232,8 +236,16 @@ paf:ActivityResult rdf:type owl:Class;
     rdfs:comment "The total number of times that the learner submitted an incorrect response to the activity.  "
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      paf:score;
+    rdfs:comment "The score that the learner earned on the activity."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      paf:attempt;
     rdfs:comment "A node that contributes to the overall <code>ActivityResult</code>.  Each node encapulates information about one <em>session</em> when the user interacted with the activity."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:binding;
+    rdfs:comment "The binding which identifies the particular instance of the activity to which these results pertain."
   ] ; 
   rdfs:comment "<code>ActivityResult</code> summarizes the results aggregated from all of a given learner's interactions with a specific activity; it rolls up the results from all the various attempts by the learner to respond to the given activity.  Each attempt is represented by a node in an ActivitySequence.  " .
 
@@ -388,7 +400,13 @@ paf:nodeResult rdf:type owl:FunctionalProperty ;
   owl:inverseOf paf:ownerNode .
 
 paf:binding rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:SequenceNode ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:SequenceNode
+      paf:ActivityResult
+    )
+  ] ;
   rdfs:range paf:ActivityBinding ;
   rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity." .
 
@@ -425,12 +443,17 @@ paf:htmlResponse rdf:type owl:FunctionalProperty ;
 paf:duration rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityResult ;
   rdfs:range xdt:dayTimeDuration ;
-  rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of <code>ActivityResult</code> is the sum of the durations recorded by the nodes." .
+  rdfs:comment "An estimate for the total amount of time that the learner interacted with the activity.  The <code>duration</code> is not necessarily equal to <code>endTime - startTime</code>.  It is possible for the learner to start interacting with the activity, leave, and then return to the activity later to finish it.  Indeed, a learner could revisit the same activity multiple times.  Each time the learner visits the activity a different <code>SequenceNode</code> is created.  Each node records the start and end times for that particular visit.  The <code>duration</code> of the <code>ActivityResult</code> is the sum of the durations recorded by the individual nodes." .
 
 paf:numLearningAidsUsed rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityResult ;
   rdfs:range xsd:integer ;
   rdfs:comment "The total number of learning aids that the Learner used while responding to the activity." .
+
+paf:numAttempts rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The number of times that the user worked on the activity.  This is equal to the number of <code>SequenceNode</code>s associated with the <code>ActivityResult</code>." .
 
 paf:correctOnFirstTry rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityResult ;
@@ -441,6 +464,11 @@ paf:incorrectSubmissionCount rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityResult ;
   rdfs:range xsd:integer ;
   rdfs:comment "The total number of times that the learner submitted an incorrect response to the activity.  " .
+
+paf:score rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The score that the learner earned on the activity." .
 
 paf:attempt rdf:type rdf:Property ;
   rdfs:domain paf:ActivityResult ;

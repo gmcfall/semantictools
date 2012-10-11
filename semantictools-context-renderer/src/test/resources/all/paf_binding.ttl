@@ -87,5 +87,9 @@ paf:ActivityResult rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:attempt ;
     bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:binding ;
+    bind:associationType bind:Aggregation
   ] .
 
