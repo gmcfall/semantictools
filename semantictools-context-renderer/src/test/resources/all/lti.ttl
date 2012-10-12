@@ -6,7 +6,7 @@
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
 <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> a owl:Ontology  ;
-  rdfs:label "lti" ;
+  rdfs:label "IMS LTI" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "lti" .
 
@@ -15,4 +15,6 @@ lti:ProductFamily rdf:type owl:Class ;
 
 lti:Capability rdf:type owl:Class ; 
   rdfs:comment "A formal declaration of the ability to implement some portion of an integration contract.  Capabilities are declared by one party of the integration and enabled by another." .
+
+lti:ToolProxy rdf:type owl:Class .
 

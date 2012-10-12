@@ -353,7 +353,7 @@ public class TreeGenerator {
 
       TermInfo info = context.getTermInfoByURI(sub.getUri());
       if (info == null) {
-        throw new TermNotFoundException(sub.getUri());
+        throw new TermNotFoundException(contextProperties.getMediaType(), sub.getUri());
       }
       String typeName = info.getTermName();
       String href = "#" + typeName;

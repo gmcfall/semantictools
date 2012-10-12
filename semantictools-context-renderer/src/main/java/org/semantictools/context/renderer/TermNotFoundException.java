@@ -7,6 +7,11 @@ public class TermNotFoundException extends RuntimeException {
     super("The JSON-LD context does not contain the requested term: " + uriOrSimpleName);
   }
   
+  public TermNotFoundException(String mediaType, String uriOrSimpleName) {
+    super("The JSON-LD context [" + mediaType + "] does not contain the requested term: " + uriOrSimpleName);
+    
+  }
+  
  
 
 }

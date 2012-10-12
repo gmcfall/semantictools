@@ -5,4 +5,5 @@
 
 lti:ProductFamily rdf:type bind:Addressable .
 lti:Capability rdf:type bind:Addressable .
+lti:ToolProxy rdf:type bind:Addressable .
 

@@ -341,7 +341,6 @@ public class ServiceDocumentationManager {
     setServiceDocumentationFile(doc);
     setCssFile(doc);
     setMethods(doc);
-    setPostResponseMediaType(doc);
     setPostResponseMediaTypeRef(doc, typeName);
     setTitle(doc, typeName);
     setAbstractText(doc, typeName);
@@ -457,21 +456,6 @@ public class ServiceDocumentationManager {
     
   }
 
-  private void setPostResponseMediaType(ServiceDocumentation doc) {
-    if (doc.getPostResponseMediaType() != null) return;
-    
-    List<ContextProperties> list = doc.listContextProperties();
-    if (list.size() == 1) {
-      String mediaType = list.get(0).getMediaType();
-      if (mediaType.endsWith("+json")) {
-        String value = contextManager.createIdMediaTypeName(mediaType);
-        doc.setPostResponseMediaType(value);
-      }
-    }
-    
-   
-    
-  }
 
   private void setGetDoc(ServiceDocumentation doc, String typeName) {
 
@@ -745,26 +729,31 @@ public class ServiceDocumentationManager {
       
 
       
-      String okDescription =
-          "The request has succeeded.\n" +
-          "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
-          "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
-          "The <code>Content-Type</code> header of the response will be set to this media type.";
+      String okDescription = null;
       String idMediaType = doc.getPostResponseMediaType();
       if (idMediaType == null) {
-        throw new ServiceDocumentationSyntaxError(POST_RESPONSE_MEDIATYPE + " property must be defined for " + doc.getRdfTypeURI());
+        okDescription = "The request has succeeded.\n" +
+        "<p>The reponse will contain an empty body.</p>";
+      } else {
+        ContextProperties context = contextManager.getContextPropertiesByMediaType(idMediaType);
+        if (context == null) {
+          throw new ServiceDocumentationSyntaxError("Unknown media type: " + idMediaType);
+        }
+        LinkManager linkManager = new LinkManager(doc.getServiceDocumentationFile());
+        String href = linkManager.relativize(context.getMediaTypeDocFile());
+        StringBuilder anchor = new StringBuilder();
+        appendAnchor(anchor, href, idMediaType);
+        okDescription = 
+            "The request has succeeded.\n" +
+            "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
+            "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
+            "The <code>Content-Type</code> header of the response will be set to this media type.";
+        okDescription = format(okDescription, typeName, anchor.toString());
+        
       }
       
-      ContextProperties context = contextManager.getContextPropertiesByMediaType(idMediaType);
-      if (context == null) {
-        throw new ServiceDocumentationSyntaxError("Unknown media type: " + idMediaType);
-      }
-      LinkManager linkManager = new LinkManager(doc.getServiceDocumentationFile());
-      String href = linkManager.relativize(context.getMediaTypeDocFile());
-      StringBuilder anchor = new StringBuilder();
-      appendAnchor(anchor, href, idMediaType);
       
-      addResponse(method, ResponseInfo.OK.copy(format(okDescription, typeName, anchor.toString())));
+      addResponse(method, ResponseInfo.OK.copy(okDescription));
       addResponse(method, ResponseInfo.BAD_REQUEST);
       addResponse(method, ResponseInfo.UNAUTHORIZED);
       addResponse(method, ResponseInfo.INTERNAL_SERVER_ERROR);
