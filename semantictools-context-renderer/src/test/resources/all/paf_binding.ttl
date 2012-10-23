@@ -94,6 +94,10 @@ paf:ActivityPlayer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:widgetFrontend ;
     bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:frameFrontend ;
+    bind:associationType bind:Composition
   ] .
 paf:ActivityState rdf:type bind:Addressable .
 paf:ActivityState rdfs:subClassOf
@@ -119,5 +123,10 @@ paf:NodeProcess rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:targetNode ;
     bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:trigger ;
+    bind:associationType bind:Aggregation
   ] .
+paf:TriggerType rdf:type bind:Enum .
 

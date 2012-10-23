@@ -16,10 +16,12 @@ public class BindVocabulary {
   public static final OntClass Aggregation = model.createClass("http://purl.org/semantictools/v1/vocab/bind#Aggregation");
   public static final OntClass Composition = model.createClass("http://purl.org/semantictools/v1/vocab/bind#Composition");
   public static final OntClass AssociationQualifier = model.createClass("http://purl.org/semantictools/v1/vocab/bind#AssociationQualifier");
+  public static final OntClass Package = model.createClass("http://purl.org/semantictools/v1/vocab/bind#Package");
   public static final OntProperty uniqueKey = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#uniqueKey");
   public static final OntProperty onProperty = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#onProperty");
   public static final OntProperty associationType = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#associationType");
   public static final OntProperty org = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#org");
   public static final OntProperty jsonContext = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#jsonContext");
   public static final OntProperty suggestedPrefix = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#suggestedPrefix");
+  public static final OntProperty javaName = model.createOntProperty("http://purl.org/semantictools/v1/vocab/bind#javaName");
 }

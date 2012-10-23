@@ -1,0 +1,72 @@
+@prefix dir: <http://example.com/vocab/v1/directory#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://example.com/vocab/v1/directory#> a owl:Ontology  ;
+  rdfs:label "Example" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "dir" .
+
+dir:Person rdf:type owl:Class .
+
+dir:PostalAddress rdf:type owl:Class .
+
+dir:Phone rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      dir:phoneNumber;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      dir:phoneType;
+    owl:minCardinality  1
+  ] .
+
+dir:PhoneType a owl:Class  ;
+  owl:equivalentClass [
+    owl:oneOf (
+      dir:HOME 
+      dir:WORK 
+      dir:MOBILE
+    )
+  ] .
+
+dir:emailAddress rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:Person ;
+  rdfs:range xsd:normalizedString .
+
+dir:postalAddress rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:Person ;
+  rdfs:range dir:PostalAddress .
+
+dir:phone rdf:type rdf:Property ;
+  rdfs:domain dir:Person ;
+  rdfs:range dir:Phone .
+
+dir:street rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:PostalAddress ;
+  rdfs:range xsd:normalizedString .
+
+dir:city rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:PostalAddress ;
+  rdfs:range xsd:normalizedString .
+
+dir:state rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:PostalAddress ;
+  rdfs:range xsd:normalizedString .
+
+dir:zipcode rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:PostalAddress ;
+  rdfs:range xsd:normalizedString .
+
+dir:phoneNumber rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:Phone ;
+  rdfs:range xsd:normalizedString .
+
+dir:phoneType rdf:type owl:FunctionalProperty ;
+  rdfs:domain dir:Phone ;
+  rdfs:range dir:PhoneType .
+

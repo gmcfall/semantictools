@@ -376,7 +376,8 @@ public class ContextHtmlPrinter extends PrintEngine {
         value.indexOf('\n')<0 &&
         !value.matches(numericRange) &&
         !value.matches(jsonArray) &&
-        !value.contains(" ... ")
+        !value.contains(" ... ") &&
+        !value.contains("=")
       ) {
         list.add(matcher.group());
       }

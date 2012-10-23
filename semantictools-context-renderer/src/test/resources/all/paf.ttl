@@ -178,17 +178,13 @@ paf:ActivityPlayer rdf:type owl:Class;
     rdfs:comment "The Content-Type for the kind of activities that this player can handle."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:remoteFrontend;
-    rdfs:comment "The URI for a remote client that the Activity Manager can load into an iframe.  The Activity Manager communicates with this client via HTML 4 postMessage."
-  ] ,
-  [ a owl:Restriction ;
     owl:onProperty      paf:toolProxy;
     owl:minCardinality  1;
     rdfs:comment "The IMS LTI ToolProxy that governs the use of this ActivityPlayer.  The ToolProxy is used primarily for managing security credentials."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:preprocessor;
-    rdfs:comment "Provides information about a processor that should be run prior to delivering a <code>SequenceNode</code> to the Activity Manager inside the browser or mobile device.  Typically, this processor adds state to the SequenceNode.  For example, the player for a math problem might randomly generate values for numbers that appear in the problem, and it would store those random values as state."
+    rdfs:comment "Provides information about a processor that should be run prior to delivering a <code>SequenceNode</code> to the Activity Manager inside the browser or mobile device.  Typically, this processor adds state to the SequenceNode.  For example, the player for a math problem might randomly generate values for numbers that appear in the problem, and it would store those random values as state.  Or it might add a list of learning aids that should be exposed to the user based on the context in which the activity occurs.  The kind of state added to the SequenceNode is entirely open-ended."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:postprocessor;
@@ -197,6 +193,10 @@ paf:ActivityPlayer rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      paf:widgetFrontend;
     rdfs:comment "A W3C Widget which can render an activity from within the same domain as the Activity Manager.  The Activity Manager and the widget must each implement JavaScript APIs which allow them to communicate with each other.   TODO:  These APIs still need to be defined."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:frameFrontend;
+    rdfs:comment "A component of the ActivityPlayer that renders activities within an IFrame.  The ActivityFrame gets loaded once by an Activity Manager, and it may then be reused at different points of time to render different activities of the same type within that frame.  The Activity Manager and the client-side application within the IFrame communicate with each other via HTML 5 postMessage."
   ] ; 
   rdfs:comment "A pluggable software component that can render the user interface for a certain type of activity and process learner responses to compute results.  To render the user interface, the player may offer a remote frontend which runs in an iframe loaded from a remote domain,  a W3C widget which runs in an iframe from the same domain as the Activity Manager, or both.  The ActivityManager chooses the appropriate frontend to use." .
 
@@ -296,7 +296,7 @@ paf:NodeProcessorInfo rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      paf:repeatable;
     owl:minCardinality  1;
-    rdfs:comment "Specifies whether the processor can be called more than once.  The primary use case for this flag is a preprocessor that should be invoked the first time a learner engages in an activity, but to skip the preprocessor on subsequent visits.  TODO: Explore other alternative designs to achieve the same goal."
+    rdfs:comment "Specifies whether the processor can be called more than once.  The primary use case for this flag is a preprocessor that should be invoked the first time a learner engages in an activity, but the  preprocessor should be skipped on subsequent visits.  TODO: Explore other alternative designs to achieve the same goal."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:processorURI;
@@ -310,10 +310,21 @@ paf:NodeProcess rdf:type owl:Class;
     owl:onProperty      paf:targetNode;
     owl:minCardinality  1;
     rdfs:comment "The node that is to be decorated with state and/or results."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:trigger;
+    owl:minCardinality  1
   ] ; 
   rdfs:comment "A <code>NodeProcess</code> represents a job that can be run by an <code>ActivityPlayer</code> to decorate a <code>SequenceNode</code> with state or results." .
 
-paf:ActivityWidget rdf:type owl:Class .
+paf:ActivityWidget rdf:type owl:Class ; 
+  rdfs:comment "A W3C Widget which can render an activity from within the same domain as the Activity Manager.  The Activity Manager and the widget must each implement JavaScript APIs which allow them to communicate with each other.   An ActivityWidget uses JavaScript to update elements within its parent window.  This means that activities do not get rendered in separate IFrames; they all get rendered in the same window and the ActivityManager controls their layout." .
+
+paf:ActivityFrame rdf:type owl:Class ; 
+  rdfs:comment "An ActivityFrame is a component of an ActivityPlayer that renders activities within an IFrame.  The ActivityFrame gets loaded once by an ActivityManager, and it may then be reused at different points of time to render different activities of the same type within that frame.  The ActivityManager and the client-side application within the IFrame communicate with each other via HTML 5 postMessage." .
+
+paf:TriggerType rdf:type owl:Class ; 
+  rdfs:comment "A enumeration that specifies the type of trigger for a <code>NodeProcess</code>.  " .
 
 paf:ActivityBindingList rdfs:subClassOf
   rdf:List,
@@ -496,11 +507,6 @@ paf:contentType rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:normalizedString ;
   rdfs:comment "The Content-Type for the kind of activities that this player can handle." .
 
-paf:remoteFrontend rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityPlayer ;
-  rdfs:range xsd:anyURI ;
-  rdfs:comment "The URI for a remote client that the Activity Manager can load into an iframe.  The Activity Manager communicates with this client via HTML 4 postMessage." .
-
 paf:toolProxy rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityPlayer ;
   rdfs:range lti:ToolProxy ;
@@ -509,7 +515,7 @@ paf:toolProxy rdf:type owl:FunctionalProperty ;
 paf:preprocessor rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityPlayer ;
   rdfs:range paf:NodeProcessorInfo ;
-  rdfs:comment "Provides information about a processor that should be run prior to delivering a <code>SequenceNode</code> to the Activity Manager inside the browser or mobile device.  Typically, this processor adds state to the SequenceNode.  For example, the player for a math problem might randomly generate values for numbers that appear in the problem, and it would store those random values as state." .
+  rdfs:comment "Provides information about a processor that should be run prior to delivering a <code>SequenceNode</code> to the Activity Manager inside the browser or mobile device.  Typically, this processor adds state to the SequenceNode.  For example, the player for a math problem might randomly generate values for numbers that appear in the problem, and it would store those random values as state.  Or it might add a list of learning aids that should be exposed to the user based on the context in which the activity occurs.  The kind of state added to the SequenceNode is entirely open-ended." .
 
 paf:postprocessor rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityPlayer ;
@@ -520,6 +526,11 @@ paf:widgetFrontend rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityPlayer ;
   rdfs:range paf:ActivityWidget ;
   rdfs:comment "A W3C Widget which can render an activity from within the same domain as the Activity Manager.  The Activity Manager and the widget must each implement JavaScript APIs which allow them to communicate with each other.   TODO:  These APIs still need to be defined." .
+
+paf:frameFrontend rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityPlayer ;
+  rdfs:range paf:ActivityFrame ;
+  rdfs:comment "A component of the ActivityPlayer that renders activities within an IFrame.  The ActivityFrame gets loaded once by an Activity Manager, and it may then be reused at different points of time to render different activities of the same type within that frame.  The Activity Manager and the client-side application within the IFrame communicate with each other via HTML 5 postMessage." .
 
 paf:nextBinding rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityState ;
@@ -600,7 +611,7 @@ paf:attempt rdf:type rdf:Property ;
 paf:repeatable rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeProcessorInfo ;
   rdfs:range xsd:boolean ;
-  rdfs:comment "Specifies whether the processor can be called more than once.  The primary use case for this flag is a preprocessor that should be invoked the first time a learner engages in an activity, but to skip the preprocessor on subsequent visits.  TODO: Explore other alternative designs to achieve the same goal." .
+  rdfs:comment "Specifies whether the processor can be called more than once.  The primary use case for this flag is a preprocessor that should be invoked the first time a learner engages in an activity, but the  preprocessor should be skipped on subsequent visits.  TODO: Explore other alternative designs to achieve the same goal." .
 
 paf:processorURI rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeProcessorInfo ;
@@ -611,7 +622,17 @@ paf:targetNode rdf:type owl:FunctionalProperty ;
   rdfs:range paf:SequenceNode ;
   rdfs:comment "The node that is to be decorated with state and/or results." .
 
+paf:trigger rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeProcess ;
+  rdfs:range paf:TriggerType .
+
 paf:ForPractice rdf:type paf:Credit .
 
 paf:ForCredit rdf:type paf:Credit .
+
+paf:BEFORE rdf:type paf:TriggerType ;
+  rdfs:comment "Signifies that the <code>NodeProcess</code> was triggered <em>before</em> sending the associated <code>SequenceNode</code> to the ActivityPlayer's frontend." .
+
+paf:AFTER rdf:type paf:TriggerType ;
+  rdfs:comment "Signifies that the <code>NodeProcess</code> was triggered <em>after</em> receiving a response from the ActivityPlayer's frontend." .
 
