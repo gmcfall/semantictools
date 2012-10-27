@@ -16,5 +16,10 @@
   "timeRequired" : "PT20S",
   "created" : "2012-09-21T11:09:43-04:00",
   "timeRequired" : "PT1H49M",
-  "educationalAlignment" : [ "http://purl.org/pearson/objectives/38372547345645" ]
+  "educationalAlignment" : [ "http://purl.org/pearson/objectives/38372547345645" ],
+  "sameAs" : [
+    { "@id" : "http://mastering.com/question/12345",
+      "format" : ["application/vnd.pearson.mastering.v3.item+xml"]
+    }
+  ]
 }

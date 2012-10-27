@@ -50,9 +50,18 @@ TABLE.propertiesTable TH, TABLE.enumTable TH  {
   border: 1px solid #9B9B9B;
 }
 
-TABLE.propertiesTable TD, TABLE.enumTable TD {
+TABLE.propertiesTable TD, TABLE.enumTable TD:first-child {
 	padding: 5px;
   border: 1px solid #9B9B9B;
+}
+
+TABLE.enumTable TD {
+  border: 1px solid #9B9B9B;
+}
+
+.enumText {
+	margin-top: 10px;
+	padding: 5px;
 }
 
 .toc {
@@ -177,6 +186,15 @@ OL.uncondensed LI {
 	font-style: italic;
 	font-size: 70%;
 }
+
+.individual-uri {
+	padding: 3px;
+	font-family: courier;
+	font-size: 75%;
+	background-color: #F0F0F0;
+}
+
+
 
 .status {
   position: fixed;

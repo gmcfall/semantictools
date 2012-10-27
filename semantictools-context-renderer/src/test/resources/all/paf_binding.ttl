@@ -14,7 +14,7 @@ paf:ActivityContainer rdfs:subClassOf
 paf:ActivityBinding rdf:type bind:EmbeddableClass .
 paf:ActivityBinding rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:activity ;
+    bind:onProperty paf:boundActivity ;
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
@@ -116,7 +116,7 @@ paf:ActivityResult rdfs:subClassOf
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:binding ;
+    bind:onProperty paf:activityBinding ;
     bind:associationType bind:Aggregation
   ] .
 paf:NodeProcess rdfs:subClassOf
@@ -129,4 +129,22 @@ paf:NodeProcess rdfs:subClassOf
     bind:associationType bind:Aggregation
   ] .
 paf:TriggerType rdf:type bind:Enum .
+paf:ActivityManager rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:managerWidget ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:preprocessor ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:postprocessor ;
+    bind:associationType bind:Composition
+  ] .
+paf:SequenceProcess rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:targetSequence ;
+    bind:associationType bind:Aggregation
+  ] .
 

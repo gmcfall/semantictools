@@ -312,7 +312,7 @@ public class TreeGenerator {
   private void addSubtypes(TreeNode node, Frame frame, int depth) {
     
     List<Frame> list = frame.listAllSubtypes();
-    removeAbstractTypes(list);
+    filterSubtypes(list);
 
     
     Collections.sort(list);
@@ -366,11 +366,16 @@ public class TreeGenerator {
     
   }
 
-  private void removeAbstractTypes(List<Frame> list) {
+  private void filterSubtypes(List<Frame> list) {
     Iterator<Frame> sequence = list.iterator();
     while (sequence.hasNext()) {
       Frame frame = sequence.next();
       if (frame.isAbstract()) {
+        sequence.remove();
+      }
+      // Don't include subtypes that are not referenced by the JSON-LD context.
+      // 
+      if (context.getTermInfoByURI(frame.getUri())==null) {
         sequence.remove();
       }
     }

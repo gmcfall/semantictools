@@ -5,6 +5,7 @@
 @prefix dc: <http://purl.org/dc/terms/> .
 @prefix lrmi: <http://schema.org/> .
 @prefix pmeta: <http://purl.org/pearson/metadata/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 pcm:Envelope rdf:type bind:Addressable .
 pcm:Envelope rdfs:subClassOf
@@ -41,6 +42,10 @@ pcm:ManagedResource rdfs:subClassOf
   ], 
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty pmeta:contentTypeTier2 ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty owl:sameAs ;
     bind:associationType bind:Aggregation
   ] .
 

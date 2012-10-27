@@ -60,7 +60,7 @@ public class UmlPrinter extends HtmlPrinter {
       UmlFileManager linkManager, 
       LinkedDataIndex oracle) {
     super(rewriter);
-    this.global = global;
+    this.global = global==null ? new GlobalProperties() : global;
     this.umlManager = umlManager;
     this.linkManager = linkManager;
     this.mediaTypeOracle = oracle;

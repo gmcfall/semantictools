@@ -14,7 +14,506 @@
 ltiv:Variable rdf:type owl:Class ;
   rdfs:subClassOf lti:Capability .
 
-ltiv:User.id rdf:type ltiv:Variable .
+ltiv:User.id rdf:type ltiv:Variable ;
+  rdfs:comment "Corresponds to the user_id launch parameterfrom the <code>LaunchMixin</code> class.  This is the local identifier for the user within the Tool Consumer system." .
 
-ltiv:User.image rdf:type ltiv:Variable .
+ltiv:User.image rdf:type ltiv:Variable ;
+  rdfs:comment "The URL for an image of the user suitable for use as a profile picture or avatar." .
+
+ltiv:Person.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the user.  
+<p>In the LIS Database, this value corresponds to <code>personRecord/sourceId</code></p>""" .
+
+ltiv:Person.name.full rdf:type ltiv:Variable ;
+  rdfs:comment """The full name of the user.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/formname/[formnameType/instanceValue/text=\"Full\"] /formattedName/text
+</div></p>""" .
+
+ltiv:Person.name.family rdf:type ltiv:Variable ;
+  rdfs:comment """The family name of the user.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/name/partName[instanceName/text=\"Family\u201d]/instanceValue/text 
+</div></p>""" .
+
+ltiv:Person.name.given rdf:type ltiv:Variable ;
+  rdfs:comment """The given name of the user.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/name/partName[instanceName/text=\"Given\u201d]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.name.middle rdf:type ltiv:Variable ;
+  rdfs:comment """The middle name of the user.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/name/partName[instanceName/text=\"Middle\u201d]/instanceValue/text 
+</div></p>""" .
+
+ltiv:Person.name.prefix rdf:type ltiv:Variable ;
+  rdfs:comment """The prefix for the user's name, such as <em>Dr.</em>, <em>Mr.</em>, <em>Ms.</em> etc.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/name/partName[instanceName/text=\"Prefix\u201d]/instanceValue/text 
+</div></p>""" .
+
+ltiv:Person.name.suffix rdf:type ltiv:Variable ;
+  rdfs:comment """The suffix for the user's name, such as <em>Jr.</em>, <em>II</em>,  etc.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/name/partName[instanceName/text=\"Suffix\u201d]/instanceValue/text 
+</div></p>""" .
+
+ltiv:Person.address.street1 rdf:type ltiv:Variable ;
+  rdfs:comment """The first line of the user's street address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"NonFieldedStreetAddress1\"]/instanceValue /text  
+</div></p>""" .
+
+ltiv:Person.address.street2 rdf:type ltiv:Variable ;
+  rdfs:comment """The second line of the user's street address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]  addressPart /nameValuePair[instanceName/text=\"NonFieldedStreetAddress2\"] /instanceValue/text 
+</div></p>""" .
+
+ltiv:Person.address.street3 rdf:type ltiv:Variable ;
+  rdfs:comment """The third line of the user's street address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"NonFieldedStreetAddress3\"] /instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.street4 rdf:type ltiv:Variable ;
+  rdfs:comment """The fourth line of the user's street address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"NonFieldedStreetAddress4\"] /instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.locality rdf:type ltiv:Variable ;
+  rdfs:comment """The city, town, or other locality within the user's address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"Locality\"]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.statepr rdf:type ltiv:Variable ;
+  rdfs:comment """The state or province within the user's address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair/[instanceName/text=\"Statepr\"]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.country rdf:type ltiv:Variable ;
+  rdfs:comment """The country within the user's address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"Country\"]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.postcode rdf:type ltiv:Variable ;
+  rdfs:comment """The postal code within the user's address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"Postcode\"]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.address.timezone rdf:type ltiv:Variable ;
+  rdfs:comment """The user's time zone.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/address/[addressType/instanceValue/text=\"Preferred\"]addressPart /nameValuePair /[instanceName/text=\"Timezone\"]/instanceValue/text
+</div></p>""" .
+
+ltiv:Person.phone.mobile rdf:type ltiv:Variable ;
+  rdfs:comment """The user's mobile phone number
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"Mobile\"] /contactInfoValue/text
+</div></p>""" .
+
+ltiv:Person.phone.primary rdf:type ltiv:Variable ;
+  rdfs:comment """The user's primary phone number
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo [contactinfoType/instanceValue/text=\"Telephone_Primary\"]/contactinfoValue /text
+</div></p>""" .
+
+ltiv:Person.phone.home rdf:type ltiv:Variable ;
+  rdfs:comment """The user's home phone number
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo [contactinfoType/instanceValue/text=\"Telephone_Home\"]/contactinfoValue /text
+</div></p>""" .
+
+ltiv:Person.phone.work rdf:type ltiv:Variable ;
+  rdfs:comment """The user's work phone number.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo [contactinfoType/instanceValue/text=\"Telephone_Work\"]/contactinfoValue /text
+</div></p>""" .
+
+ltiv:Person.email.primary rdf:type ltiv:Variable ;
+  rdfs:comment """The user's primary email address.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"Email_Primary\"] /contactinfoValue/text
+</div></p>""" .
+
+ltiv:Person.email.personal rdf:type ltiv:Variable ;
+  rdfs:comment """The user's personal email address
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">person/contactinfo[contactinfoType/instanceValue/text=\"Email_Personal\"]/contactinfoValue /text
+</div></p>""" .
+
+ltiv:Person.webaddress rdf:type ltiv:Variable ;
+  rdfs:comment """The user's web address.  This could be a facebook address, a blog, or any other web address linked to the user.  The value should be a URL.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"Web-Address\"] /contactinfoValue/text
+</div></p>""" .
+
+ltiv:Person.sms rdf:type ltiv:Variable ;
+  rdfs:comment """The number at which the user prefers to receive SMS text messages.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"SMS\"]  /contactinfoValue/text
+</div></p>""" .
+
+ltiv:CourseTemplate.sourceId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/sourcedId
+</div></p>""" .
+
+ltiv:CourseTemplate.label rdf:type ltiv:Variable ;
+  rdfs:comment """A human readable label used to help identify the Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/label/textString
+</div></p>""" .
+
+ltiv:CourseTemplate.title rdf:type ltiv:Variable ;
+  rdfs:comment """The title of the Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/title/textString
+</div></p>""" .
+
+ltiv:CourseTemplate.shortDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A short description of the Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/catalogDescription/shortDescription
+</div></p>""" .
+
+ltiv:CourseTemplate.longDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A long description of the Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/catalogDescription/longDescription
+</div></p>""" .
+
+ltiv:CourseTemplate.courseNumber rdf:type ltiv:Variable ;
+  rdfs:comment """The course number, such as \"Biology 101\".  In general, this number is not just a numeric value.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/courseNumber/textString
+</div></p>""" .
+
+ltiv:CourseTemplate.credits rdf:type ltiv:Variable ;
+  rdfs:comment """The default credits set for this Course Template.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseTemplateRecord/courseTemplate/defaultCredits/textString
+</div></p>""" .
+
+ltiv:CourseOffering.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Course Offering.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/sourcedId
+</div></p>""" .
+
+ltiv:CourseOffering.label rdf:type ltiv:Variable ;
+  rdfs:comment """A human readable label for the Course Offering
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/label
+</div></p>""" .
+
+ltiv:CourseOffering.title rdf:type ltiv:Variable ;
+  rdfs:comment """The title of the Course Offering.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/title
+</div></p>""" .
+
+ltiv:CourseOffering.shortDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A short description of the Course Offering.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/catalogDescription/shortDescription
+</div></p>""" .
+
+ltiv:CourseOffering.longDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A long description of the Course Offering.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/catalogDescription/longDescription
+</div></p>""" .
+
+ltiv:CourseOffering.credits rdf:type ltiv:Variable ;
+  rdfs:comment """The default credits set for this Course Offering
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/defaultCredits/textString
+</div></p>""" .
+
+ltiv:CourseOffering.academicSession rdf:type ltiv:Variable ;
+  rdfs:comment """The text data that is used to describe the academic session for the course offering.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseOfferingRecord/courseOffering/defaultCredits/textString
+</div></p>""" .
+
+ltiv:CourseSection.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Course Section
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSection/sourcedId
+</div></p>""" .
+
+ltiv:CourseSection.label rdf:type ltiv:Variable ;
+  rdfs:comment """A human readable label for the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/label
+</div></p>""" .
+
+ltiv:CourseSection.title rdf:type ltiv:Variable ;
+  rdfs:comment """The title of the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/title
+</div></p>""" .
+
+ltiv:CourseSection.shortDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A short description of the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/catalogDescription/shortDescription
+</div></p>""" .
+
+ltiv:CourseSection.longDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A long description of the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/catalogDescription/longDescription
+</div></p>""" .
+
+ltiv:CourseSection.courseNumber rdf:type ltiv:Variable ;
+  rdfs:comment """The course number, such as \"Biology 101\".  In general, this number is not just a numeric value.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/courseNumber/textString
+</div></p>""" .
+
+ltiv:CourseSection.credits rdf:type ltiv:Variable ;
+  rdfs:comment """The default credits set for the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/defaultCredits/textString
+</div></p>""" .
+
+ltiv:CourseSection.maxNumberofStudents rdf:type ltiv:Variable ;
+  rdfs:comment """The maximum number of students that can be enrolled in the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/maxNumberofStudents
+</div></p>""" .
+
+ltiv:CourseSection.numberofStudents rdf:type ltiv:Variable ;
+  rdfs:comment """The number of students who are enrolled in the Course Section.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/numberofStudents
+</div></p>""" .
+
+ltiv:CourseSection.dept rdf:type ltiv:Variable ;
+  rdfs:comment """The department within which the Course Section is offered.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/org[type/textString=\"Dept\"]/orgName/textString
+</div></p>""" .
+
+ltiv:CourseSection.timeFrame.begin rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time when the Course Section becomes available.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/timeFrame/begin
+</div></p>""" .
+
+ltiv:CourseSection.timeFrame.end rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time after which the Course Section is no longer available.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/timeFrame/end
+</div></p>""" .
+
+ltiv:CourseSection.enrollControll.accept rdf:type ltiv:Variable ;
+  rdfs:comment """A boolean value that specifies whether the Course Section is accepting enrollments.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/enrollControl/enrollAccept
+</div></p>""" .
+
+ltiv:CourseSection.enrollControl.allowed rdf:type ltiv:Variable ;
+  rdfs:comment """A boolean value that specifies whether the Tool Provider can enroll people in the Course Section.  The value <code>false</code> indicates that only the source system can enroll people.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/enrollControl/enrollAllowed
+</div></p>""" .
+
+ltiv:CourseSection.dataSource rdf:type ltiv:Variable ;
+  rdfs:comment """An identifier for the original source system of the CourseSection object.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">courseSectionRecord/courseSection/dataSource
+</div></p>""" .
+
+ltiv:CourseSection.sourceSectionId rdf:type ltiv:Variable ;
+  rdfs:comment """The identifier for the source Course Section from which the target Course Section was cloned.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">createCourseSectionFromCourseSectionRequest/sourcedId
+</div></p>""" .
+
+ltiv:Group.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Group.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/sourcedId
+</div></p>""" .
+
+ltiv:Group.grouptype rdf:type ltiv:Variable ;
+  rdfs:comment "A URI that uniquely identifies the type of group.  This convention differs from the LIS convention of using a structured object to describe the type of a group.  Ideally, the URI should resolve to JSON-LD document that describes the group type.  However, any URI that uniquely identifies the group type in accordance with the rules of the grouptype scheme is acceptable." .
+
+ltiv:Group.email rdf:type ltiv:Variable ;
+  rdfs:comment """An email address used for posting messages to members of the group.  
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/email
+</div></p>""" .
+
+ltiv:Group.url rdf:type ltiv:Variable ;
+  rdfs:comment """The web address of the Group.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/url
+</div></p>""" .
+
+ltiv:Group.timeFrame.begin rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time when access to Group resources begins.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/timeframe/begin
+</div></p>""" .
+
+ltiv:Group.timeFrame.end rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time when access to Group resources ends.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/timeframe/end
+</div></p>""" .
+
+ltiv:Group.enrollControl.accept rdf:type ltiv:Variable ;
+  rdfs:comment """A boolean value that specifies whether the Group is accepting enrollments.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/enrollControl/enrollAccept
+</div></p>""" .
+
+ltiv:Group.enrollControl.allowed rdf:type ltiv:Variable ;
+  rdfs:comment """A boolean value that specifies whether the Tool Provider can enroll people in the Group.  The value <code>false</code> indicates that only the source system can enroll people.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/enrollControl/enrollAllowed
+</div></p>""" .
+
+ltiv:Group.shortDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A short description of the Group.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/description/shortDescription
+</div></p>""" .
+
+ltiv:Group.longDescription rdf:type ltiv:Variable ;
+  rdfs:comment """A long description of the Group.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/description/longDescription
+</div></p>""" .
+
+ltiv:Group.parentId rdf:type ltiv:Variable ;
+  rdfs:comment """An identifier for the parent group within which the target group is nested.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">groupRecord/group/relationship[relation=\"Parent\"]/sourcedId
+</div></p>""" .
+
+ltiv:Membership.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Membership.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/sourcedId
+</div></p>""" .
+
+ltiv:Membership.collectionSourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the organizational unit (Course Section, Group, etc.) to which the Membership pertains.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/collectionSourcedId
+</div></p>""" .
+
+ltiv:Membership.personSourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Person associated with the Membership.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/member/personSourcedId
+</div></p>""" .
+
+ltiv:Membership.status rdf:type ltiv:Variable ;
+  rdfs:comment """Indicates if the membership is active or inactive.  In accordance with the LIS specification, the value should be either <code>Active</code> or <code>Inactive</code>.  If the Person has more than one role within the organizational unit, then this value is a comma separated list, where the values are ordered in correspondence with the roles named by the Membership.role variable.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/member/role/status
+</div></p>""" .
+
+ltiv:Membership.createdTimestamp rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time when the membership role was created.  If the Person has more than one role within the organizational unit, then this value is a comma separated list corresponding to the roles listed by the Membership.role variable.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/member/role/dateTime
+</div></p>""" .
+
+ltiv:Membership.dataSource rdf:type ltiv:Variable ;
+  rdfs:comment """An identifier for the original source system of the Membership record.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/member/role/dataSource
+</div></p>""" .
+
+ltiv:Membership.role rdf:type ltiv:Variable ;
+  rdfs:comment """A comma separated list of roles that the Person has within the organizational unit.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">membershipRecord/membership/member/role/roleType
+</div></p>""" .
+
+ltiv:LineItem.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the LineItem
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">lineItemRecord/sourcedId
+</div></p>""" .
+
+ltiv:LineItem.type rdf:type ltiv:Variable ;
+  rdfs:comment """A URI that uniquely identifies the LineItem type.  This convention differs from the LIS convention of using a structured object to describe LineItem types.   The URI <em>should</em> resolve to a JSON-LD resource that describes the LineItem type.  As a best practice the URI should start with a base URL that identifies the LineItemType vocabulary and end with a relative URL for a type within that vocabulary.
+<p>In the LIS Database, the LineItem type is given by 
+<div style="font-family: courier">lineItemRecord/lineItem/lineItemType
+</div></p>""" .
+
+ltiv:LineItem.type.displayName rdf:type ltiv:Variable ;
+  rdfs:comment """The display name for the LineItemType.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">lineItemTypeRecord/lineItemType/displayName
+</div></p>""" .
+
+ltiv:LineItem.resultValue.max rdf:type ltiv:Variable ;
+  rdfs:comment """The maximum numeric score that a learner may earn on the assignment associated with this LineItem.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">resultValueRecord/resultValue/valueRange/max
+</div></p>
+<p>where
+<div style="font-family: courier">resultValueRecord.sourcedId = lineItemRecord/lineItem/resultValueSourcedId
+</p>""" .
+
+ltiv:LineItem.dataSource rdf:type ltiv:Variable ;
+  rdfs:comment """An identifier for the original source system of the LineItem record.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">lineItemRecord/lineItem/dataSource
+</div></p>""" .
+
+ltiv:Result.sourcedId rdf:type ltiv:Variable ;
+  rdfs:comment """The LIS identifier for the Result resource.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">
+</div></p>""" .
+
+ltiv:Result.createdTimestamp rdf:type ltiv:Variable ;
+  rdfs:comment """The date and time when the Result was created.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">
+</div></p>""" .
+
+ltiv:Result.status rdf:type ltiv:Variable ;
+  rdfs:comment """A URI for the status of the Result.    As a best practice, the URI <em>should</em> resolve to a JSON-LD description of the status value or a term in a VDEX file.   The vocabulary for Result status values is extensible.  The set of standard values includes:
+<UL>
+  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Unmoderated
+  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Tobemoderated
+  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Pending
+  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Completed
+</UL>
+""" .
+
+ltiv:Result.resultScore rdf:type ltiv:Variable ;
+  rdfs:comment """The score that the learner earned on the assignment or activity to which this Result pertains.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">resultRecord/result/resultScore/textString
+</div></p>""" .
+
+ltiv:Result.dataSource rdf:type ltiv:Variable ;
+  rdfs:comment """An identifier for the original source system of the Result record.
+<p>In the LIS Database, this value corresponds to 
+<div style="font-family: courier">resultRecord/result/dataSource
+</div></p>""" .
+
+ltiv:Result.uri rdf:type ltiv:Variable ;
+  rdfs:comment "The URI of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URI." .
 

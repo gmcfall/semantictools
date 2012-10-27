@@ -51,9 +51,10 @@ public class MediaTypeDocumenter {
     this.fileManager = contextManager.getMediaTypeFileManager();
     this.contextManager = contextManager;
     this.umlFileManager = umlFileManager;
-    this.global = global;
+    this.global = global==null ? new GlobalProperties() : global;
     typeManager = new TypeManager();
     uploadClient = new AppspotUploadClient();
+    
   }
   
   public AppspotUploadClient getUploadClient() {

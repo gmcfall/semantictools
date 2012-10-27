@@ -114,7 +114,7 @@ public class Frame implements Comparable<Frame>, RdfType {
 
   private void addSubtypes(List<Frame> list, Frame frame) {
     
-    for (Frame sub : subtypeList) {
+    for (Frame sub : frame.getSubtypeList()) {
       if (!list.contains(sub)) {
         list.add(sub);
         addSubtypes(list, sub);

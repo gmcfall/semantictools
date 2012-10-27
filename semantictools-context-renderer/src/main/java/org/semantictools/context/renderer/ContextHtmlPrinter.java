@@ -2187,7 +2187,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     indent().println("<TR>");
     pushIndent();
     indent().print("<TH>Simple Name</TH>");
-    indent().print("<TH>Description / URI</TH>");
+    indent().print("<TH>URI / Description</TH>");
     popIndent();
     indent().println("</TR>");
     for (NamedIndividual n : list) {
@@ -2207,10 +2207,10 @@ public class ContextHtmlPrinter extends PrintEngine {
       pushIndent();
       indent().print("<TD>").print(localName).println("</TD>");
       indent().print("<TD>");
+      print("<div class=\"individual-uri\">").print(uri).print("</div>");
       if (comment != null) {
-        print("<P>").print(comment).print("</P>");
+        print("<div class=\"enumText\">").print(comment).print("</div>");
       }
-      print("<code>").print(uri).print("</code>");
       println("</TD>");
       popIndent();
       indent().println("</TR>");

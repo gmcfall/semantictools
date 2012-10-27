@@ -49,7 +49,7 @@ paf:ActivityBinding rdf:type owl:Class ;
     rdfs:comment "A title for the referenced activity.  This value overrides any default title defined directly by the underlying activity."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:activity;
+    owl:onProperty      paf:boundActivity;
     owl:minCardinality  1;
     rdfs:comment "The activity referenced by this ActivityBinding.  "
   ] ,
@@ -173,6 +173,11 @@ paf:SequenceNode rdf:type owl:Class;
 paf:ActivityPlayer rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
+    owl:onProperty      paf:guid;
+    owl:minCardinality  1;
+    rdfs:comment "A globally unique identifier for the ActivityPlayer."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      paf:contentType;
     owl:minCardinality  1;
     rdfs:comment "The Content-Type for the kind of activities that this player can handle."
@@ -286,12 +291,12 @@ paf:ActivityResult rdf:type owl:Class;
     rdfs:comment "A node that contributes to the overall <code>ActivityResult</code>.  Each node encapulates information about one <em>session</em> when the user interacted with the activity."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:binding;
+    owl:onProperty      paf:activityBinding;
     rdfs:comment "The binding which identifies the particular instance of the activity to which these results pertain."
   ] ; 
   rdfs:comment "<code>ActivityResult</code> summarizes the results aggregated from all of a given learner's interactions with a specific activity; it rolls up the results from all the various attempts by the learner to respond to the given activity.  Each attempt is represented by a node in an ActivitySequence.  " .
 
-paf:NodeProcessorInfo rdf:type owl:Class;
+paf:ProcessorInfo rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      paf:repeatable;
@@ -315,7 +320,9 @@ paf:NodeProcess rdf:type owl:Class;
     owl:onProperty      paf:trigger;
     owl:minCardinality  1
   ] ; 
-  rdfs:comment "A <code>NodeProcess</code> represents a job that can be run by an <code>ActivityPlayer</code> to decorate a <code>SequenceNode</code> with state or results." .
+  rdfs:comment """A <code>NodeProcess</code> represents a job that can be run by an <code>ActivityPlayer</code> to decorate a <code>SequenceNode</code> with state or results.
+<p>TODO: define a method by which a NodeProcess may be 
+injected into the Data Grid so that we can avoid a round-trip to a remote service.</p>""" .
 
 paf:ActivityWidget rdf:type owl:Class ; 
   rdfs:comment "A W3C Widget which can render an activity from within the same domain as the Activity Manager.  The Activity Manager and the widget must each implement JavaScript APIs which allow them to communicate with each other.   An ActivityWidget uses JavaScript to update elements within its parent window.  This means that activities do not get rendered in separate IFrames; they all get rendered in the same window and the ActivityManager controls their layout." .
@@ -325,6 +332,29 @@ paf:ActivityFrame rdf:type owl:Class ;
 
 paf:TriggerType rdf:type owl:Class ; 
   rdfs:comment "A enumeration that specifies the type of trigger for a <code>NodeProcess</code>.  " .
+
+paf:ActivityManager rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:preprocessor;
+    rdfs:comment "Information about a processor that will operate on the assignment before it is delivered to the ActivityManager widget."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:postprocessor;
+    rdfs:comment "Information about a processor that will be inovked after the assignment is submitted."
+  ] ; 
+  rdfs:comment """<code>ActivityManager</code> is a software component that manages a collection of activities within an assignment.
+<p>The ActivityMananager uses a W3C Widget which runs within the user agent (browser or mobile device) and a backend which performs pre-processing and post-processing of the assignment.""" .
+
+paf:ActvityManagerWidget rdf:type owl:Class .
+
+paf:SequenceProcess rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:targetSequence;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "A <code>SequenceProcess</code> represents a job that can be triggered before an ActivitySequence is delivered to the user agent, or after the learner submits the associated overall activity." .
 
 paf:ActivityBindingList rdfs:subClassOf
   rdf:List,
@@ -358,6 +388,7 @@ paf:guid rdf:type owl:FunctionalProperty ;
     rdf:type owl:Class ;
     owl:unionOf (
       paf:ActivityBinding
+      paf:ActivityPlayer
       paf:SystemResponse
     )
   ] ;
@@ -373,14 +404,8 @@ paf:activityTitle rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:string ;
   rdfs:comment "A title for the referenced activity.  This value overrides any default title defined directly by the underlying activity." .
 
-paf:activity rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      paf:ActivityBinding
-      paf:SequenceNode
-    )
-  ] ;
+paf:boundActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
   rdfs:range paf:Activity ;
   rdfs:comment "The activity referenced by this ActivityBinding.  " .
 
@@ -471,6 +496,10 @@ paf:parentSequence rdf:type owl:FunctionalProperty ;
   owl:inverseOf paf:node ;
   rdfs:comment "The parent <code>ActivitySequence</code> within which this <code>SequenceNode</code> is found." .
 
+paf:activity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:Activity .
+
 paf:activityState rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceNode ;
   rdfs:range paf:ActivityState ;
@@ -482,13 +511,7 @@ paf:nodeResult rdf:type owl:FunctionalProperty ;
   owl:inverseOf paf:ownerNode .
 
 paf:binding rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      paf:SequenceNode
-      paf:ActivityResult
-    )
-  ] ;
+  rdfs:domain paf:SequenceNode ;
   rdfs:range paf:ActivityBinding ;
   rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity." .
 
@@ -513,13 +536,25 @@ paf:toolProxy rdf:type owl:FunctionalProperty ;
   rdfs:comment "The IMS LTI ToolProxy that governs the use of this ActivityPlayer.  The ToolProxy is used primarily for managing security credentials." .
 
 paf:preprocessor rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityPlayer ;
-  rdfs:range paf:NodeProcessorInfo ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:ActivityPlayer
+      paf:ActivityManager
+    )
+  ] ;
+  rdfs:range paf:ProcessorInfo ;
   rdfs:comment "Provides information about a processor that should be run prior to delivering a <code>SequenceNode</code> to the Activity Manager inside the browser or mobile device.  Typically, this processor adds state to the SequenceNode.  For example, the player for a math problem might randomly generate values for numbers that appear in the problem, and it would store those random values as state.  Or it might add a list of learning aids that should be exposed to the user based on the context in which the activity occurs.  The kind of state added to the SequenceNode is entirely open-ended." .
 
 paf:postprocessor rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityPlayer ;
-  rdfs:range paf:NodeProcessorInfo ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:ActivityPlayer
+      paf:ActivityManager
+    )
+  ] ;
+  rdfs:range paf:ProcessorInfo ;
   rdfs:comment "Provides information about a processor that will be executed when a user is done working on one activity and before advancing to the next activity.   Typically, this processor decorates the SequenceNode with results. For example, the processor might compute a score for the activity and add it to the NodeResult." .
 
 paf:widgetFrontend rdf:type owl:FunctionalProperty ;
@@ -608,13 +643,18 @@ paf:attempt rdf:type rdf:Property ;
   owl:inverseOf paf:aggregateResult ;
   rdfs:comment "A node that contributes to the overall <code>ActivityResult</code>.  Each node encapulates information about one <em>session</em> when the user interacted with the activity." .
 
+paf:activityBinding rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityResult ;
+  rdfs:range paf:ActivityBinding ;
+  rdfs:comment "The binding which identifies the particular instance of the activity to which these results pertain." .
+
 paf:repeatable rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:NodeProcessorInfo ;
+  rdfs:domain paf:ProcessorInfo ;
   rdfs:range xsd:boolean ;
   rdfs:comment "Specifies whether the processor can be called more than once.  The primary use case for this flag is a preprocessor that should be invoked the first time a learner engages in an activity, but the  preprocessor should be skipped on subsequent visits.  TODO: Explore other alternative designs to achieve the same goal." .
 
 paf:processorURI rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:NodeProcessorInfo ;
+  rdfs:domain paf:ProcessorInfo ;
   rdfs:range xsd:anyURI .
 
 paf:targetNode rdf:type owl:FunctionalProperty ;
@@ -625,6 +665,14 @@ paf:targetNode rdf:type owl:FunctionalProperty ;
 paf:trigger rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeProcess ;
   rdfs:range paf:TriggerType .
+
+paf:managerWidget rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityManager ;
+  rdfs:range paf:ActvityManagerWidget .
+
+paf:targetSequence rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceProcess ;
+  rdfs:range paf:ActivitySequence .
 
 paf:ForPractice rdf:type paf:Credit .
 
