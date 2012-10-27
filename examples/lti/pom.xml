@@ -14,10 +14,10 @@
       <plugin>
         <groupId>org.semantictools</groupId>
         <artifactId>semantictools-maven-plugin</artifactId>
-        <version>1.5</version>
+        <version>1.9</version>
         <configuration>
           <version>2012-10-10</version>
-          <publish>true</publish>
+          <publish>false</publish>
           <indexFileName>lti.html</indexFileName>
         </configuration>
         <executions>

@@ -115,7 +115,7 @@ lti:LocalizedName rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:default_value;
-    owl:onClass         lti-type:LongName.Type;
+    owl:allValuesFrom  lti-type:LongName.Type;
     rdfs:comment "The default value for the display name.  This value is used if (1) the key attribute is undefined, (2) the localization capability is not enabled, or (3) a value for the specified key is not found in the locale-specific resource bundle."
   ] ; 
   rdfs:comment "This container stores the default display name for some object plus a key that may be used to lookup a translation for the display name from a resource bundle for a particular locale.  The string value has a maximum length of 128 characters." .
@@ -128,7 +128,7 @@ lti:LocalizedText rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:default_value;
-    owl:onClass         lti-type:Text.Type;
+    owl:allValuesFrom  lti-type:Text.Type;
     rdfs:comment "This is the default value for the text. This default value  is used if (1) the key is not specified, (2) the localization capability is not enabled, or (3) the specified key is not found in the locale-specific resource bundle."
   ] ; 
   rdfs:comment "This container defines a block of text.  The container includes a default value for the text, plus a key that can be used to lookup a locale-specific value from a resource bundle." .
@@ -205,8 +205,8 @@ lti:ProductProfile rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:onClass         xsd:normalizedString;
-    owl:minQualifiedCardinality  1;
+    owl:allValuesFrom  xsd:normalizedString;
+    owl:minCardinality  1;
     rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract."
   ] ,
   [ a owl:Restriction ;
@@ -249,8 +249,8 @@ lti:ResourceHandler rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:name;
-    owl:onClass         lti:LocalizedName;
-    owl:minQualifiedCardinality  1;
+    owl:allValuesFrom  lti:LocalizedName;
+    owl:minCardinality  1;
     rdfs:comment "The name of the resource handler suitable for display in the TC user interface."
   ] ,
   [ a owl:Restriction ;
@@ -273,8 +273,8 @@ lti:Parameter rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:name;
-    owl:onClass         xsd:Name;
-    owl:minQualifiedCardinality  1;
+    owl:allValuesFrom  xsd:Name;
+    owl:minCardinality  1;
     rdfs:comment "The name of the parameter."
   ] ,
   [ a owl:Restriction ;
@@ -295,7 +295,7 @@ lti:ShortLocalizedName rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:default_value;
-    owl:onClass         lti-type:ShortName.Type;
+    owl:allValuesFrom  lti-type:ShortName.Type;
     rdfs:comment "The default value for the display name.  This value is used if (1) the key attribute is undefined, (2) the localization capability is not enabled, or (3) a value for the specified key is not found in the locale-specific resource bundle."
   ] ; 
   rdfs:comment "This container stores the default display name for some object plus a key that may be used to lookup a translation for the display name from a resource bundle for a particular locale.  This class is similar to LocalizedName, except that that the string value is limited to 64 characters." .
@@ -309,8 +309,8 @@ lti:Vendor rdf:type owl:Class ;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:name;
-    owl:onClass         lti:LocalizedName;
-    owl:minQualifiedCardinality  1;
+    owl:allValuesFrom  lti:LocalizedName;
+    owl:minCardinality  1;
     rdfs:comment "Defines a human readable name for the Vendor.  The name should be suitable for display in management screens within the Tool Provider system."
   ] ,
   [ a owl:Restriction ;
@@ -459,8 +459,8 @@ lti:ToolProxy rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:onClass         xsd:token;
-    owl:minQualifiedCardinality  1;
+    owl:allValuesFrom  xsd:token;
+    owl:minCardinality  1;
     rdfs:comment "The LTI version that governs the integration between the Tool and ToolConsumer. "
   ] ,
   [ a owl:Restriction ;
@@ -485,7 +485,7 @@ lti:ToolProxy rdf:type owl:Class;
   ] ; 
   rdfs:comment "This entity defines the integration contract between a ToolConsumer and a Tool.   It is called a \"ToolProxy\" because its primary purpose is to provide the ToolConsumer with all of the information needed to embed a given Tool within the ToolConsumer system." .
 
-lti:HttpMethod a owl:Class ;
+lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
     owl:oneOf (
       lti:POST 
