@@ -256,7 +256,7 @@ public class FrameBuilder {
       return;
     }
     if (restriction != null) {
-      Resource onClass = restriction.getPropertyResourceValue(OWL2.onClass);
+      Resource onClass = restriction.getPropertyResourceValue(OWL2.allValuesFrom);
       if (onClass != null) {
         range = onClass.as(OntResource.class);
         if (restriction.hasProperty(OWL2.minQualifiedCardinality)) {

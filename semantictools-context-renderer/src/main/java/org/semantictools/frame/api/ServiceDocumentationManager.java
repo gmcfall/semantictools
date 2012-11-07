@@ -18,6 +18,7 @@ import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
+import org.semantictools.context.renderer.model.QueryParam;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.context.renderer.model.ServiceFileManager;
@@ -26,6 +27,7 @@ import org.semantictools.index.model.ServiceDocumentationList;
 
 public class ServiceDocumentationManager {
 
+  private static final String TITLE = "title";
   private static final String CONTENT_NEGOTIATION = "contentNegotiation";
   private static final String MEDIATYPE = "mediaType";
   private static final String RDFTYPE = "rdfType";
@@ -37,7 +39,9 @@ public class ServiceDocumentationManager {
   private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
   private static final String INTRODUCTION = "introduction";
   private static final String METHODS = "methods";
+  private static final String GET_INSTRUCTIONS = "GET.instructions";
   private static final String GET_SUMMARY = "GET.summary";
+  private static final String QUERY_PARAM = "GET?";
   private static final String GET_REQUEST_HEADERS = "GET.requestHeaders";
   private static final String DEFAULT_MEDIA_TYPE = "GET.default.mediaType";
   private static final String GET_REQUEST_BODY = "GET.requestBody";
@@ -46,6 +50,10 @@ public class ServiceDocumentationManager {
   private static final String HTML_FORMAT_DOCUMENTATION = "htmlFormatDocumentation";
   private static final String MEDIA_TYPE_URI_PREFIX = "mediaType.uri.";
   private static final String POST_PROCESSING_RULES = "POST.processing.rules";
+  private static final String REPRESENTATIONS_HEADING = "representations.heading";
+  private static final String REPRESENTATIONS_TEXT = "representations.text";
+  private static final String PUT_INSTRUCTIONS = "PUT.instructions";
+  private static final String PUT_RULES = "PUT.rules";
   
   private static final String GET_REQUEST_BODY_DEFAULT = "The request body must be empty.";
   
@@ -118,6 +126,8 @@ public class ServiceDocumentationManager {
       
       if (MEDIATYPE.equals(key)) {
         setMediaType(sink, value, properties);
+      } else if (TITLE.equals(key)) {
+        sink.setTitle(value);
       } else if (RDFTYPE.equals(key)) {
         setRdfType(sink, value);
       } else if (CONTENT_NEGOTIATION.equals(key)) {
@@ -139,11 +149,15 @@ public class ServiceDocumentationManager {
       }  else if (METHODS.equals(key)) {
         setMethods(sink, value);
       } else if (GET_SUMMARY.equals(key)) {
-        setGetSummary(sink, value);        
+        setGetSummary(sink, value);     
+      } else if (GET_INSTRUCTIONS.equals(key)) {
+        sink.setGetInstructions(value);
       } else if (GET_REQUEST_BODY.equals(key)) {
         setGetRequestBody(sink, value);        
       } else if (GET_REQUEST_HEADERS.equals(key)) {
         setGetRequestHeaders(sink, value);
+      } else if (key.startsWith(QUERY_PARAM)) {
+        addQueryParam(sink, key, value);
       } else if (POST_RESPONSE_MEDIATYPE.equals(key)) {
         setPostResponseMediaType(sink, value);
       } else if (URL_TEMPLATES.equals(key)) {
@@ -152,6 +166,14 @@ public class ServiceDocumentationManager {
         sink.setHtmlFormatDocumentation(value);
       } else if (POST_PROCESSING_RULES.equals(key)) {
         sink.setPostProcessingRules(value);
+      } else if (REPRESENTATIONS_HEADING.equals(key)) {
+        sink.setRepresentationHeading(value);
+      } else if (REPRESENTATIONS_TEXT.equals(key)) {
+        sink.setRepresentationText(value);
+      } else if (PUT_INSTRUCTIONS.equals(key)) {
+        sink.setPutInstructions(value);
+      } else if (PUT_RULES.equals(key)) {
+        setPutRules(sink, value);
       }
     }
 
@@ -163,6 +185,27 @@ public class ServiceDocumentationManager {
   }
 
 
+
+  private void setPutRules(ServiceDocumentation sink, String value) {
+    StringTokenizer tokens = new StringTokenizer(value, "\r\n");
+    while (tokens.hasMoreTokens()) {
+      String rule = tokens.nextToken().trim();
+      sink.getPutRules().add(rule);
+    }
+    
+  }
+
+  private void addQueryParam(ServiceDocumentation doc, String key, String value) {
+    int qmark = key.indexOf('?');
+    String paramName = key.substring(qmark+1);
+    QueryParam param = new QueryParam();
+    param.setName(paramName);
+    param.setDescription(value);
+    
+    doc.getQueryParams().add(param);
+    
+    
+  }
 
   private void setPostResponseMediaType(ServiceDocumentation sink, String value) {
     sink.setPostResponseMediaType(value);
@@ -464,9 +507,12 @@ public class ServiceDocumentationManager {
       MethodDocumentation method = new MethodDocumentation();
       doc.setGetDocumentation(method);
 
-      String pattern =
+      String pattern = doc.getGetInstructions();
+      if (pattern == null) {
+        pattern =
           "To get a representation of a particular {0} instance, the client submits an HTTP GET request to the resource''s " +
           "REST endpoint, in accordance with the following rules:";
+      }
       method.setSummary(format(pattern, typeName));   
       setGetRequestHeadersDefault(doc);
       method.setRequestBodyRequirement(GET_REQUEST_BODY_DEFAULT);
@@ -593,9 +639,12 @@ public class ServiceDocumentationManager {
       MethodDocumentation method = new MethodDocumentation();
       doc.setPutDocumentation(method);
 
-      String pattern =
+      String pattern = doc.getPutInstructions();
+      if (pattern == null) {
+        pattern =
           "To update a particular {0} instance, the client submits an HTTP PUT request to the resource''s " +
           "REST endpoint in accordance with the following rules:";
+      }
       
       method.setSummary(format(pattern, typeName));      
       addContentTypeHeader(doc, method);

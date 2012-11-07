@@ -13,10 +13,6 @@ pm:Message rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty pm:metadata ;
     bind:associationType bind:Composition
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty pm:body ;
-    bind:associationType bind:Composition
   ] .
 
 pm:HttpAction rdf:type bind:Enum .

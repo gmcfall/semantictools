@@ -107,6 +107,35 @@ public class TreeGenerator {
     return root;
   }
   
+  public TreeNode generateGraph(List<Frame> frameList) {
+    memory = new HashSet<String>();
+    this.maxDepth = 5;
+    TreeNode root = new TreeNode();
+    root.setDescription("");
+    root.setKind(Kind.FRAME);
+    root.setLocalName("");
+    root.setTypeName("");
+    
+    addContextNode(root);
+    TreeNode graph = new TreeNode();
+    root.add(graph);
+    graph.setMaxCardinality(-1);
+    graph.setKind(Kind.PROPERTY);
+    graph.setLocalName("@graph");
+    graph.setTypeName("");
+    graph.setBranchStyle(BranchStyle.OBLIQUE);
+    
+    for (Frame frame : frameList) {
+      TreeNode node = createBasicFrameNode(frame);
+      graph.add(node);
+      addTypeNode(node, frame, 1);
+      addProperties(node, frame, 0);
+    }
+    memory = null;
+    
+    return root;
+  }
+  
   public TreeNode generateNode(Frame frame, int depth) {
     memory = new HashSet<String>();
     maxDepth = depth;
@@ -134,7 +163,7 @@ public class TreeGenerator {
     addIdProperty(parent, frame);
     List<Field> list = frame.listAllFields();
     for (Field field : list) {
-      addField(parent, field, depth);
+      addField(parent, frame, field, depth);
     }
     
   }
@@ -157,9 +186,7 @@ public class TreeGenerator {
       
       parent.add(node);
     }
-    
   }
-  
 
 
   public TreeNode generateNode(Field field) {
@@ -187,14 +214,37 @@ public class TreeGenerator {
     
     
     TreeNode node = new TreeNode();
+    TreeNode setContainer = null;
+    int max = field.getMaxCardinality();
+    boolean isList = field.getRdfType().canAsListType();
+    if (max < 0  && !isList && contextProperties.isSetProperty(field.getURI())) {
+      node.setLocalName("@set");
+      TreeNode id = new TreeNode();
+      id.setLocalName("@id");
+      id.setMaxCardinality(1);
+      id.setMinCardinality(1);
+      id.setTypeName("xs:anyURI");
+      
+      setContainer = new TreeNode();
+      setContainer.add(id);
+      setContainer.add(node);
+      setContainer.setLocalName(context.rewrite(uri));
+      setContainer.setMinCardinality(field.getMinCardinality());
+      setContainer.setMaxCardinality(1);
+      setContainer.setTypeName("");
+      setContainer.setKind(Kind.PROPERTY);
+    } else {
+      node.setLocalName(context.rewrite(uri));
+    }
+    
+    
     node.setKind(Kind.PROPERTY);
-    node.setLocalName(context.rewrite(uri));
     node.setMinCardinality(field.getMinCardinality());
     node.setMaxCardinality(field.getMaxCardinality());
     setDescription(node, field);
     setType(node, field);
     
-    if (field.getRdfType().canAsListType()) {
+    if (isList) {
       node.setMaxCardinality(-1);
       node.setSequential(true);
     }
@@ -224,7 +274,7 @@ public class TreeGenerator {
     
     checkExpandedValue(node, field, term);
     
-    return node;
+    return setContainer == null ? node : setContainer;
     
   }
   
@@ -277,7 +327,7 @@ public class TreeGenerator {
     return frame;
   }
 
-  private void addField(TreeNode parent, Field field, int depth) {
+  private void addField(TreeNode parent, Frame parentFrame, Field field, int depth) {
     
     
     TreeNode node = doGenerateNode(field);
@@ -286,6 +336,9 @@ public class TreeGenerator {
     }
 
     parent.add(node);
+    if (contextProperties.isSetProperty(field.getURI())) {
+      node = node.getChildren().get(1);
+    }
     
     
     
@@ -295,7 +348,8 @@ public class TreeGenerator {
     if (node.getObjectPresentation()==ObjectPresentation.NONE ) {
       
       List<Frame> subtypeList = frame.getSubtypeList();
-      if (subtypeList.isEmpty()) {      
+      boolean excludeSubtypes = excludeSubtypes(parentFrame, field);
+      if (subtypeList.isEmpty() || excludeSubtypes) {      
         addProperties(node, frame, depth);
         
       } else {
@@ -306,8 +360,11 @@ public class TreeGenerator {
     }
     
   }
-  
  
+  private boolean excludeSubtypes(Frame frame, Field field) {
+    FrameConstraints constraints = contextProperties.getFrameConstraints(frame.getUri());
+    return constraints != null && constraints.isExcludesSubtypes(field.getURI());
+  }
 
   private void addSubtypes(TreeNode node, Frame frame, int depth) {
     
@@ -384,6 +441,7 @@ public class TreeGenerator {
 
   private boolean isCyclic(TreeNode node) {
     String typeName = node.getTypeName();
+    if (typeName.length()==0) return false;
     
     while ((node=node.getParent()) != null) {
       if (typeName.equals(node.getTypeName())) {
@@ -523,7 +581,11 @@ public class TreeGenerator {
     }
     
     text.append("</UL>");
-    String termName = context.getTermInfoByURI(frame.getUri()).getTermName();
+    TermInfo info = context.getTermInfoByURI(frame.getUri());
+    if (info == null) {
+      throw new TermNotFoundException(context.getMediaType(), frame.getUri());
+    }
+    String termName = info.getTermName();
     text.append(
         "<P>Implementations may use a custom JSON-LD context which defines simple names for additional types " +
         "that are subtypes of <code>" + termName + ".</code></P>"

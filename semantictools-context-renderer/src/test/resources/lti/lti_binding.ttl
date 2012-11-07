@@ -194,6 +194,23 @@ lti:ToolProxy rdfs:subClassOf
     bind:onProperty lti:enabled_capability ;
     bind:associationType bind:Aggregation
   ] .
+lti:ToolProxyBinding rdf:type bind:Addressable .
+lti:ToolProxyBinding rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:tool_proxy ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:context ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:LtiLink rdf:type bind:Addressable .
+lti:Context rdf:type bind:Addressable .
+lti:ToolSettingsContainer rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:custom ;
+    bind:associationType bind:Composition
+  ] .
 
 lti:HttpMethod rdf:type bind:Enum .
 

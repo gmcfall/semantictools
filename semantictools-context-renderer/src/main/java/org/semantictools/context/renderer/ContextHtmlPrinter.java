@@ -114,12 +114,14 @@ public class ContextHtmlPrinter extends PrintEngine {
   private NodeComparatorFactory nodeComparatorFactory;
   private UmlFileManager umlFileManager;
   private Frame root;
+  private List<Frame> graphTypes;
   private Heading topHeading;
   private Heading currentHeading;
   private int h2;
   private int h3;
   private int figureNumber;
   private int tableNumber;
+  private boolean defaultTemplate;
 
   private Caption overviewDiagram;
   private Set<Caption> forwardReferenceList;
@@ -146,6 +148,23 @@ public class ContextHtmlPrinter extends PrintEngine {
     this.typeManager = typeManager;
     this.namer = namer;
   }
+  
+  public List<Frame> getGraphTypes() {
+    if (graphTypes == null) {
+      List<String> uriList = contextProperties.getGraphTypes();
+      if (uriList != null && !uriList.isEmpty()) {
+        graphTypes = new ArrayList<Frame>();
+        for (String uri : uriList) {
+          Frame frame = typeManager.getFrameByUri(uri);
+          if (frame == null) {
+            throw new FrameNotFoundException(uri);
+          }
+          graphTypes.add(frame);
+        }
+      }
+    }
+    return graphTypes;
+  }
 
   public Frame getRootFrame() {
     return root;
@@ -158,18 +177,16 @@ public class ContextHtmlPrinter extends PrintEngine {
   public void printHtml(JsonContext context, ContextProperties properties)
       throws IOException {
     h2 = h3 = 0;
+    defaultTemplate = !ContextProperties.TEMPLATE_SIMPLE.equalsIgnoreCase(properties.getTemplate());
     topHeading = new Heading(Level.H1, "", "");
     currentHeading = topHeading;
     this.contextProperties = properties;
     this.context = context;
     treeGenerator = new TreeGenerator(typeManager, context, properties);
     sampleGenerator = new JsonSampleGenerator(typeManager);
-    root = typeManager.getFrameByUri(context.getRootType());
-    if (root == null) {
-      throw new FrameNotFoundException(context.getRootType());
-    }
-    overviewDiagram = new Caption(CaptionType.Figure,
-        "Complete JSON representation of " + root.getLocalName(), "completeRep", null);
+    root = context == null ? null : typeManager.getFrameByUri(context.getRootType());
+    
+    overviewDiagram = overviewDiagramCaption();
     forwardReferenceList = new HashSet<Caption>();
     captionManager = new CaptionManager();
     jsonManager = new JsonManager(typeManager, context);
@@ -193,6 +210,16 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     writeOutput();
 
+  }
+
+  private Caption overviewDiagramCaption() {
+    String text = null;
+    if (root == null) {
+      text = "Graphical representation of the " + contextProperties.getMediaType() + " media type";
+    } else {
+      text = "Complete JSON representation of " + root.getLocalName();
+    }
+    return new Caption(CaptionType.Figure,  text, "completeRep", null);
   }
 
   private void printStatus() {
@@ -238,6 +265,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printReferences() {
+    if (!defaultTemplate) return;
     
     String text = getBodyText();
     
@@ -387,6 +415,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printDataBindings() throws IOException {
+    if (!defaultTemplate) return;
+    
     Heading heading = createHeading("JSON Data Bindings");
     beginHeading(heading);
     printOverviewDiagram();
@@ -407,6 +437,10 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private void printMediaTypeConformance() {
     endHeading();
+    // TODO: move the endHeading call to the same scope where the heading begins.
+    if (context == null) {
+      return;
+    }
     String headingTemplate = "The {0} Media Type";
     String typeName = context.rewrite(root.getUri());
     String mediaType = contextProperties.getMediaType();
@@ -527,6 +561,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printToc() {
+    if (!defaultTemplate) return;
 
     println(TOC_MARKER);
 
@@ -578,6 +613,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printAbstract() {
+    if (!defaultTemplate) return;
 
     String abstractText = contextProperties == null ? null : contextProperties
         .getAbstactText();
@@ -592,12 +628,13 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printIntroduction() throws IOException {
-    String text = contextProperties == null ? null : contextProperties
-        .getIntroduction();
-    String headingText = "Introduction";
+    String text = contextProperties.getIntroduction();
 
-    Heading heading = createHeading(headingText);
-    beginHeading(heading);
+    if (defaultTemplate) {
+      String headingText = "Introduction";
+      Heading heading = createHeading(headingText);
+      beginHeading(heading);
+    }
     if (text != null) {
       indent().println("<DIV>");
       print(text);
@@ -605,17 +642,37 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
 
     printSample();
-    printHowToRead();
+    
+    if (defaultTemplate) {
+      printHowToRead();
+    }
 
 
   }
 
   private void printSample() throws IOException {
 
-    String typeName = context.rewrite(root.getUri());
-    String defaultText =
-        "<p>Figure 1 shows the representation of " +article(typeName) + typeName + " resource in the <code>" +
-         contextProperties.getMediaType() + "</code> format.</p>";
+    String typeName = null;
+    
+    if (context != null && root!=null) {
+      typeName = context.rewrite(root.getUri());
+    } 
+    String defaultText = contextProperties.getSampleText();
+   
+    if (defaultText == null) {
+    
+      if (typeName == null) {
+        defaultText = 
+          "<p>Figure 1 shows the representation of a resource in the <code>" +
+              contextProperties.getMediaType() + "</code> format.</p>";
+        
+      } else {
+        defaultText =
+          "<p>Figure 1 shows the representation of " +article(typeName) + typeName + " resource in the <code>" +
+           contextProperties.getMediaType() + "</code> format.</p>";
+      }
+    }
+    
     
     List<SampleJson> list = contextProperties.getSampleJsonList();
     if (list.isEmpty()) {
@@ -640,6 +697,9 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printHowToRead() throws IOException {
+    if (context == null) {
+      return;
+    }
 
     Heading heading = createHeading("How To Read this Document");
     print(heading);
@@ -1057,7 +1117,10 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     String src = namer.getImagesDir() + "/sampleObj.png";
     
-    TreeNode node = treeGenerator.generateRoot(root, 1);
+    List<Frame> graphTypes = getGraphTypes();
+    TreeNode node = (graphTypes == null) ? 
+        treeGenerator.generateRoot(root, 1) : treeGenerator.generateGraph(graphTypes);
+        
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
 //
 //    CreateDiagramRequest request = new CreateDiagramRequest(context, root, src,
@@ -1628,7 +1691,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   public boolean isIncludeOverviewDiagram() {
-    return includeOverviewDiagram;
+    return includeOverviewDiagram && (context!=null);
   }
 
   public void setIncludeOverviewDiagram(boolean includeOverviewDiagram) {
@@ -1646,9 +1709,9 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void printTitle() {
 
     String title = contextProperties.getTitle();
-    String mediaType = context.getMediaType();
-    String rdfType = root.getUri();
-    String contextURI = context.getContextURI();
+    String mediaType = contextProperties.getMediaType();
+    String rdfType = (root==null) ? null : root.getUri();
+    String contextURI = context==null ? null : context.getContextURI();
     String contextHref = namer.getJsonContextFileName(context);
     String status = contextProperties == null ? null : contextProperties
         .getStatus();
@@ -1681,51 +1744,52 @@ public class ContextHtmlPrinter extends PrintEngine {
 
       String path = namer.getIndexFileName();
       File sourceFile = streamFactory.getOutputFile(path);
-      if (sourceFile != null) {
+      if (sourceFile != null && root!=null) {
         rdfTypeHref = umlFileManager.getTypeRelativePath(sourceFile, root);
       }
     }
     
-
-    indent().print("<TABLE");
-    printAttr("class", "mediaTypeProperties");
-    println(">");
-    pushIndent();
-    indent().println("<TR>");
-    pushIndent();
-    indent().println("<TH>Media Type</TH>");
-    indent().print("<TD>").print(mediaType).println("</TD>");
-    popIndent();
-    indent().println("</TR>");
-    indent().println("<TR>");
-    pushIndent();
-    indent().println("<TH>RDF Type</TH>");
-   
-    indent().print("<TD>");
-    if (rdfTypeHref == null) {
-      print(rdfType);
-    } else {
-      print("<a ");
-      printAttr("href", rdfTypeHref);
-      print(">");
-      print(rdfType);
-      print("</a>");
+    if (defaultTemplate) {
+      indent().print("<TABLE");
+      printAttr("class", "mediaTypeProperties");
+      println(">");
+      pushIndent();
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>Media Type</TH>");
+      indent().print("<TD>").print(mediaType).println("</TD>");
+      popIndent();
+      indent().println("</TR>");
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>RDF Type</TH>");
+     
+      indent().print("<TD>");
+      if (rdfTypeHref == null) {
+        print(rdfType);
+      } else {
+        print("<a ");
+        printAttr("href", rdfTypeHref);
+        print(">");
+        print(rdfType);
+        print("</a>");
+      }
+      
+      println("</TD>");
+      popIndent();
+      indent().println("</TR>");
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>JSON-LD</TH>");
+      indent().print("<TD>");
+      print("<A");
+      printAttr("HREF", contextHref);
+      print(">").print(contextURI).println("</A></TD>");
+      popIndent();
+      indent().println("</TR>");
+      popIndent();
+      indent().println("</TABLE>");
     }
-    
-    println("</TD>");
-    popIndent();
-    indent().println("</TR>");
-    indent().println("<TR>");
-    pushIndent();
-    indent().println("<TH>JSON-LD</TH>");
-    indent().print("<TD>");
-    print("<A");
-    printAttr("HREF", contextHref);
-    print(">").print(contextURI).println("</A></TD>");
-    popIndent();
-    indent().println("</TR>");
-    popIndent();
-    indent().println("</TABLE>");
     
     if (contextProperties.hasHistoryLink()) {
       indent().print("<DIV");
@@ -1770,7 +1834,7 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private void printStyleSheetLink() {
 
-    String mediaType = context.getMediaType();
+    String mediaType = contextProperties.getMediaType();
     String href = namer.pathToStyleSheet(mediaType);
 
     indent().print("<LINK");
@@ -1787,7 +1851,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printOverviewDiagram() throws IOException {
-    if (!includeOverviewDiagram)
+    if (!isIncludeOverviewDiagram())
       return;
     
     String typeName = context.rewrite(root.getUri());
@@ -1821,7 +1885,12 @@ public class ContextHtmlPrinter extends PrintEngine {
     
     if (diagramGenerator != null) {
       String rdfProperty = contextProperties.getRdfProperty();
-      TreeNode node = treeGenerator.generateRoot(root, rdfProperty, -1);
+
+      List<Frame> graphTypes = getGraphTypes();
+      TreeNode node = (graphTypes == null) ? 
+          treeGenerator.generateRoot(root, rdfProperty, -1) :
+          treeGenerator.generateGraph(graphTypes);
+          
       sortAll(node);
       
       CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
@@ -1845,9 +1914,15 @@ public class ContextHtmlPrinter extends PrintEngine {
     indent().print("</DIV>");
     
     
-    String sampleCaptionText = "Example JSON document containing {0} {1} object";
-    sampleCaptionText = sampleCaptionText.replace("{0}", article(typeName));
-    sampleCaptionText = sampleCaptionText.replace("{1}", typeName);
+    String sampleCaptionText = null;
+    if (typeName == null) {
+      sampleCaptionText =
+          "Example JSON document in the format " + contextProperties.getMediaType();
+    } else {
+      sampleCaptionText = "Example JSON document containing {0} {1} object";
+      sampleCaptionText = sampleCaptionText.replace("{0}", article(typeName));
+      sampleCaptionText = sampleCaptionText.replace("{1}", typeName);
+    }
     
     Caption sampleCaption = new Caption(CaptionType.Figure, sampleCaptionText, "completeSample", null);
     assignNumber(sampleCaption);
@@ -1949,7 +2024,7 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private String createJsonSample() throws IOException {
     
-    ObjectNode node = sampleGenerator.generateSample(context);
+    ObjectNode node = sampleGenerator.generateSample(context, contextProperties);
     
     
     String fileName = namer.getJsonSampleFileName();
@@ -2116,7 +2191,8 @@ public class ContextHtmlPrinter extends PrintEngine {
     println();
     
     TreeGenerator generator = new TreeGenerator(typeManager, context, contextProperties);
-    TreeNode node = (frame == root) ? 
+    List<Frame> graphTypes = getGraphTypes();
+    TreeNode node = (frame == root && graphTypes==null) ? 
         generator.generateRoot(frame, 1) :
         generator.generateNode(frame, 1);
         
@@ -2444,6 +2520,9 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void collectFrames() {
     frameList = new ArrayList<Frame>();
     datatypeList = new ArrayList<Datatype>();
+
+    if (context == null) return;
+    
     Set<String> reachable = getReachableTypes();
 
     List<TermInfo> termList = context.getTerms();
@@ -2514,7 +2593,14 @@ public class ContextHtmlPrinter extends PrintEngine {
   private Set<String> getReachableTypes() {
     Set<String> set = new HashSet<String>();
 
-    addReachableTypes(set, root);
+    List<Frame> graphTypes = getGraphTypes();
+    if (graphTypes != null) {
+      for (Frame frame : graphTypes) {
+        addReachableTypes(set, frame);
+      }
+    } else if (root != null) {
+      addReachableTypes(set, root);
+    }
     return set;
   }
 

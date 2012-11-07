@@ -9,10 +9,22 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.semantictools.context.renderer.model.GlobalProperties;
+import org.semantictools.frame.api.OntologyManager;
 
 public class GlobalPropertiesReader {
   private static final String IGNORE = "ignore";
+  private static final String UPLOAD_SCHEMA_SERVICE_URI = "uploadSchemaServiceURI";
+  private static final String UPLOAD_SCHEMA_LIST = "uploadSchemaList";
+  private static final String LOCAL_REPO = "localRepo";
   
+  private OntologyManager ontologyManager;
+  
+  
+  
+  public GlobalPropertiesReader(OntologyManager ontologyManager) {
+    this.ontologyManager = ontologyManager;
+  }
+
   public GlobalProperties scan(File source) throws IOException {
     if ("global.properties".equals(source.getName())) {
       return parseProperties(source);
@@ -38,9 +50,26 @@ public class GlobalPropertiesReader {
       String value = e.getValue().toString();
       if (IGNORE.equals(key)) {
         setIgnoredOntologies(global, value);
+      } else if (UPLOAD_SCHEMA_SERVICE_URI.equals(key)) {
+        ontologyManager.setOntologyServiceURI(value);
+      } else if (LOCAL_REPO.equals(key)) {
+        ontologyManager.setLocalRepository(new File(value));
+      } else if (UPLOAD_SCHEMA_LIST.equals(key)) {
+        setUploadSchemaList(value);
       }
     }
     return global;
+  }
+
+  private void setUploadSchemaList(String value) {
+
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreTokens()) {
+      String uri = tokenizer.nextToken();
+      if (uri.length()>0) {
+        ontologyManager.getUploadList().add(uri);
+      }
+    }
   }
 
   private void setIgnoredOntologies(GlobalProperties global, String value) {

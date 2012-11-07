@@ -1,8 +1,8 @@
 @prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
 @prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -62,12 +62,6 @@ pm:Message rdf:type owl:Class;
     owl:onProperty      pm:metadata;
     owl:minCardinality  1;
     rdfs:comment "A container that holds metadata about the message."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      pm:body;
-    owl:allValuesFrom  owl:Thing;
-    owl:minCardinality  1;
-    rdfs:comment "The body of the Message.  "
   ] ; 
   rdfs:comment "An envelope that separates the payload of a message from its header." .
 
@@ -82,20 +76,8 @@ pm:HttpAction a owl:Class  ;
   ] .
 
 pm:body rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      po:GradebookItemEvent
-      pm:Message
-    )
-  ] ;
-  rdfs:range  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      po:GradebookItem
-      owl:Thing
-    )
-  ] ;
+  rdfs:domain po:GradebookItemEvent ;
+  rdfs:range po:GradebookItem ;
   rdfs:comment "The GradebookItem that is being created or updated." .
 
 pm:version rdf:type owl:FunctionalProperty ;

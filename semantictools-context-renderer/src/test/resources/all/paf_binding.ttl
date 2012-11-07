@@ -5,10 +5,15 @@
 
 paf:Activity rdf:type bind:Addressable .
 paf:Activity rdf:type bind:AbstractClass .
+paf:Activity rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:defaultResultValueSpec ;
+    bind:associationType bind:Composition
+  ] .
 paf:ActivityContainer rdf:type bind:Addressable .
 paf:ActivityContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:childActivity ;
+    bind:onProperty paf:binding ;
     bind:associationType bind:Composition
   ] .
 paf:ActivityBinding rdf:type bind:EmbeddableClass .
@@ -20,6 +25,14 @@ paf:ActivityBinding rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:credit ;
     bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:sourceActivity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:scoreConstraints ;
+    bind:associationType bind:Composition
   ] .
 paf:StructuredAssignment rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
@@ -58,11 +71,7 @@ paf:ActivitySequence rdfs:subClassOf
 paf:SequenceNode rdf:type bind:Addressable .
 paf:SequenceNode rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:activity ;
-    bind:associationType bind:Aggregation
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:activityState ;
+    bind:onProperty paf:targetActivity ;
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
@@ -70,11 +79,15 @@ paf:SequenceNode rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:binding ;
+    bind:onProperty paf:targetBinding ;
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:player ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:prevNode ;
     bind:associationType bind:Aggregation
   ] .
 paf:ActivityPlayer rdf:type bind:Addressable .
@@ -99,15 +112,17 @@ paf:ActivityPlayer rdfs:subClassOf
     bind:onProperty paf:frameFrontend ;
     bind:associationType bind:Composition
   ] .
-paf:ActivityState rdf:type bind:Addressable .
-paf:ActivityState rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty paf:nextActivity ;
-    bind:associationType bind:Aggregation
-  ] .
 paf:NodeResult rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:systemResponse ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:nextActivity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:nextBinding ;
     bind:associationType bind:Aggregation
   ] .
 paf:ActivityResult rdfs:subClassOf
@@ -145,6 +160,23 @@ paf:ActivityManager rdfs:subClassOf
 paf:SequenceProcess rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty paf:targetSequence ;
+    bind:associationType bind:Aggregation
+  ] .
+paf:NodeProcessResponse rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:nodeResult ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:backendResult ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:aggregateResult ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty paf:filteredResult ;
     bind:associationType bind:Aggregation
   ] .
 

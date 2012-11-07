@@ -5,6 +5,7 @@ import java.util.List;
 import org.semantictools.context.renderer.model.HttpHeaderInfo;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
+import org.semantictools.context.renderer.model.QueryParam;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 
@@ -100,6 +101,17 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     List<HttpHeaderInfo> requestHeaders = method.getRequestHeaders();
     Caption requestHeadersCaption = null;
+    Caption queryParamsCaption = null;
+    
+    List<QueryParam> paramList = doc.getQueryParams();
+    if (!paramList.isEmpty()) {
+      queryParamsCaption = new Caption(CaptionType.Table, "Query Parameters", "queryParams", null);
+      assignNumber(queryParamsCaption);
+      indent().print("<LI>The request may contain the query parameters specified in ");
+      printLink(queryParamsCaption);
+      println(".</LI>");
+    }
+    
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for GET Request", "getHeader", null);
@@ -114,6 +126,12 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     popIndent();
     indent().println("</UL>");
+    
+    if (!paramList.isEmpty()) {
+      printParagraph("&nbsp;");
+      printQueryParams(paramList, queryParamsCaption);
+      
+    }
    
     printParagraph("&nbsp;");
     printRequestHeaders(method, requestHeadersCaption);
@@ -138,6 +156,14 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     List<HttpHeaderInfo> requestHeaders = method.getRequestHeaders();
     Caption requestHeadersCaption = null;
+    
+    List<String> ruleList = doc.getPutRules();
+    if (!ruleList.isEmpty()) {
+      for (String rule : ruleList) {
+        indent().print("<LI>").print(rule).println("</LI>");
+      }
+    }
+    
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for PUT Request", "getHeader", null);
@@ -303,6 +329,38 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 //    printCaption(responseCaption);
     
   }
+
+
+  private void printQueryParams(List<QueryParam> paramList, Caption caption) {
+
+    indent().print("<TABLE");
+    printAttr("class", "propertiesTable");
+    println(">");
+    pushIndent();
+    indent().println("<TR>");
+    pushIndent();
+    indent().println("<TH>Parameter</TH><TH>Description</TH>");
+    popIndent();
+    indent().println("</TR>");
+    
+    for (QueryParam param : paramList) {
+      indent().println("<TR>");
+      pushIndent();
+      indent().print("<TD>");
+      print(param.getName());
+      print("</TD><TD>");
+      print(param.getDescription());
+      println("</TD>");        
+      popIndent();
+      indent().println("</TR>");
+    }
+    popIndent();
+    indent().println("</TABLE>");
+    printCaption(caption);
+
+    
+  }
+  
   
   private void printRequestHeaders(MethodDocumentation method, Caption caption) {
 

@@ -4,6 +4,9 @@
   "@id" : "http://paf.api.pearson.com/resources/sequences/4109739438957376",
   "guid" : "4109739438957376",
   "user" : "http://idm.api.pearson.com/resources/identities/59292747585605473",
-  "learningContext" : "http://ecollege.com/resources/sections/252684305693276",
+  "learningContext" : {
+    "@type" : "CourseSection",
+    "@id" : "http://ecollege.com/resources/sections/252684305693276"
+  },
   "overallActivity" : "http://content.api.pearson.com/resources/activity/4282892857827"
 }

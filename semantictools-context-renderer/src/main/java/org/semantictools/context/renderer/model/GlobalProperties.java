@@ -14,5 +14,7 @@ public class GlobalProperties {
   public boolean isIgnoredOntology(String ontologyURI) {
     return ignoredOntology.contains(ontologyURI);
   }
+  
+
 
 }

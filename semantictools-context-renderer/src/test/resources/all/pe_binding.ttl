@@ -7,4 +7,19 @@ pe:CourseSection rdf:type bind:Addressable .
 pe:Person rdf:type bind:Addressable .
 pe:Role rdf:type bind:Enum .
 pe:LearningContext rdf:type bind:Addressable .
+pe:LearningContext rdf:type bind:AbstractClass .
+pe:LearningContext rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pe:membership ;
+    bind:associationType bind:Composition
+  ] .
+pe:Membership rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pe:member ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty pe:role ;
+    bind:associationType bind:Aggregation
+  ] .
 

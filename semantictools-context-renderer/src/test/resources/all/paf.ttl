@@ -1,10 +1,10 @@
 @prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
-@prefix pcd: <http://purl.org/pearson/content/v1/xsd/datatypes#> .
+@prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix pcd: <http://purl.org/pearson/content/v1/xsd/datatypes#> .
 @prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
 @prefix xdt: <http://www.w3.org/2004/10/xpath-datatypes#> .
-@prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
 @prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -16,8 +16,8 @@
   a bind:TargetNamespace ;
   bind:suggestedPrefix "paf" .
 
-paf:Activity rdf:type owl:Class ;
-  rdfs:subClassOf paf:ScoreConstraints ,
+paf:Activity rdf:type owl:Class;
+  rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      paf:versionHistory;
     rdfs:comment "The VersionHistory to which this Activity belongs."
@@ -27,18 +27,18 @@ paf:Activity rdf:type owl:Class ;
 paf:ActivityContainer rdf:type owl:Class ;
   rdfs:subClassOf paf:Activity ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:childActivity;
-    owl:minCardinality  1;
+    owl:onProperty      paf:binding;
     rdfs:comment "A reified association between this ActivityContainer and a child Activity within the container."
   ] ; 
   rdfs:comment """A container that holds a collection of Activities.  The ActivityContainer does not reference child activities directly.  Rather, the child activities are referenced indirectly through <code>ActivityBinding</code> resources.  The ActivityBinding points to the child activity, but it also decorates it with additional information.  A child activity nested within an ActivityContainer may be anotherActivityContainer; this is the principal way in which hierarchical activities are defined.
 <p>The concept of an <code>ActivityContainer</code> is semantically equivalent to an <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_infov2p1pd2.html#element10511\">assessmentSection</a> in the QTI specification.</p>""" .
 
-paf:ActivityBinding rdf:type owl:Class ;
-  rdfs:subClassOf paf:ScoreConstraints ,
+paf:ActivityBinding rdf:type owl:Class;
+  rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      paf:guid;
-    owl:minCardinality  1
+    owl:onProperty      paf:bindingIndex;
+    owl:minCardinality  1;
+    rdfs:comment "A globally unique identifier for this binding."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:activityFormat;
@@ -56,6 +56,10 @@ paf:ActivityBinding rdf:type owl:Class ;
   [ a owl:Restriction ;
     owl:onProperty      paf:credit;
     rdfs:comment "Specifies whether the scores on the activity should contribute to the overall score within the containing assignment."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:sourceActivity;
+    rdfs:comment "The original activity with which this binding is associated.  This property is used when obfuscation is enabled.  In this case, URI values for activities and bindings are obfuscated to prevent students from producing \"cheat sheets\" based on activity identifiers.  When obfuscation is enabled, the URI for the <code>boundActivity</code> contains a random GUID, and the <code>sourceActivity</code> retains the original URI.  The <code>sourceActiivity</code> property should never be transmitted to the user agent (browser or mobile device).   The Activity Hub uses the <code>sourceActivity</code> to translate between obfuscated URIs and <em>real</em> URIs."
   ] ; 
   rdfs:comment """An <code>ActivityBinding</code> reifies the relationship between an ActivityContainer and child activities within that container.  It associates the activity with the parent container but also decorates the activity with additional properties that are relevant within the scope of the container.  For example, the properties inherited from <code>ScoreConstraints</code> (normalMaximum and extraCreditMaxium) override the default values for these same properties that may be defined directly on the child Activity. 
 <p>The concept of an ActivityBinding is semantically equivalent to an <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_infov2p1pd2.html#element10519\">assessmentItemRef</a> in the QTI standard.</p>""" .
@@ -106,6 +110,10 @@ paf:ActivitySequence rdf:type owl:Class;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      paf:nodeCollection;
+    rdfs:comment "The endpoint to which new SequenceNode resources should be posted."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      paf:node;
     rdfs:comment "A node within this ActivitySequence."
   ] ,
@@ -129,11 +137,6 @@ paf:ActivitySequence rdf:type owl:Class;
 paf:SequenceNode rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      pcm:guid;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for the ActivitySequence."
-  ] ,
-  [ a owl:Restriction ;
     owl:onProperty      paf:nodeIndex;
     owl:minCardinality  1;
     rdfs:comment "The position of this node within the sequence.  The first node has nodeIndex=1, the second node has nodeIndex=2, and so on."
@@ -143,32 +146,32 @@ paf:SequenceNode rdf:type owl:Class;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      paf:resultCollection;
+    rdfs:comment "The endpoint to which NodeResult objects should be posted."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      paf:parentSequence;
     owl:minCardinality  1;
     rdfs:comment "The parent <code>ActivitySequence</code> within which this <code>SequenceNode</code> is found."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:activity;
-    owl:minCardinality  1
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      paf:activityState;
-    rdfs:comment "A resource that stores state information about the user's engagement with the activity associated with this <code>SequenceNode</code>."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      paf:binding;
+    owl:onProperty      paf:targetBinding;
     rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      paf:aggregateResult;
-    owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:player;
     rdfs:comment "The player that should be used to render the activity at this node in the sequence. TODO:  Explore other options for identifying the associated player."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:prevNode;
+    rdfs:comment "The previous node in the sequence."
   ] ; 
-  rdfs:comment """A <code>SequenceNode</code> represents one step in an <code>ActivitySequence</code>.  Each node records state information about the user's engagement with some activity at that step within the sequence.
-<p> While the overall sequence is associated with a composite activity like a test or quiz, the nodes correspond to individual items within the assignment.  However, the order of the nodes does not necessarily reflect the natural order of items in the assignment.  Rather, the order of the nodes reflects the order in which the user attacked the individual items.</p>""" .
+  rdfs:comment """A <code>SequenceNode</code> represents one step in an <code>ActivitySequence</code>.  
+<p> While the overall sequence is associated with a composite activity like a test or quiz, nodes correspond to individual items within the assignment.  However, the order of the nodes does not necessarily reflect the natural order of items in the assignment.  Rather, the order of the nodes reflects the order in which the user attacked the individual items.</p>
+<p>If a learner leaves the target activity and then returns to work on it later, a new <code>SequenceNode</code> will be created. All of the SequenceNode resources associated with the same activity are related to each other through an <code>ActivityResult</code> resource.  The <code>ActivityResult</code> stores state information that is common to all of the nodes for a particular activity.  For example, if the activity has template variables, they would be assigned random values when the first SequenceNode is created, and those values would be stored in the <code>ActivityResult</code>.  The ActivityResult also stores the effective result of all interactions with the target assignment, such as the learner's score.
+</p>
+<p>Each SequenceNode contains a list of <code>NodeResult</code> objects which acts as a running log of interactions between the user and the target <code>Activity</code>.   The Activity Manager receives <code>NodeResult</code> objects from the player front-end and passes them to the Hub.  The ActivityManager may decorate NodeResult resources with values that signal navigation to a new Activity.
+</p>""" .
 
 paf:ActivityPlayer rdf:type owl:Class;
   rdfs:subClassOf 
@@ -205,24 +208,27 @@ paf:ActivityPlayer rdf:type owl:Class;
   ] ; 
   rdfs:comment "A pluggable software component that can render the user interface for a certain type of activity and process learner responses to compute results.  To render the user interface, the player may offer a remote frontend which runs in an iframe loaded from a remote domain,  a W3C widget which runs in an iframe from the same domain as the Activity Manager, or both.  The ActivityManager chooses the appropriate frontend to use." .
 
-paf:ActivityState rdf:type owl:Class;
+paf:SystemResponse rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      paf:nextBinding;
-    rdfs:comment "A client sets this property when it wishes to specify what instance of an activity should come next in the sequence.  The value is the GUID for an ActivityBinding. If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted. This property is relevant only if the learner is working on a <code>StructuredAssignment</code>.  Otherwise, the client should use the <code>nextActivity</code> property."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      paf:computeNext;
-    rdfs:comment "A flag which serves as a trigger to compute the next activity based on server-side logic."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      paf:nextActivity;
-    rdfs:comment "A client sets this property when it wishes to specify what activity should come next in the sequence.  If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted.  If the learner is working on a StructuredAssignment, the client should use the <code>nextBinding</code> property instead of <code>nextActivity</code>."
+    owl:onProperty      paf:htmlResponse;
+    owl:minCardinality  1;
+    rdfs:comment "An HTML fragment that contains the system's feedback to the learner."
   ] ; 
-  rdfs:comment "The abstract base class for state that records information about the learner's interaction with the activity.  Typicallly for each kind of Activity one defines a corresponding subclass of ActivityState that is appropriate for that activity.  For example, the <a href=\"http://www.imsglobal.org/question/qtiv2p1pd2/imsqti_resultv2p1pd2.html#element10816\">itemResult</a> element within the IMS QTI standard is an example of ActivityState for QTI items." .
+  rdfs:comment "A response produced by the system to provide feedback to a learner who has engaged with an activity." .
 
 paf:NodeResult rdf:type owl:Class;
   rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:resultIndex;
+    owl:minCardinality  1;
+    rdfs:comment "An index for this particular <code>NodeResult</code> within the list of all results logged for the owner <code>SequenceNode</code>.   Index values are zero-based."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      paf:timestamp;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this result was logged with the owner <code>SequenceNode</code>."
+  ] ,
   [ a owl:Restriction ;
     owl:onProperty      paf:correct;
     rdfs:comment "A boolean value which specifies whether the user responded to the activity correctly during the engagement represented by the <em>owner</em> node."
@@ -232,25 +238,19 @@ paf:NodeResult rdf:type owl:Class;
     rdfs:comment "The score that the Learner earned based on his or her response to the activity durnig the engagement represented by the <em>owner</em> node."
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      paf:computeNext;
+    rdfs:comment "A flag which serves as a trigger to compute the next activity based on server-side logic."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      paf:ownerNode;
     owl:minCardinality  1;
     rdfs:comment "The <em>SequenceNode</em> that records a time when the user was engaged with the activity and provided a response which is captured as <code>activityState</code>.  This <code>NodeResult</code> records the result from that particular engagement."
-  ] ; 
-  rdfs:comment "<code>NodeResult</code> encapsulates the output from processing the learner's response to a activity during one particular engagement with the activity.  That engagement is captured by a <code>SequenceNode</code> which is identified as the <em>owner</em> of the <code>NodeResult</code>." .
-
-paf:SystemResponse rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      paf:guid;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for this <code>SystemResponse</code>"
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      paf:htmlResponse;
-    owl:minCardinality  1;
-    rdfs:comment "An HTML fragment that contains the system's feedback to the learner."
+    owl:onProperty      paf:nextActivity;
+    rdfs:comment "A client sets this property when it wishes to specify what activity should come next in the sequence.  If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted.  If the learner is working on a StructuredAssignment, the client should use the <code>nextBinding</code> property instead of <code>nextActivity</code>."
   ] ; 
-  rdfs:comment "A response produced by the system to provide feedback to a learner who has engaged with an activity." .
+  rdfs:comment "<code>NodeResult</code> stores state and encapsulates the output from processing the learner's response to an activity during one particular engagement with the activity.  That engagement is captured by a <code>SequenceNode</code> which is identified as the <em>owner</em> of the <code>NodeResult</code>." .
 
 paf:ActivityResult rdf:type owl:Class;
   rdfs:subClassOf 
@@ -356,6 +356,13 @@ paf:SequenceProcess rdf:type owl:Class;
   ] ; 
   rdfs:comment "A <code>SequenceProcess</code> represents a job that can be triggered before an ActivitySequence is delivered to the user agent, or after the learner submits the associated overall activity." .
 
+paf:NodeProcessResponse rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      paf:nodeResult;
+    owl:maxCardinality  1
+  ] .
+
 paf:ActivityBindingList rdfs:subClassOf
   rdf:List,
   [ rdf:type owl:Restriction ;
@@ -378,21 +385,19 @@ paf:versionHistory rdf:type owl:FunctionalProperty ;
   owl:inverseOf paf:activityVersion ;
   rdfs:comment "The VersionHistory to which this Activity belongs." .
 
-paf:childActivity rdf:type rdf:Property ;
+paf:defaultResultValueSpec rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:Activity ;
+  rdfs:range po:ResultValueSpec .
+
+paf:binding rdf:type rdf:Property ;
   rdfs:domain paf:ActivityContainer ;
   rdfs:range paf:ActivityBindingList ;
   rdfs:comment "A reified association between this ActivityContainer and a child Activity within the container." .
 
-paf:guid rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      paf:ActivityBinding
-      paf:ActivityPlayer
-      paf:SystemResponse
-    )
-  ] ;
-  rdfs:range pcd:GUID.Type .
+paf:bindingIndex rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "A globally unique identifier for this binding." .
 
 paf:activityFormat rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityBinding ;
@@ -413,6 +418,15 @@ paf:credit rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityBinding ;
   rdfs:range paf:Credit ;
   rdfs:comment "Specifies whether the scores on the activity should contribute to the overall score within the containing assignment." .
+
+paf:sourceActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range paf:Activity ;
+  rdfs:comment "The original activity with which this binding is associated.  This property is used when obfuscation is enabled.  In this case, URI values for activities and bindings are obfuscated to prevent students from producing \"cheat sheets\" based on activity identifiers.  When obfuscation is enabled, the URI for the <code>boundActivity</code> contains a random GUID, and the <code>sourceActivity</code> retains the original URI.  The <code>sourceActiivity</code> property should never be transmitted to the user agent (browser or mobile device).   The Activity Hub uses the <code>sourceActivity</code> to translate between obfuscated URIs and <em>real</em> URIs." .
+
+paf:scoreConstraints rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityBinding ;
+  rdfs:range po:ResultValueSpec .
 
 paf:normalMaximum rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ScoreConstraints ;
@@ -443,6 +457,11 @@ paf:masterActivity rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:VersionHistory ;
   rdfs:range paf:Activity ;
   rdfs:comment "One distinguished activity that serves as a prototypical example of all the activities within the VersionHistory." .
+
+paf:nodeCollection rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivitySequence ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "The endpoint to which new SequenceNode resources should be posted." .
 
 paf:node rdf:type rdf:Property ;
   rdfs:domain paf:ActivitySequence ;
@@ -490,33 +509,45 @@ paf:endTime rdf:type owl:FunctionalProperty ;
   ] ;
   rdfs:range xsd:dateTime .
 
+paf:resultCollection rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "The endpoint to which NodeResult objects should be posted." .
+
 paf:parentSequence rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceNode ;
   rdfs:range paf:ActivitySequence ;
   owl:inverseOf paf:node ;
   rdfs:comment "The parent <code>ActivitySequence</code> within which this <code>SequenceNode</code> is found." .
 
-paf:activity rdf:type owl:FunctionalProperty ;
+paf:targetActivity rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceNode ;
   rdfs:range paf:Activity .
 
-paf:activityState rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:SequenceNode ;
-  rdfs:range paf:ActivityState ;
-  rdfs:comment "A resource that stores state information about the user's engagement with the activity associated with this <code>SequenceNode</code>." .
-
-paf:nodeResult rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:SequenceNode ;
+paf:nodeResult rdf:type rdf:Property ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:SequenceNode
+      paf:NodeProcessResponse
+    )
+  ] ;
   rdfs:range paf:NodeResult ;
   owl:inverseOf paf:ownerNode .
 
-paf:binding rdf:type owl:FunctionalProperty ;
+paf:targetBinding rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceNode ;
   rdfs:range paf:ActivityBinding ;
   rdfs:comment "The ActivityBinding that defines the \"natural\" position of the Activity within the overall activity." .
 
 paf:aggregateResult rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:SequenceNode ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      paf:SequenceNode
+      paf:NodeProcessResponse
+    )
+  ] ;
   rdfs:range paf:ActivityResult ;
   owl:inverseOf paf:attempt .
 
@@ -524,6 +555,16 @@ paf:player rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceNode ;
   rdfs:range paf:ActivityPlayer ;
   rdfs:comment "The player that should be used to render the activity at this node in the sequence. TODO:  Explore other options for identifying the associated player." .
+
+paf:prevNode rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SequenceNode ;
+  rdfs:range paf:SequenceNode ;
+  rdfs:comment "The previous node in the sequence." .
+
+paf:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:ActivityPlayer ;
+  rdfs:range pcd:GUID.Type ;
+  rdfs:comment "A globally unique identifier for the ActivityPlayer." .
 
 paf:contentType rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityPlayer ;
@@ -567,20 +608,20 @@ paf:frameFrontend rdf:type owl:FunctionalProperty ;
   rdfs:range paf:ActivityFrame ;
   rdfs:comment "A component of the ActivityPlayer that renders activities within an IFrame.  The ActivityFrame gets loaded once by an Activity Manager, and it may then be reused at different points of time to render different activities of the same type within that frame.  The Activity Manager and the client-side application within the IFrame communicate with each other via HTML 5 postMessage." .
 
-paf:nextBinding rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityState ;
-  rdfs:range pcd:GUID.Type ;
-  rdfs:comment "A client sets this property when it wishes to specify what instance of an activity should come next in the sequence.  The value is the GUID for an ActivityBinding. If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted. This property is relevant only if the learner is working on a <code>StructuredAssignment</code>.  Otherwise, the client should use the <code>nextActivity</code> property." .
+paf:htmlResponse rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:SystemResponse ;
+  rdfs:range xsd:string ;
+  rdfs:comment "An HTML fragment that contains the system's feedback to the learner." .
 
-paf:computeNext rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityState ;
-  rdfs:range xsd:boolean ;
-  rdfs:comment "A flag which serves as a trigger to compute the next activity based on server-side logic." .
+paf:resultIndex rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "An index for this particular <code>NodeResult</code> within the list of all results logged for the owner <code>SequenceNode</code>.   Index values are zero-based." .
 
-paf:nextActivity rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:ActivityState ;
-  rdfs:range paf:Activity ;
-  rdfs:comment "A client sets this property when it wishes to specify what activity should come next in the sequence.  If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted.  If the learner is working on a StructuredAssignment, the client should use the <code>nextBinding</code> property instead of <code>nextActivity</code>." .
+paf:timestamp rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time when this result was logged with the owner <code>SequenceNode</code>." .
 
 paf:correct rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeResult ;
@@ -592,6 +633,11 @@ paf:itemScore rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:float ;
   rdfs:comment "The score that the Learner earned based on his or her response to the activity durnig the engagement represented by the <em>owner</em> node." .
 
+paf:computeNext rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "A flag which serves as a trigger to compute the next activity based on server-side logic." .
+
 paf:ownerNode rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeResult ;
   rdfs:range paf:SequenceNode ;
@@ -602,10 +648,14 @@ paf:systemResponse rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:NodeResult ;
   rdfs:range paf:SystemResponse .
 
-paf:htmlResponse rdf:type owl:FunctionalProperty ;
-  rdfs:domain paf:SystemResponse ;
-  rdfs:range xsd:string ;
-  rdfs:comment "An HTML fragment that contains the system's feedback to the learner." .
+paf:nextActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range paf:Activity ;
+  rdfs:comment "A client sets this property when it wishes to specify what activity should come next in the sequence.  If this property is absent, the <code>ActivitySequence</code> will use its own internal business logic to determine the next activity when state is persisted.  If the learner is working on a StructuredAssignment, the client should use the <code>nextBinding</code> property instead of <code>nextActivity</code>." .
+
+paf:nextBinding rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeResult ;
+  rdfs:range paf:ActivityBinding .
 
 paf:duration rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:ActivityResult ;
@@ -673,6 +723,14 @@ paf:managerWidget rdf:type owl:FunctionalProperty ;
 paf:targetSequence rdf:type owl:FunctionalProperty ;
   rdfs:domain paf:SequenceProcess ;
   rdfs:range paf:ActivitySequence .
+
+paf:backendResult rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeProcessResponse ;
+  rdfs:range paf:ActivityResult .
+
+paf:filteredResult rdf:type owl:FunctionalProperty ;
+  rdfs:domain paf:NodeProcessResponse ;
+  rdfs:range paf:ActivityResult .
 
 paf:ForPractice rdf:type paf:Credit .
 

@@ -1,12 +1,12 @@
 @prefix pcm: <http://purl.org/pearson/content/v1/vocab/metadata#> .
 @prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
 @prefix pcd: <http://purl.org/pearson/content/v1/xsd/datatypes#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dc: <http://purl.org/dc/terms/> .
 @prefix topic: <http://purl.org/pearson/topics/> .
 @prefix lrmi: <http://schema.org/> .
 @prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -22,11 +22,6 @@ pcm:Envelope rdf:type owl:Class;
     owl:onProperty      pcm:metadata;
     owl:minCardinality  1;
     rdfs:comment "The metadata for the resource."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      pcm:body;
-    owl:minCardinality  1;
-    rdfs:comment "The concrete representation of the resource that is described by the metadata within the envelope."
   ] .
 
 pcm:DublinCoreResource rdf:type owl:Class;
@@ -87,7 +82,6 @@ pcm:guid rdf:type owl:FunctionalProperty ;
     rdf:type owl:Class ;
     owl:unionOf (
       paf:ActivitySequence
-      paf:SequenceNode
       pcm:ManagedResource
     )
   ] ;
@@ -97,11 +91,6 @@ pcm:metadata rdf:type owl:FunctionalProperty ;
   rdfs:domain pcm:Envelope ;
   rdfs:range pcm:Metadata ;
   rdfs:comment "The metadata for the resource." .
-
-pcm:body rdf:type owl:FunctionalProperty ;
-  rdfs:domain pcm:Envelope ;
-  rdfs:range owl:Thing ;
-  rdfs:comment "The concrete representation of the resource that is described by the metadata within the envelope." .
 
 pcm:format rdf:type rdf:Property ;
   rdfs:domain pcm:ManagedResource ;

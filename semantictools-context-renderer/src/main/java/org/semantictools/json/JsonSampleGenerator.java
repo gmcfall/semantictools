@@ -13,8 +13,10 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.context.renderer.model.TermInfo;
+import org.semantictools.frame.api.FrameNotFoundException;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.Datatype;
 import org.semantictools.frame.model.Field;
@@ -31,6 +33,7 @@ public class JsonSampleGenerator {
   
   private TypeManager typeManager;
   private JsonContext context;
+  private ContextProperties contextProperties;
   private JsonNodeFactory factory;
   private Random random;
   
@@ -43,20 +46,51 @@ public class JsonSampleGenerator {
     random = new Random(new Date().getTime());
   }
   
-  public ObjectNode generateSample(JsonContext context) {
-    
-    this.context = context;
+  public ObjectNode generateSample(JsonContext context, ContextProperties properties) {
+
     ObjectNode node = factory.objectNode();
     
-    Frame frame = typeManager.getFrameByUri(context.getRootType());
-    Branch branch = new Branch(null, null, node, frame);
+    if (context == null) {
+      return node;
+    }
     
+    this.contextProperties = properties;
+    this.context = context;
     addContextProperty(node);
-    addTypeProperty(node, frame);
-    addProperties(branch);
+    
+    List<String> graphTypes = properties.getGraphTypes();
+    if (graphTypes.isEmpty()) {
+      Frame frame = typeManager.getFrameByUri(context.getRootType());
+      Branch branch = new Branch(null, null, node, frame);
+      
+      addTypeProperty(node, frame);
+      addProperties(branch);
+      
+    } else {
+      buildGraph(node, graphTypes);
+    }
     
     
     return node;
+  }
+
+  private void buildGraph(ObjectNode node, List<String> graphTypes) {
+   
+    ArrayNode array = factory.arrayNode();
+    node.put("@graph", array);
+    for (String typeURI : graphTypes) {
+      Frame frame = typeManager.getFrameByUri(typeURI);
+      if (frame == null) {
+        throw new FrameNotFoundException(typeURI);
+      }
+      ObjectNode obj = factory.objectNode();
+      array.add(obj);
+      addTypeProperty(obj, frame);
+
+      Branch branch = new Branch(null, null, obj, frame);
+      addProperties(branch);
+    }
+    
   }
 
   private void addProperties(Branch branch) {
@@ -67,48 +101,53 @@ public class JsonSampleGenerator {
     List<Field> fieldList = branch.getFrame().listAllFields();
     
     for (Field field : fieldList) {
-      addField(branch, field);
+      addField(branch, field, null);
     }
     
     
   }
 
-  private void addField(Branch branch, Field field) {
+  private void addField(Branch branch, Field field, String fieldName) {
     
     RdfType type = field.getRdfType();
     
-    if (type.canAsDatatype()) {
-      addDatatype(branch, field, type.asDatatype());
+    if (fieldName == null && contextProperties.isSetProperty(field.getURI())) {
+      addSetProperty(branch, field, type);
+      
+    } else if (type.canAsDatatype()) {
+      addDatatype(branch, field, fieldName, type.asDatatype());
       
     } else if (type.canAsListType()) {
       addList(branch, field, type.asListType());
       
-    } else if (type.canAsFrame() && !shortCircuit(branch, field, type.asFrame())) {
+    } else if (type.canAsFrame() && !shortCircuit(branch, field, fieldName, type.asFrame())) {
       
-      addFrame(branch, field, type.asFrame());
+      addFrame(branch, field, fieldName, type.asFrame());
     }
     
   }
   
   
-  private boolean shortCircuit(Branch branch, Field field, Frame frame) {
+
+  private boolean shortCircuit(Branch branch, Field field, String fieldName, Frame frame) {
     List<Frame> frameList = frame.listAllSubtypes();
     List<Datatype> typeList = frame.getSubdatatypeList();
     
     if ((frameList.size()+typeList.size()) != 1) return false;
     
     if (frameList.isEmpty()) {
-      addDatatype(branch, field, typeList.get(0));
+      addDatatype(branch, field, fieldName, typeList.get(0));
       
     } else {
-      addFrame(branch, field, frameList.get(0));
+      addFrame(branch, field, fieldName, frameList.get(0));
     }
     
     
     return true;
   }
 
-  private void addFrame(final Branch branch, Field field, Frame frame) {
+  
+  private void addFrame(final Branch branch, Field field, String fieldNameOverride, Frame frame) {
     
     int maxCount = field.getMaxCardinality();
     if (maxCount < 0 || maxCount>maxRepeat) {
@@ -120,7 +159,7 @@ public class JsonSampleGenerator {
     if (term == null) {
       return;
     }
-    final String fieldName = term.getTermName();
+    final String fieldName = (fieldNameOverride==null) ? term.getTermName() : fieldNameOverride;
     
     NodeConsumer callback = null;
     
@@ -316,13 +355,35 @@ public class JsonSampleGenerator {
     
   }
 
-  private void addDatatype(Branch branch, Field field, Datatype type) {
+
+  private void addSetProperty(Branch branch, Field field, RdfType type) {
+    String fieldName = getSimpleName(field.getURI());
+    
+    
+    ObjectNode setContainer = factory.objectNode();
+    branch.getNode().put(fieldName, setContainer);
+    
+    
+    TermInfo term = context.getTermInfoByURI(branch.getFrame().getUri());
+    String typeName = (term==null) ? branch.getFrame().getLocalName() : term.getTermName();
+    String value = "http://server.example.com/resources/" + typeName + "/" + random.nextInt(100000) + "/" + fieldName;
+    setContainer.put("@id", value);
+    Branch setBranch = new Branch(branch, field, setContainer, branch.getFrame());
+    addField(setBranch, field, "@set");
+    
+    
+    
+  }
+
+  private void addDatatype(Branch branch, Field field, String fieldName, Datatype type) {
     
     int maxCount = field.getMaxCardinality();
     if (maxCount<0 || maxCount>maxRepeat) {
       maxCount = maxRepeat;
     }
-    String fieldName = getSimpleName(field.getURI());
+    if (fieldName == null) {
+      fieldName = getSimpleName(field.getURI());
+    }
     if (fieldName == null) return;
     
     if (maxCount == 1) {
@@ -550,6 +611,13 @@ public class JsonSampleGenerator {
     node.put("@context", context.getContextURI());
   }
   
+  /**
+   * A wrapper around an ObjectNode so that we can track associated objects
+   * such as the parent within which the ObjectNode is placed, the Frame
+   * that defines the properties of the ObjectNode, and the field through which
+   * the ObjectNode is accessed.
+   *
+   */
   static class Branch {
     private Branch parent;
     private ObjectNode node;

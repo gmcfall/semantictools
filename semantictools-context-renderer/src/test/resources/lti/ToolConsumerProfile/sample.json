@@ -65,7 +65,7 @@
       }
     }
   },
-  "capability" : [
+  "capability_offered" : [
      "basic-lti-launch-request",
      "Result.autocreate",
      "Result.sourcedGUID"
@@ -88,7 +88,7 @@
     { 
       "@type" : "RestService",
       "@id" : ":Result.item",
-      "endpoint" : "http://lms.example.com/resources/Result/{sourcedGUID}",
+      "endpoint" : "http://lms.example.com/resources/Result/{sourcedId}",
       "format" : ["application/vnd.ims.lis.v2.Result+json"],
       "action" : ["GET", "PUT"]
     }

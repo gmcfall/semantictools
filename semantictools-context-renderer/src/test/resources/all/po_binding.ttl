@@ -48,10 +48,6 @@ po:AssignmentType rdf:type bind:Addressable .
 po:Assignment rdf:type bind:Addressable .
 po:Assignment rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty po:taxon ;
-    bind:associationType bind:Aggregation
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty po:defaultResultValueSpec ;
     bind:associationType bind:Composition
   ] .

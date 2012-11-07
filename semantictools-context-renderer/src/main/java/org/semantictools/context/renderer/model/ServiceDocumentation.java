@@ -33,6 +33,9 @@ public class ServiceDocumentation implements ReferenceManager {
   private String postProcessingRules;
   private boolean contentNegotiation;
   
+  private String getInstructions;
+  private String putInstructions;
+  
   private MethodDocumentation postDocumentation;
   private MethodDocumentation getDocumentation;
   private MethodDocumentation putDocumentation;
@@ -41,6 +44,8 @@ public class ServiceDocumentation implements ReferenceManager {
   private List<String> editors = new ArrayList<String>();
   private List<String> authors = new ArrayList<String>();
   private List<HttpMethod> methodList = new ArrayList<HttpMethod>();
+  private List<QueryParam> queryParams = new ArrayList<QueryParam>();
+  private List<String> putRules = new ArrayList<String>();
   
   private String cssHref;
   private Map<String, String> referenceMap = new HashMap<String, String>();
@@ -298,6 +303,33 @@ public class ServiceDocumentation implements ReferenceManager {
       if ("GET".equals(method.getName())) return method;
     }
     return null;
+  }
+  /**
+   * Returns the text which describes how to GET a representation.
+   * The default text is:
+   * <blockquote>
+   * To get a representation of a particular {0} instance, the client submits an HTTP GET 
+   * request to the resource's REST endpoint in accordance with the following rules:
+   * </blockquote>
+   * @return
+   */
+  public String getGetInstructions() {
+    return getInstructions;
+  }
+  public void setGetInstructions(String getInstructions) {
+    this.getInstructions = getInstructions;
+  }
+  public List<QueryParam> getQueryParams() {
+    return queryParams;
+  }
+  public List<String> getPutRules() {
+    return putRules;
+  }
+  public String getPutInstructions() {
+    return putInstructions;
+  }
+  public void setPutInstructions(String putInstructions) {
+    this.putInstructions = putInstructions;
   }
   
 

@@ -51,7 +51,11 @@ public class ContextBuilder {
     context.setRootType(properties.getRdfTypeURI());
     
     String typeURI = properties.getRdfTypeURI();
+    if (typeURI == null) {
+      return null;
+    }
 
+    addGraphTypes(context, properties);
     Frame frame = typeManager.getFrameByUri(typeURI);
     if (frame == null) {
       throw new FrameNotFoundException(typeURI);
@@ -66,6 +70,22 @@ public class ContextBuilder {
   }
 
 
+  private void addGraphTypes(JsonContext context, ContextProperties properties) {
+    List<String> graphTypes = properties.getGraphTypes();
+    if (!graphTypes.isEmpty()) {
+      for (String uri : graphTypes) {
+        Frame frame = typeManager.getFrameByUri(uri);
+        if (frame == null) {
+          throw new FrameNotFoundException(uri);
+        }
+        addType(properties, context, frame, false);
+      }
+    }
+    
+  }
+
+
+
   private void updateFrameConstraints(ContextProperties properties,  JsonContext context) {
     
     List<FrameConstraints> list = properties.listFrameConstraints();
@@ -74,6 +94,7 @@ public class ContextBuilder {
       TermInfo term = context.getTermInfoByShortName(name);
       if (term != null) {
         String uri = term.getIri();
+        uri = context.rewrite(uri);
         c.setClassURI(uri);
         properties.addFrameConstraints(c);
       }
@@ -105,14 +126,15 @@ public class ContextBuilder {
     if (isStandard(typeURI)) return;
 
     String localName = rdfType.getLocalName();
-    if (context.containsTerm(localName)) return;
     
     String prefix = getPrefix(context, rdfType.getNamespace());
     
     
     String iri = (prefix == null) ? typeURI : prefix + ":" + localName;
-    
-    context.add(localName, iri).setCategory(TermCategory.TYPE);
+
+    if (!context.containsTerm(localName)) {
+      context.add(localName, iri).setCategory(TermCategory.TYPE);
+    }
     
 
     if (stubbed || history.contains(typeURI)) return;
@@ -291,6 +313,10 @@ public class ContextBuilder {
 
 
   private boolean isIncluded(Field field, ContextProperties properties, Frame declaringFrame) {
+    
+    String fieldType = field.getRdfType().getUri();
+    if (properties.getExcludedTypes().contains(fieldType)) return false;
+    
     FrameConstraints constraints = properties.getFrameConstraints(declaringFrame.getLocalName());
    
     return (constraints == null) || constraints.isIncludedProperty(field.getURI());

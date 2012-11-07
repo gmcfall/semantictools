@@ -13,6 +13,8 @@ import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ServiceFileManager;
 import org.semantictools.frame.api.ContextManager;
 import org.semantictools.frame.api.MediaTypeDocumenter;
+import org.semantictools.frame.api.OntologyManager;
+import org.semantictools.frame.api.SchemaParseException;
 import org.semantictools.frame.api.ServiceDocumentationManager;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.index.api.LinkedDataIndexPrinter;
@@ -106,7 +108,7 @@ public class DocumentationGenerator {
   }
 
 
-  public void run() throws IOException, ParserConfigurationException, SAXException  {
+  public void run() throws IOException, ParserConfigurationException, SAXException, SchemaParseException  {
 
 
     UmlPrinter umlPrinter;
@@ -119,7 +121,8 @@ public class DocumentationGenerator {
     File mediaTypeDir = new File(pubDir, "mediatype");
     File umlCss = new File(umlDir, "uml.css");
 
-    GlobalPropertiesReader globalReader = new GlobalPropertiesReader();
+    OntologyManager ontoManager = new OntologyManager();
+    GlobalPropertiesReader globalReader = new GlobalPropertiesReader(ontoManager);
     GlobalProperties global = globalReader.scan(rdfDir);
     UmlFileManager umlFileManager = new UmlFileManager(umlDir);
     
@@ -175,6 +178,11 @@ public class DocumentationGenerator {
       uploader.setVersion(version);
       uploader.uploadAll(pubDir);
     }
+    
+    ontoManager.scan(rdfDir);
+    ontoManager.upload();
+    ontoManager.uploadJsonLdContextFiles(contextManager.listContextProperties());
+    ontoManager.publishToLocalRepository(contextManager.listContextProperties());
     
     
     

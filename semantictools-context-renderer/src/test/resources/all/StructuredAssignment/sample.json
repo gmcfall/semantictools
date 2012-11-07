@@ -1,25 +1,41 @@
 {
   "@context" : "http://purl.org/pearson/paf/v1/ctx/core/StructuredAssignment",
   "@type" : "StructuredAssignment",
-  "@id" : "http://content.api.pearson.com/resources/activity/51434494373634373",
+  "@id" : "http://repo.paf.pearson.com/resources/activity/51434494373634373",
   "versionHistory" : "http://content.api.pearson.com/resources/VersionHistory/424384726485846339",
   "title" : "Chapter 3 Quiz",  
-  "extraCreditMaximum" : 5,
-  "normalMaximum" : 30,
+  "defaultResultValueSpec" : {
+    "extraCreditMaximum" : 5,
+    "normalMaximum" : 30,
+    "totalMaximum" : 35
+  },
   "assignmentContents" : {
-    "childActivity" : [ 
-      { "activityFormat" : "application/vnd.pearson.qti.v1.itempresentation+json",
-        "activity" : "http://content.api.pearson.com/resources/activity/3937356253848474",
+    "@id" : "http://repo.paf.pearson.com/resources/activity/1601588278310373",
+    "binding" : [ 
+      { "@id" : "http://repo.paf.pearson.com/resources/activity/1601588278310373/bindings/1",
+        "versionHistory" : "http://repo.paf.pearson.com/resources/history/37039384649263958",
+        "bindingIndex" : 1,
+        "boundActivity"  : "http://content.api.pearson.com/resources/activity/3937356253848474",
+        "sourceActivity" : "http://content.api.pearson.com/resources/activity/5030276210104839",
+        "activityFormat" : "application/vnd.pearson.qti.v2.asi+xml",
         "activityTitle" : "Question 1",
         "credit" : "ForCredit",
-        "extraCreditMaximum" : 5,
-        "normalMaximum" : 20
+        "scoreConstraints" : {
+          "extraCreditMaximum" : 5,
+          "normalMaximum" : 20,
+          "totalMaximum" : 25
+        }
       },
-      { "activityFormat" : "application/vnd.pearson.qti.v1.itempresentation+json",
-        "activity" : "http://content.api.pearson.com/resources/activity/59037905673623785",
+      { "@id" : "http://repo.paf.pearson.com/resources/activity/1601588278310373/bindings/2",
+        "bindingIndex" : 2,
+        "boundActivity"  : "http://content.api.pearson.com/resources/activity/9011529428185896",
+        "sourceActivity" : "http://content.api.pearson.com/resources/activity/8379883211338893",
+        "activityFormat" : "application/vnd.pearson.qti.v2.asi+xml",
         "activityTitle" : "Question 2",
         "credit" : "ForCredit",
-        "normalMaximum" : 10
+        "scoreConstraints" : {
+          "normalMaximum" : 10
+        }
       }
     ]
   }

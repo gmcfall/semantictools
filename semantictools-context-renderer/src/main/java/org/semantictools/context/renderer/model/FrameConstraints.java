@@ -7,6 +7,7 @@ public class FrameConstraints {
   private String classURI;
   private Set<String> includedProperties = new HashSet<String>();
   private Set<String> excludedProperties = new HashSet<String>();
+  private Set<String> excludeSubtypes = new HashSet<String>();
   
   public FrameConstraints(String classURI) {
     this.classURI = classURI;
@@ -39,6 +40,21 @@ public class FrameConstraints {
    */
   public void addExcludedProperty(String propertyURI) {
     excludedProperties.add(propertyURI);
+  }
+  
+  /**
+   * Declare that the specified property should not include subtypes in the JSON-LD context.
+   */
+  public void addExcludesSubtype(String propertyURI) {
+    excludeSubtypes.add(propertyURI);
+  }
+  
+  /**
+   * Returns true if the specified property should not include subtypes in the JSON-LD context.
+   * @return
+   */
+  public boolean isExcludesSubtypes(String propertyURI) {
+    return excludeSubtypes.contains(propertyURI);
   }
   
   /**

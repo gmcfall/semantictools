@@ -27,6 +27,7 @@
           "key" : "tool.technical"
         },
         "product_family" : {
+          "@id" : "http://toolprovider.example.com/vendor/acme.com/product/assessment-tool",
           "code" : "assessment-tool",
           "vendor" : {
             "code" : "acme.com",
@@ -75,6 +76,7 @@
      ],
     "resource_handler" : [
       { 
+        "resource_type" : { "code" : "asmt"},
         "name" : {
           "default_value" : "Acme Assessment",
           "key" : "assessment.resource.name"
@@ -86,13 +88,12 @@
         "message" : [{ 
           "message_type" : "basic-lti-launch-request",
           "path" : "/handler/launchRequest",
-          "capability" : [
-            "Result.autocreate",
-            "Result.sourcedGUID"
+          "enabled_capability" : [
+            "Result.autocreate"
           ],
           "parameter" : [
-            { "name" : "result_id",
-              "variable" : "$Result.sourcedGUID"
+            { "name" : "result_uri",
+              "variable" : "$Result.uri"
             },
             { "name" : "discipline",
               "fixed" : "chemistry"
@@ -136,6 +137,12 @@
       { "@type" : "RestServiceProfile",
         "service" : "http://lms.example.com/profile/b6ffa601-ce1d-4549-9ccf-145670a964d4#Result.item",
         "action" : ["GET", "PUT"]
+      }      
+    ],
+    "end_user_service" : [
+      { "@type" : "RestServiceProfile",
+        "service" : "http://lms.example.com/profile/b6ffa601-ce1d-4549-9ccf-145670a964d4#Result.item",
+        "action" : ["PUT"]
       }      
     ]
   }

@@ -12,10 +12,6 @@ pcm:Envelope rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty pcm:metadata ;
     bind:associationType bind:Aggregation
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty pcm:body ;
-    bind:associationType bind:Aggregation
   ] .
 pcm:DublinCoreResource rdf:type bind:Addressable .
 pcm:DublinCoreResource rdfs:subClassOf

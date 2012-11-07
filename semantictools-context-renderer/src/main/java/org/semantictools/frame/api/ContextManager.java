@@ -24,8 +24,11 @@ public class ContextManager {
   private static final String RDF_PROPERTY = "rdfProperty";
   private static final String MEDIATYPE = "mediaType";
   private static final String MEDIATYPEURI = "mediaTypeURI";
+  private static final String MEDIATYPEREF = "mediaTypeRef";
   private static final String CONTEXTURI = "contextURI";
   private static final String CONTEXTREF = "contextRef";
+  private static final String GRAPH_TYPES = "graphTypes";
+  private static final String SET = "@set";
   private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
   private static final String IDREF = "idref";
   private static final String REQUIRES_ID = "requiresId";
@@ -36,13 +39,16 @@ public class ContextManager {
   private static final String EDITORS = "editors";
   private static final String AUTHORS = "authors";
   private static final String TITLE = "title";
+  private static final String SAMPLE_TEXT = "sampleText";
   private static final String EXCLUDE_TYPE = "excludeType";
   private static final String INTRODUCTION = "introduction";
   private static final String INCLUDES_SUFFIX = ".includes";
   private static final String EXCLUDES_SUFFIX = ".excludes";
+  private static final String EXCLUDE_SUBTYPES_SUFFIX = ".excludeSubtypes";
   private static final String PURL_DOMAIN = "purlDomain";
   private static final String EXPANDED_VALUE = "expandedValue";
   private static final String CAPTION_SUFFIX = ".caption";
+  private static final String TEMPLATE = "template";
   
   private MediaTypeFileManager fileManager;
   private Map<String, ContextProperties> contextMap = new HashMap<String, ContextProperties>();
@@ -155,12 +161,18 @@ public class ContextManager {
         sink.setMediaType(value);
       } else if (MEDIATYPEURI.equals(key)) {
         sink.setMediaTypeURI(value);
+      } else if (MEDIATYPEREF.equals(key)) {
+        sink.setMediaTypeRef(value);
       } else if (RDFTYPE.equals(key)) {
         sink.setRdfTypeURI(value);
       } else if (RDFTYPE_REF.equals(key)) {
         sink.setRdfTypeRef(value);
       } else if (RDF_PROPERTY.equals(key)) {
         sink.setRdfProperty(value);
+      } else if (GRAPH_TYPES.equals(key)) {
+        setGraphTypes(sink, value);
+      } else if (SET.equals(key)) {
+        setSetProperties(sink, value);
       } else if (CONTEXTREF.equals(key)) {
         sink.setContextRef(value);
       } else if (STATUS.equals(key)) {
@@ -179,18 +191,24 @@ public class ContextManager {
         sink.setIntroduction(value);
       } else if (TITLE.equals(key)) {
         sink.setTitle(value);
+      } else if (SAMPLE_TEXT.equals(key)) {
+        sink.setSampleText(value);
       } else if (EXCLUDE_TYPE.equals(key)) {
         setExcludedTypes(sink, value);        
       } else if (key.endsWith(INCLUDES_SUFFIX)) {
         addIncludesConstraint(sink, key, value);
       } else if (key.endsWith(EXCLUDES_SUFFIX)) {
         addExcludesConstraint(sink, key, value);
+      } else if (key.endsWith(EXCLUDE_SUBTYPES_SUFFIX)) {
+        addExcludeSubtypesConstraint(sink, key, value);
       } else if (key.endsWith(CAPTION_SUFFIX)) {
         addCaption(sink, key, value);
       } else if (PURL_DOMAIN.equals(key)) {
         sink.setPurlDomain(value);
       } else if (EXPANDED_VALUE.equals(key)) {
         setExpandedValue(sink, value);
+      } else if (TEMPLATE.equals(key)) {
+        sink.setTemplate(value);
       }
     }
     validate(sink);
@@ -198,6 +216,22 @@ public class ContextManager {
     
   }
 
+
+
+  private void setSetProperties(ContextProperties sink, String value) {
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.addSetProperty(tokenizer.nextToken());
+    }
+  }
+
+  private void setGraphTypes(ContextProperties sink, String value) {
+
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.addGraphType(tokenizer.nextToken());
+    }
+  }
 
   private void setRequiresId(ContextProperties sink, String value) {
 
@@ -269,6 +303,21 @@ public class ContextManager {
     
   }
 
+  private void addExcludeSubtypesConstraint(ContextProperties sink, String key,
+      String value) {
+    
+    int dot = key.lastIndexOf('.');
+    String name = key.substring(0, dot);
+    
+    FrameConstraints constraints = sink.fetchFrameConstraints(name);
+    StringTokenizer tokens = new StringTokenizer(value, " \r\n\t");
+    while (tokens.hasMoreTokens()) {
+      String propertyURI = tokens.nextToken();
+      constraints.addExcludesSubtype(propertyURI);
+    }
+    
+  }
+
   private void setDefaults(ContextProperties sink) {
     setTitle(sink);
     setMediaTypeDocFile(sink);
@@ -333,10 +382,16 @@ public class ContextManager {
   
   private void setTitle(ContextProperties sink) {
     if (sink.getTitle() == null) {
-      String typeName = getLocalName(sink.getRdfTypeURI());
+      String typeURI = sink.getRdfTypeURI();
+
       String mediaType = sink.getMediaType();
-      
-      String title = typeName + " JSON Binding<BR/>in the <code>" + mediaType + "</code> format";
+      String title = null;
+      if (typeURI == null) {
+        title = "The <code>" + mediaType + "</code> format";
+      } else {
+        String typeName = getLocalName(typeURI);
+        title = typeName + " JSON Binding<BR/>in the <code>" + mediaType + "</code> format";
+      }
       sink.setTitle(title);
     }
     
@@ -381,15 +436,15 @@ public class ContextManager {
 
   private void validate(StringBuilder error, ContextProperties p) {
     
-    if (p.getContextURI() == null) {
-      append(error,  CONTEXTURI);
-    }
+//    if (p.getContextURI() == null) {
+//      append(error,  CONTEXTURI);
+//    }
     if (p.getMediaType() == null) {
       append(error,  MEDIATYPE);
     }
-    if (p.getRdfTypeURI() == null) {
-      append(error,  RDFTYPE);
-    }
+//    if (p.getRdfTypeURI() == null) {
+//      append(error,  RDFTYPE);
+//    }
     
   }
 

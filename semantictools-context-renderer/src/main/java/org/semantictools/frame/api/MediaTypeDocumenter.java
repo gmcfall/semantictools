@@ -148,8 +148,11 @@ public class MediaTypeDocumenter {
   public void produceAllDocumentation(File outDir) throws IOException {
     List<ContextProperties> list = contextManager.listContextProperties();
     for (ContextProperties p : list) {
-      String ontologyURI = TypeManager.getNamespace(p.getRdfTypeURI());
-      if (global.isIgnoredOntology(ontologyURI)) continue;
+      String typeURI = p.getRdfTypeURI();
+      if (typeURI != null) {
+        String ontologyURI = TypeManager.getNamespace(typeURI);
+        if (global.isIgnoredOntology(ontologyURI)) continue;
+      }
       produceDocumentation(p, outDir);
     }
     copyMediaTypeStylesheet(outDir);
@@ -213,11 +216,14 @@ public class MediaTypeDocumenter {
     ContextBuilder contextBuilder = new ContextBuilder(typeManager);
     JsonContext context = contextBuilder.createContext(properties);
     
-    ContextWriter contextWriter = new ContextWriter();
-    File contextFile = new File(baseDir, fileManager.getJsonContextFileName(context));
-    PrintWriter printWriter = new PrintWriter(new FileWriter(contextFile));
-    contextWriter.writeContext(printWriter, context);
-    printWriter.close();
+    if (context != null) {
+      ContextWriter contextWriter = new ContextWriter();
+      File contextFile = new File(baseDir, fileManager.getJsonContextFileName(context));
+      properties.setContextFile(contextFile);
+      PrintWriter printWriter = new PrintWriter(new FileWriter(contextFile));
+      contextWriter.writeContext(printWriter, context);
+      printWriter.close();
+    }
     
 
 

@@ -19,8 +19,55 @@ pe:Person rdf:type owl:Class ;
 
 pe:Role rdf:type owl:Class .
 
-pe:LearningContext rdf:type owl:Class ; 
+pe:LearningContext rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pe:membership;
+    rdfs:comment "A membership registered with this learning context."
+  ] ; 
   rdfs:comment "The context within which learning activities occur.  Usually, this is a <code>CourseSection</code>, but other types of learning contexts are possible." .
+
+pe:Membership rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pe:membershipContext;
+    owl:minCardinality  1;
+    rdfs:comment "The organizational unit (such as a CourseSection) in which the membership is registered."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pe:member;
+    owl:minCardinality  1;
+    rdfs:comment "The person to whom this membership pertains."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pe:role;
+    owl:minCardinality  1;
+    rdfs:comment """The role of the person in the learning context where this Membership is registered.
+TODO: Need to decide if we are going to support multiple roles.  Also need to decide if we are going to support structured information per role (such as availability window, etc.)  We don't have that information today, so current recommendation is to leave it out of the model for now."""
+  ] .
+
+pe:membership rdf:type rdf:Property ;
+  rdfs:domain pe:LearningContext ;
+  rdfs:range pe:Membership ;
+  owl:inverseOf pe:membershipContext ;
+  rdfs:comment "A membership registered with this learning context." .
+
+pe:membershipContext rdf:type owl:FunctionalProperty ;
+  rdfs:domain pe:Membership ;
+  rdfs:range pe:LearningContext ;
+  owl:inverseOf pe:membership ;
+  rdfs:comment "The organizational unit (such as a CourseSection) in which the membership is registered." .
+
+pe:member rdf:type owl:FunctionalProperty ;
+  rdfs:domain pe:Membership ;
+  rdfs:range pe:Person ;
+  rdfs:comment "The person to whom this membership pertains." .
+
+pe:role rdf:type owl:FunctionalProperty ;
+  rdfs:domain pe:Membership ;
+  rdfs:range pe:Role ;
+  rdfs:comment """The role of the person in the learning context where this Membership is registered.
+TODO: Need to decide if we are going to support multiple roles.  Also need to decide if we are going to support structured information per role (such as availability window, etc.)  We don't have that information today, so current recommendation is to leave it out of the model for now.""" .
 
 pe:Student rdf:type pe:Role .
 

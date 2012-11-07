@@ -17,7 +17,11 @@ import org.semantictools.frame.api.TypeManager;
  *
  */
 public class ContextProperties implements ReferenceManager, Comparable<ContextProperties> {
+  
+  public static final String TEMPLATE_SIMPLE = "simple";
+  
   private File sourceFile;
+  private File contextFile;
   private String rdfTypeURI;
   private String rdfTypeRef;
   private String rdfProperty;
@@ -26,12 +30,16 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   private String mediaType;
   private String mediaTypeURI;
   private String mediaTypeRef;
+  private String template;
+  private String sampleText;
   private String purlDomain;
   private boolean historyLink;
   private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
   private Set<String> requiresId = new HashSet<String>();
+  private List<String> graphTypes = new ArrayList<String>();
+  private Set<String> setProperty = new HashSet<String>();
   private String title;
   private String status;
   private String date;
@@ -51,6 +59,19 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.rawProperties = rawProperties;
   }
   
+  /**
+   * Register a property that uses the "@set" keyword
+   */
+  public void addSetProperty(String propertyURI) {
+    setProperty.add(propertyURI);
+  }
+  
+  /**
+   * Returns true if the specified property uses the "@set" keyword.
+   */
+  public boolean isSetProperty(String propertyURI) {
+    return setProperty.contains(propertyURI);
+  }
   
   /**
    * Returns the set of URI values for classes whose "@id" property
@@ -66,6 +87,18 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
    */
   public boolean requiresId(String rdfTypeURI) {
     return requiresId.contains(rdfTypeURI);
+  }
+  
+  /**
+   * Return the list of types that can appear in the 
+   * @param rdfTypeURI
+   */
+  public void addGraphType(String rdfTypeURI) {
+    graphTypes.add(rdfTypeURI);
+  }
+  
+  public List<String> getGraphTypes() {
+    return graphTypes;
   }
 
 
@@ -405,10 +438,54 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     return mediaType.compareTo(other.mediaType);
   }
 
+  public String getSampleText() {
+    return sampleText;
+  }
 
+  public void setSampleText(String sampleText) {
+    this.sampleText = sampleText;
+  }
+
+  /**
+   * Returns the name of the template to use when generating documentation.
+   * At the present time, only two templates are supported.  The supported names are:
+   * <UL>
+   *   <LI> default
+   *   <LI> simple
+   * </UL>
+   * @return
+   */
+  public String getTemplate() {
+    return template;
+  }
+
+  /**
+   * Sets the name of the template to use when generating documentation.
+   * At the present time, only two templates are supported.  The supported names are:
+   * <UL>
+   *   <LI> default
+   *   <LI> simple
+   * </UL>
+   * @return
+   */
+  public void setTemplate(String template) {
+    this.template = template;
+  }
+
+  /**
+   * Returns the output file that contains the generated JSON-LD context.
+   */
+  public File getContextFile() {
+    return contextFile;
+  }
+
+  /**
+   * Sets the output file that contains the generated JSON-LD context.
+   */
+  public void setContextFile(File contextFile) {
+    this.contextFile = contextFile;
+  }
   
-
-
   
 
 }

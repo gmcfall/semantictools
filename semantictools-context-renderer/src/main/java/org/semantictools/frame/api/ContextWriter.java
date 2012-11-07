@@ -24,13 +24,21 @@ public class ContextWriter {
     writer.println();
     indent -= tabSize;
     endObject(writer, indent);
-    
-    writer.println();
+    writer.println(",");
+    writer.print("  \"@id\" : \"");
+    writer.print(context.getContextURI());
+    writer.println("\"");
     writer.println("}");
     
     
   }
   
+
+  
+
+
+  
+
 
   private void writeTerms(PrintWriter writer, int indent, JsonContext context) {
     List<TermInfo> list = context.getTerms();

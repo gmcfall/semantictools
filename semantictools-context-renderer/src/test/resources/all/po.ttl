@@ -2,11 +2,11 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix pe: <http://purl.org/pearson/core/v1/vocab/enterprise#> .
 @prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix paf: <http://purl.org/pearson/paf/v1/vocab/core#> .
 @prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
@@ -113,10 +113,6 @@ po:AssignmentType rdf:type owl:Class;
 po:Assignment rdf:type owl:Class ;
   rdfs:subClassOf paf:Activity ,
   [ a owl:Restriction ;
-    owl:onProperty      po:taxon;
-    rdfs:comment "A taxon places the assignment within some taxonic hierarchy. This property is typically used to identify learning standards or skills that are assessed by the assignment. "
-  ] ,
-  [ a owl:Restriction ;
     owl:onProperty      po:defaultResultValueSpec;
     rdfs:comment "The default ResultValueSpec associated with this assignment.   The ResultValueSpec specifies whether scores on the assignment should be reported as floating point numbers or letter grades, and it provides constraints on those values.  As the name suggests, the defaultResultValueSpec is merely a default.  When an assignment is used in a learning context like a course section, it is associated with a GradebookItem that has its own resultValueSpec property.  Frequently, the resultValueSpec of the GradebookItem is  copy of the defaultResultValueSpec associated with the Assignment, but it may be different.  For example, extra credit points may be allowed or disallowed on a case-by-case basis.  "
   ] ; 
@@ -126,7 +122,6 @@ po:GradebookItemEvent rdf:type owl:Class ;
   rdfs:subClassOf pm:Message ,
   [ a owl:Restriction ;
     owl:onProperty      pm:body;
-    owl:allValuesFrom  po:GradebookItem;
     owl:minCardinality  1;
     rdfs:comment "The GradebookItem that is being created or updated."
   ] ; 
@@ -398,11 +393,6 @@ po:contentLocation rdf:type rdf:Property ;
   rdfs:domain po:AssignmentAdministration ;
   rdfs:range po:ContentItem ;
   rdfs:comment "This is a reference to the pedagogical material from which the learner may acquire the knowledge or skills needed to complete the assignment." .
-
-po:taxon rdf:type rdf:Property ;
-  rdfs:domain po:Assignment ;
-  rdfs:range owl:Thing ;
-  rdfs:comment "A taxon places the assignment within some taxonic hierarchy. This property is typically used to identify learning standards or skills that are assessed by the assignment. " .
 
 po:defaultResultValueSpec rdf:type owl:FunctionalProperty ;
   rdfs:domain po:Assignment ;
