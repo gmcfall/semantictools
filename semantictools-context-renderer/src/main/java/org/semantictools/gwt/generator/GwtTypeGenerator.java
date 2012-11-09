@@ -386,7 +386,13 @@ public class GwtTypeGenerator {
     private void printFields() {
       String frameType = info.getRdfType().asFrame().getUri();
       
-      List<Field> list = info.hasSingleSupertype() ? 
+      if (!info.hasSingleSupertype()) {
+        printLdContextField();
+        printRdfTypeField();
+        printResourceUriField();
+      }
+      
+      List<Field> list = !info.hasMultipleSupertypes() ? 
           info.getRdfType().asFrame().getDeclaredFields() :
           info.getRdfType().asFrame().listAllFields();
         
@@ -398,6 +404,86 @@ public class GwtTypeGenerator {
       }
       
     }
+    private void printResourceUriField() {
+      printResourceUriGetter();
+      printResourceUriSetter();
+    }
+
+    private void printResourceUriSetter() {
+      println();
+      indent().println("public final native void setResourceUri(String uri) /*-{");
+      indent().println("  this[\"@id\"] = uri;");
+      indent().println("}-*/;");
+    }
+
+    private void printResourceUriGetter() {
+      println();
+      indent().println("public final native String getResourceUri() /*-{");
+      indent().println("  return this[\"@id\"];");
+      indent().println("}-*/;");
+      
+    }
+
+    private void printRdfTypeField() {
+      printRdfTypeGetter();
+      printRdfTypeSetter();
+      
+    }
+
+    private void printRdfTypeSetter() {
+      println();
+      indent().println("public final native void setRdfType(String type) /*-{");
+      indent().println("  this[\"@type\"]=type;");
+      indent().println("}-*/;");
+      
+    }
+
+    private void printRdfTypeGetter() {
+      println();
+      indent().println("public final native String getRdfType() /*-{");
+      pushIndent();
+      indent().println("return this[\"@type\"]");
+      popIndent();
+      indent().println("}-*/;");
+    }
+
+    private void printLdContextField() {
+      printLdContextGetter();
+      printLdContextSetter();
+      
+    }
+
+    private void printLdContextSetter() {
+      println();
+      indent().println("public final native void setLdContextUri(String uri) /*-{");
+      pushIndent();
+      indent().println("this[\"@context\"]=uri;");
+      popIndent();
+      indent().println("}-*/;");
+      
+    }
+
+    /**
+  public final native String getLdContextUri() {
+    if (typeof this["@context"] == "string") {
+      return this["@context"];
+    }
+    return null;
+  }
+     */
+    private void printLdContextGetter() {
+      println();
+      indent().println("public final native String getLdContextUri() /*-{");
+      pushIndent();
+      indent().println("if (typeof this[\"@context\"] == \"string\") {");
+      indent().println("  return this[\"@context\"];");
+      indent().println("}");
+      indent().println("return null;");
+      popIndent();
+      indent().println("}-*/;");
+      
+    }
+
     private void printField(Field field) {
       RdfType type = field.getRdfType();
       
@@ -822,6 +908,9 @@ public final native JsArray<Phone> getPhone() {
     
     public boolean hasSingleSupertype() {
       return listSupertypes().size()==1;
+    }
+    public boolean hasMultipleSupertypes() {
+      return listSupertypes().size()>1;
     }
     
     public Frame getSingleSupertype() {

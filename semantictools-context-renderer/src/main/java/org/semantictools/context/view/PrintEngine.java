@@ -1,4 +1,4 @@
-package org.semantictools.context.renderer;
+package org.semantictools.context.view;
 
 import java.io.PrintWriter;
 

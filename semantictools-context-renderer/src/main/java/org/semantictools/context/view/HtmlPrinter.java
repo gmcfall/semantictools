@@ -1,4 +1,4 @@
-package org.semantictools.context.renderer;
+package org.semantictools.context.view;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.model.ReferenceManager;
 
 abstract public class HtmlPrinter extends PrintEngine {

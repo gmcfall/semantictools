@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 import org.semantictools.context.renderer.MediaTypeFileManager;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.FrameConstraints;
+import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.SampleJson;
 
 public class ContextManager {
@@ -208,7 +209,7 @@ public class ContextManager {
       } else if (EXPANDED_VALUE.equals(key)) {
         setExpandedValue(sink, value);
       } else if (TEMPLATE.equals(key)) {
-        sink.setTemplate(value);
+        sink.setTemplateName(value);
       }
     }
     validate(sink);
@@ -334,15 +335,11 @@ public class ContextManager {
     if (sink.getReference(contextRef) != null) return;
     
     StringBuilder builder = new StringBuilder();
-    List<String> authors = sink.getAuthors();
+    List<Person> authors = sink.getAuthors();
     String comma = "";
-    for (String author : authors) {
+    for (Person author : authors) {
       builder.append(comma);
-      int mark = author.indexOf(',');
-      if (mark>0) {
-        author = author.substring(0, mark).trim();
-      }
-      builder.append(author);
+      builder.append(author.getPersonName());
       comma = ", ";
     }
     builder.append("| ");
@@ -390,7 +387,7 @@ public class ContextManager {
         title = "The <code>" + mediaType + "</code> format";
       } else {
         String typeName = getLocalName(typeURI);
-        title = typeName + " JSON Binding<BR/>in the <code>" + mediaType + "</code> format";
+        title = typeName + " JSON Binding<br>in the <code>" + mediaType + "</code> format";
       }
       sink.setTitle(title);
     }
@@ -402,11 +399,25 @@ public class ContextManager {
     while (tokens.hasMoreTokens()) {
       String text = tokens.nextToken().trim();
       if (text.length()>0) {
-        sink.getEditors().add(text);
+        sink.addEditor(parsePerson(text));
       }
       
     }
     
+  }
+
+  private Person parsePerson(String line) {
+    String personName = line;
+    String orgName = null;
+    int comma = line.indexOf(',');
+    if (comma > 0) {
+      personName = line.substring(0, comma).trim();
+      orgName = line.substring(comma+1).trim();
+    }
+    Person person = new Person();
+    person.setPersonName(personName);
+    person.setOrgName(orgName);
+    return person;
   }
 
   private void setAuthors(ContextProperties sink, String value) {
@@ -414,7 +425,7 @@ public class ContextManager {
     while (tokens.hasMoreTokens()) {
       String text = tokens.nextToken().trim();
       if (text.length()>0) {
-        sink.getAuthors().add(text);
+        sink.addAuthor(parsePerson(text));
       }
       
     }

@@ -1,10 +1,12 @@
-package org.semantictools.context.renderer;
+package org.semantictools.context.view;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.semantictools.context.renderer.IndexEntry;
 
 public class MediaTypeIndexPrinter extends PrintEngine {
 

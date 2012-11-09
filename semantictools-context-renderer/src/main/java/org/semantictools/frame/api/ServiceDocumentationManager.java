@@ -14,14 +14,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
+import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.QueryParam;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.context.renderer.model.ServiceFileManager;
+import org.semantictools.context.view.ServiceDocumentationPrinter;
 import org.semantictools.index.model.ServiceDocumentationList;
 
 
@@ -324,35 +325,43 @@ public class ServiceDocumentationManager {
     while (tokens.hasMoreTokens()) {
       String text = tokens.nextToken().trim();
       if (text.length()>0) {
-        sink.getEditors().add(text);
+        sink.getEditors().add(parsePerson(text));
       }
       
     }
     
   }
+
+  private Person parsePerson(String line) {
+    String personName = line;
+    String orgName = null;
+    int comma = line.indexOf(',');
+    if (comma > 0) {
+      personName = line.substring(0, comma).trim();
+      orgName = line.substring(comma+1).trim();
+    }
+    Person person = new Person();
+    person.setPersonName(personName);
+    person.setOrgName(orgName);
+    return person;
+  }
+
   
   private void setAuthors(ServiceDocumentation sink, String value) {
     StringTokenizer tokens = new StringTokenizer(value, "\n");
     while (tokens.hasMoreTokens()) {
       String text = tokens.nextToken().trim();
       if (text.length()>0) {
-        sink.getEditors().add(text);
+        sink.getEditors().add(parsePerson(text));
       }
       
     }
     
   }
-  private void setAuthors(ServiceDocumentation sink) {
-    
-    if (!sink.getAuthors().isEmpty()) return;
-    
-    List<String> authorList = sink.getAuthors();
-    for (ContextProperties context : sink.listContextProperties()) {
-      copyLines(context.getAuthors(), authorList);
-    }
-    
-    
-  }
+  
+  
+  
+  
 
   
 
@@ -388,8 +397,6 @@ public class ServiceDocumentationManager {
     setTitle(doc, typeName);
     setAbstractText(doc, typeName);
     setIntroduction(doc, typeName);
-    setAuthors(doc);
-    setEditors(doc);
     setRepresentationHeading(doc, typeName);
     setRepresentationText(doc, typeName);
     setPostDoc(doc, typeName);
@@ -475,15 +482,10 @@ public class ServiceDocumentationManager {
 
   private void addAuthors(StringBuilder builder, ContextProperties context) {
     String delim = "";
-    for (String text : context.getAuthors()) {
-      builder.append(delim);
-      int comma = text.indexOf(',');
-      if (comma>0) {
-        text = text.substring(0, comma).trim();
-      }
-      if (text.length()>0) {
-        builder.append(text);
-        delim = ", ";
+    if (context.getAuthors()!=null) {
+      for (Person person : context.getAuthors()) {
+        builder.append(delim);
+        builder.append(person.getPersonName());
       }
     }
     builder.append("|");
@@ -998,15 +1000,7 @@ public class ServiceDocumentationManager {
     
   }
 
-  private void setEditors(ServiceDocumentation doc) {
-    if (!doc.getEditors().isEmpty()) return;
-    List<String> editorList = doc.getEditors();
-    
-    for (ContextProperties context : doc.listContextProperties()) {
-      copyLines(context.getEditors(), editorList);
-    }
-    
-  }
+  
 
 
   private void setAbstractText(ServiceDocumentation doc, String typeName) {

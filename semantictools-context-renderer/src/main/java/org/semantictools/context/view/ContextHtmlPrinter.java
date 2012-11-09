@@ -1,4 +1,4 @@
-package org.semantictools.context.renderer;
+package org.semantictools.context.view;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,9 +24,18 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.node.ObjectNode;
+import org.semantictools.context.renderer.DiagramGenerator;
+import org.semantictools.context.renderer.MediaTypeFileManager;
+import org.semantictools.context.renderer.NodeComparatorFactory;
+import org.semantictools.context.renderer.NodeUtil;
+import org.semantictools.context.renderer.StreamFactory;
+import org.semantictools.context.renderer.TermNotFoundException;
+import org.semantictools.context.renderer.TreeGenerator;
 import org.semantictools.context.renderer.impl.NodeComparatorFactoryImpl;
+import org.semantictools.context.renderer.model.ChainedDocumentMetadata;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.CreateDiagramRequest;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.context.renderer.model.ObjectPresentation;
 import org.semantictools.context.renderer.model.SampleJson;
@@ -61,25 +70,6 @@ public class ContextHtmlPrinter extends PrintEngine {
 //  private static final String XMLSCHEMA_URI = "http://www.w3.org/2001/XMLSchema#";
   private static final String VOWEL = "aeiou";
 
-  private static enum Level {
-    H1(null), 
-    H2(H1), 
-    H3(H2);
-    
-    Level nextLevel;
-    
-    private Level(Level prev) {
-      if (prev != null) {
-        prev.nextLevel = this;
-      }
-    }
-
-    public Level getNextLevel() {
-      return nextLevel;
-    }
-    
-    
-  }
 
 //  private static final String[] STANDARD_URI = { XMLSCHEMA_URI,
 //      "http://www.w3.org/2002/07/owl#",
@@ -99,9 +89,9 @@ public class ContextHtmlPrinter extends PrintEngine {
   private MediaTypeFileManager namer;
   private boolean includeOverviewDiagram;
   private boolean includeClassDiagrams;
+  private Caption overviewDiagram;
 
   private StreamFactory streamFactory;
-  private StringWriter body;
   private List<Frame> frameList;
   private List<Datatype> datatypeList;
   private JsonContext context;
@@ -115,19 +105,16 @@ public class ContextHtmlPrinter extends PrintEngine {
   private UmlFileManager umlFileManager;
   private Frame root;
   private List<Frame> graphTypes;
-  private Heading topHeading;
-  private Heading currentHeading;
-  private int h2;
-  private int h3;
   private int figureNumber;
   private int tableNumber;
   private boolean defaultTemplate;
 
-  private Caption overviewDiagram;
-  private Set<Caption> forwardReferenceList;
   private CaptionManager captionManager;
+  private GlobalProperties global;
+  private DocumentPrinter documentPrinter;
 
   public ContextHtmlPrinter(
+      GlobalProperties global,
       GeneratorProperties properties, 
       TypeManager typeManager,
       MediaTypeFileManager namer, 
@@ -136,14 +123,12 @@ public class ContextHtmlPrinter extends PrintEngine {
       UmlFileManager umlFileManager
    ) {
     super(new PrintContext());
+    this.global = global;
     generatorProperties = properties;
     diagramGenerator = generator;
 
     this.umlFileManager = umlFileManager;
     this.streamFactory = streamFactory;
-    body = new StringWriter();
-
-    getPrintContext().setWriter(new PrintWriter(body));
 
     this.typeManager = typeManager;
     this.namer = namer;
@@ -176,18 +161,18 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   public void printHtml(JsonContext context, ContextProperties properties)
       throws IOException {
-    h2 = h3 = 0;
-    defaultTemplate = !ContextProperties.TEMPLATE_SIMPLE.equalsIgnoreCase(properties.getTemplate());
-    topHeading = new Heading(Level.H1, "", "");
-    currentHeading = topHeading;
     this.contextProperties = properties;
     this.context = context;
+    
+    
+    documentPrinter = createDocumentPrinter();
+    
+    defaultTemplate = isDefaultTemplate();
     treeGenerator = new TreeGenerator(typeManager, context, properties);
     sampleGenerator = new JsonSampleGenerator(typeManager);
     root = context == null ? null : typeManager.getFrameByUri(context.getRootType());
     
     overviewDiagram = overviewDiagramCaption();
-    forwardReferenceList = new HashSet<Caption>();
     captionManager = new CaptionManager();
     jsonManager = new JsonManager(typeManager, context);
     nodeComparatorFactory = new NodeComparatorFactoryImpl(jsonManager);
@@ -197,19 +182,113 @@ public class ContextHtmlPrinter extends PrintEngine {
     beginHTML();
     pushIndent();
     collectFrames();
-    printStatus();
-    printTitle();
+    printTitlePage();
     printAbstract();
     printToc();
     printIntroduction();
     printMediaTypeConformance();
     printDataBindings();
-    printReferences();
+    documentPrinter.printReferences();
+    documentPrinter.printFooter();
     popIndent();
     endHTML();
 
     writeOutput();
 
+  }
+  
+  private DocumentPrinter createDocumentPrinter() {
+    DocumentPrinter printer = null;
+    ChainedDocumentMetadata metadata = new ChainedDocumentMetadata(contextProperties, global);
+    String template = metadata.getTemplateName();
+    if (DocumentPrinter.TEMPLATE_IMS.equalsIgnoreCase(template)) {
+      printer = new IMSDocumentPrinter(getPrintContext());
+    } else {
+      printer = new DefaultDocumentPrinter(getPrintContext());
+    }
+    printer.setMetadata(metadata);
+    printer.setClassificationPrinter(new MyClassificationPrinter());
+   
+    return printer;
+  }
+  
+  class MyClassificationPrinter implements ClassificationPrinter {
+
+    @Override
+    public void printClassifiers() {
+
+      String mediaType = contextProperties.getMediaType();
+      String rdfType = (root==null) ? null : root.getUri();
+      String contextURI = context==null ? null : context.getContextURI();
+      String contextHref = namer.getJsonContextFileName(context);
+      
+
+      String rdfTypeHref = null;
+      if (umlFileManager != null) {
+
+        String path = namer.getIndexFileName();
+        File sourceFile = streamFactory.getOutputFile(path);
+        if (sourceFile != null && root!=null) {
+          rdfTypeHref = umlFileManager.getTypeRelativePath(sourceFile, root);
+        }
+      }
+
+      indent().print("<TABLE");
+      printAttr("class", "mediaTypeProperties");
+      println(">");
+      pushIndent();
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>Media Type</TH>");
+      indent().print("<TD>").print(mediaType).println("</TD>");
+      popIndent();
+      indent().println("</TR>");
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>RDF Type</TH>");
+     
+      indent().print("<TD>");
+      if (rdfTypeHref == null) {
+        print(rdfType);
+      } else {
+        print("<a ");
+        printAttr("href", rdfTypeHref);
+        print(">");
+        print(rdfType);
+        print("</a>");
+      }
+      
+      println("</TD>");
+      popIndent();
+      indent().println("</TR>");
+      indent().println("<TR>");
+      pushIndent();
+      indent().println("<TH>JSON-LD</TH>");
+      indent().print("<TD>");
+      print("<A");
+      printAttr("HREF", contextHref);
+      print(">").print(contextURI).println("</A></TD>");
+      popIndent();
+      indent().println("</TR>");
+      popIndent();
+      indent().println("</TABLE>");
+      indent().println("<p></p>");
+    }
+      
+
+  }
+
+  
+  public void printTitlePage() {
+    documentPrinter.printTitlePage();
+  }
+
+  private boolean isDefaultTemplate() {
+    String template = contextProperties.getTemplateName();
+    if (template == null) {
+      template = global.getTemplateName();
+    }
+    return !DocumentPrinter.TEMPLATE_SIMPLE.equalsIgnoreCase(template);
   }
 
   private Caption overviewDiagramCaption() {
@@ -222,18 +301,6 @@ public class ContextHtmlPrinter extends PrintEngine {
     return new Caption(CaptionType.Figure,  text, "completeRep", null);
   }
 
-  private void printStatus() {
-
-    String status = contextProperties.getStatus();
-    if (status == null) return;
-    
-    print("<div ");
-    printAttr("class", "status");
-    print(">");
-    print(status);
-    println("</div>");
-    
-  }
 
   private void addDefaultReferences() {
    
@@ -264,165 +331,19 @@ public class ContextHtmlPrinter extends PrintEngine {
     
   }
 
-  private void printReferences() {
-    if (!defaultTemplate) return;
-    
-    String text = getBodyText();
-    
-    List<String> list = listReferences(text);
-    
-    Heading heading = createHeading("References");
-    print(heading);
-    indent().print("<DL");
-    printAttr("class", "references");
-    println(">");
-    for (String tag : list) {
-      String id = normalizeId(tag);
-      String key = tag.replace(" ", "&nbsp;");
-      String value = contextProperties.getReference(key);
-      if (value == null) {
-        
-        if (key.equals(contextProperties.getContextRef())) {
-          TermInfo term = context.getTermInfoByURI(root.getUri());
-          
-          value = "||The standard JSON-LD context for <code>" + term.getTermName() + "</code> objects in the <code>" +
-            contextProperties.getMediaType() + "</code> media type| URL: " +
-            contextProperties.getContextURI();
-        } else {        
-          value = "<em>Undefined</em>";
-        }
-      } 
-      
-      if (value != null) {
-        value = addLinksToReference(value);
-      }
-      String replacement = "<A href=\"#" + id + "\">" + tag + "</A>";
-      text = text.replace(tag, replacement);
-      printDefinition(key, id, value);
-      
-    }
-    indent().print("</DL>");
-    
-    
-    String referencesText = getBodyText();
-    print(text);
-    print(referencesText);
-    
-  }
-  
-  private String addLinksToReference(String value) {
-    
-    Pattern pattern = Pattern.compile("URL:\\s*(.*)");
-    Matcher matcher = pattern.matcher(value);
-    String url = matcher.find() ? matcher.group(1) : null;
-    
-    if (url == null) {
-      return value;
-    }
-    
-    String[] array = value.split("\\|");
-    
-    if (array.length<3) return value;
-      
-    String authors = array[0].trim();
-    String title = array[1].trim();
-    
-    String dot = "";
-    StringBuilder builder = new StringBuilder();
-    if (authors.length()>0) {
-      builder.append(authors);
-      dot = ". ";
-    }
-    String href = generatorProperties==null ? url :
-        namer.toRelativeURL(url, generatorProperties.getBaseURL(), context.getMediaType());
-    
-    if (title.length()>0) {
-      builder.append(dot);
-      builder.append("<A href=\"");
-      builder.append(href);
-      builder.append("\">");
-      builder.append(title);
-      builder.append("</A>");
-      dot = ". ";
-      
-    }
-    for (int i=2; i<array.length-1; i++) {
-      String text = array[i].trim();
-      if (text.length()==0) continue;
-      builder.append(dot);
-      builder.append(text);
-      dot = ". ";
-    }
-    builder.append(dot);
-    builder.append("URL: <A href=\"");
-    builder.append(url);
-    builder.append("\">");
-    builder.append(url);
-    builder.append("</A>");
-    
-    return builder.toString();
-  }
-
-  private String getBodyText() {
-    getPrintContext().getWriter().flush();
-    String result = body.toString();
-    body.getBuffer().setLength(0);
-    return result;
-  }
-
-  private String normalizeId(String tag) {
-    StringBuilder builder = new StringBuilder();
-    for (int i=0; i<tag.length(); i++) {
-      char c = tag.charAt(i);
-      if (Character.isJavaIdentifierPart(c)) {
-        builder.append(c);
-      } else {
-        builder.append('_');
-      }
-    }
-    return builder.toString();
-  }
   
 
-  private List<String> listReferences(String text) {
-    List<String> list = new ArrayList<String>();
-    
-    // It is possible that the documentation might contain
-    // a numeric range, like [0, 1].  We don't want to interpret
-    // numeric ranges as citations.  So we define a regex pattern
-    // that we can use to filter out numeric ranges.
-    //
-    String numericRange = "\\[\\d+,\\s*\\d\\]";
-    String jsonArray = "\\[\\s*\".*";
-    
-    Pattern pattern = Pattern.compile("\\[[^\\]]*\\]");
-    Matcher matcher = pattern.matcher(text);
-    while (matcher.find()) {
-      String value = matcher.group();
-      if (
-        !list.contains(value) && 
-        value.indexOf('\n')<0 &&
-        !value.matches(numericRange) &&
-        !value.matches(jsonArray) &&
-        !value.contains(" ... ") &&
-        !value.contains("=")
-      ) {
-        list.add(matcher.group());
-      }
-    }
-    Collections.sort(list);
-    return list;
-  }
 
   private void printDataBindings() throws IOException {
     if (!defaultTemplate) return;
     
-    Heading heading = createHeading("JSON Data Bindings");
-    beginHeading(heading);
+    Heading heading = documentPrinter.createHeading("JSON Data Bindings");
+    
+    documentPrinter.beginSection(heading);
     printOverviewDiagram();
     printFrames();
     printDatatypes();
-    endHeading();
+    documentPrinter.endSection();
     
   }
 
@@ -436,7 +357,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printMediaTypeConformance() {
-    endHeading();
+    documentPrinter.endSection();
     // TODO: move the endHeading call to the same scope where the heading begins.
     if (context == null) {
       return;
@@ -446,8 +367,8 @@ public class ContextHtmlPrinter extends PrintEngine {
     String mediaType = contextProperties.getMediaType();
     String contextRef = contextProperties.getContextRef();
     
-    Heading heading = createHeading(headingTemplate.replace("{0}", typeName));
-    print(heading);
+    Heading heading = documentPrinter.createHeading(headingTemplate.replace("{0}", typeName));
+    documentPrinter.print(heading);
     
     String text = 
         "The following list defines the necessary and sufficient conditions for a document " +
@@ -548,7 +469,7 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private void writeOutput() throws IOException {
 
-    String text = getOutput();
+    String text = documentPrinter.getText();
 
     String path = namer.getIndexFileName();
     OutputStream stream = streamFactory.createOutputStream(path);
@@ -567,20 +488,6 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private String getOutput() {
-    body.flush();
-    String text = body.toString();
-
-    text = updateReferences(text);
-
-    body.getBuffer().setLength(0);
-    indent().println("<H2>Table of Contents</H2>");
-    printHeadings(topHeading.getChildren());
-
-    String toc = body.toString();
-    return text.replace(TOC_MARKER, toc);
-
-  }
 
   private void printHeadings(List<Heading> toc) {
     if (toc == null)
@@ -632,8 +539,8 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     if (defaultTemplate) {
       String headingText = "Introduction";
-      Heading heading = createHeading(headingText);
-      beginHeading(heading);
+      Heading heading = documentPrinter.createHeading(headingText);
+      documentPrinter.beginSection(heading);
     }
     if (text != null) {
       indent().println("<DIV>");
@@ -701,8 +608,8 @@ public class ContextHtmlPrinter extends PrintEngine {
       return;
     }
 
-    Heading heading = createHeading("How To Read this Document");
-    print(heading);
+    Heading heading = documentPrinter.createHeading("How To Read this Document");
+    documentPrinter.print(heading);
 
     printSampleObject();
     printPropertyRepresentation();
@@ -715,8 +622,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printContextDiscussion() {
-    Heading heading = createHeading("The JSON-LD Context");
-    print(heading);
+    Heading heading = documentPrinter.createHeading("The JSON-LD Context");
+    documentPrinter.print(heading);
     
 
     printContextSnippet();
@@ -869,8 +776,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printReservedTerms() {
-    Heading heading = createHeading("Reserved Terms");
-    print(heading);
+    Heading heading = documentPrinter.createHeading("Reserved Terms");
+    documentPrinter.print(heading);
     printParagraph("The JSON-LD standard reserves a handful of property names and tokens " +
       "that have special meaning.  These names and tokens, described below, begin with the '@' symbol.");
     indent().println("<DL");
@@ -917,32 +824,12 @@ public class ContextHtmlPrinter extends PrintEngine {
     
   }
 
-  private void printDefinition(String termName, String id, String description) {
-    indent().print("<DT");
-    printAttr("id", id);
-    print(">");
-    
-    print(termName).println("</DT>");
-    pushIndent();
-    indent().print("<DD>").print(description).println("</DD>");
-    popIndent();
-    
-  }
 
   private void printParagraph(String text) {
     indent().print("<P>").print(text).println("</P>");
     
   }
 
-  private Heading createHeading(String text) {
-    text = text.trim();
-    Level level = currentHeading.getLevel().getNextLevel();
-    
-    Heading result = new Heading(level, text, text.replace(' ', '_'));
-    currentHeading.add(result);
-    
-    return result;
-  }
 
   private void printPropertyRepresentation() throws IOException {
 
@@ -961,7 +848,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     Caption caption = new Caption(CaptionType.Figure,
         "Graphical notation for a property", "sampleProperty", field.getURI());
     assignNumber(caption);
-    printLink(caption);
+    documentPrinter.printLink(caption);
     print(".</P>");
 
     String src = namer.getImagesDir() + "/sampleProperty.png";
@@ -1031,7 +918,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         .println(
             "<P>When an object is to be identified by a fully-qualified URI or a CURIE, the box "
                 + "representing the object will be decorated with the #uri hash tag, as shown in ");
-    printLink(captionRef);
+    documentPrinter.printLink(captionRef);
     println(".</P>");
     
     if (caption == null) return;
@@ -1071,7 +958,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         .println(
             "<P>When an object or enumerable value is to be identified by a simple name, the box "
                 + "representing the corresponding property will be decorated with the #sn hash tag, as shown in ");
-    printLink(captionRef);
+    documentPrinter.printLink(captionRef);
     println(".</P>");
     
     if (caption == null) return;
@@ -1112,7 +999,7 @@ public class ContextHtmlPrinter extends PrintEngine {
             "<P>This specification defines the structure of a JSON document using a graphical notation. "
                 + "In this notatation, an object is represented by a box that branches out to other boxes corresponding to "
                 + "the properties of that object, as shown in ");
-    printLink(caption);
+    documentPrinter.printLink(caption);
     println(".</P>");
 
     String src = namer.getImagesDir() + "/sampleObj.png";
@@ -1153,9 +1040,8 @@ public class ContextHtmlPrinter extends PrintEngine {
       }
       print(").  A complete diagram would show branches emanating from the embedded objects to " +
            "reveal their properties, and so on, recursively. For a complete representation, see ");
-      printForwardRef(overviewDiagram);
+      documentPrinter.printForwardRef(overviewDiagram);
       print(" below.</P>");
-      forwardReferenceList.add(overviewDiagram);
 
     } else if (embedded.size() == 1) {
       // This is the case where there is exactly one embedded object
@@ -1182,9 +1068,8 @@ public class ContextHtmlPrinter extends PrintEngine {
                   + term.getTermName()
                   + "</code> "
                   + "to reveal its properties, and so on, recursively. For a complete representation, see ");
-      printForwardRef(overviewDiagram);
+      documentPrinter.printForwardRef(overviewDiagram);
       print(" below.</P>");
-      forwardReferenceList.add(overviewDiagram);
 
     }
 
@@ -1195,31 +1080,6 @@ public class ContextHtmlPrinter extends PrintEngine {
     return VOWEL.indexOf(c)>=0 ? "an " : "a ";
   }
 
-  private String updateReferences(String text) {
-    for (Caption caption : forwardReferenceList) {
-      String ref = createForwardRef(caption);
-      text = text.replace(ref, createLink(caption));
-    }
-    return text;
-  }
-
-  private String createLink(Caption caption) {
-    return "<A href=\"#" + caption.getId() + "\">" + caption.getNumber()
-        + "</A>";
-  }
-
-  private void printLink(Caption caption) {
-    print(createLink(caption));
-  }
-
-  private String createForwardRef(Caption caption) {
-    return "<!-- REF:" + caption.getId() + " -->";
-  }
-
-  private void printForwardRef(Caption caption) {
-    print(createForwardRef(caption));
-
-  }
 
   private List<Field> listEmbeddedObjects(Frame frame) {
 
@@ -1305,7 +1165,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         .print(
             "<P>If a property can have multiple values, then its box in the graphical "
                 + "notation is decorated with a circle that contains a plus sign (+) as shown in ");
-    printLink(captionRef);
+    documentPrinter.printLink(captionRef);
     String fieldName = field.getLocalName();
     String value = (field.getRdfType() != null && field.getRdfType()
         .canAsFrame()) ? " object" : " value";
@@ -1363,7 +1223,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         .print(
             "<P>If a property is optional, its box will be decorated with a circle that contains a question mark, "
                 + "as shown in ");
-    printLink(captionRef);
+    documentPrinter.printLink(captionRef);
     println(".</P>");
 
     if (caption == null) return;
@@ -1653,38 +1513,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
   
 
-  private void print(Heading heading) {
-
-    Level level = heading.getLevel();
-    String className = heading.getClassName();
-    String number = null;
-
-    switch (level) {
-    case H2:
-      h2++;
-      number = h2 + ".";
-      break;
-
-    case H3:
-      h3++;
-      number = h2 + "." + h3;
-      break;
-    }
-
-    heading.setHeadingNumber(number);
-
-    indent().print("<" + level);
-    printAttr("id", heading.getHeadingId());
-    if (className != null) {
-      printAttr("class", className);
-    }
-    print(">");
-    print(number);
-    print(" ");
-    print(heading.getHeadingText());
-    println("</" + level + ">");
-
-  }
+  
 
   public List<Frame> listFrames() {
     return frameList;
@@ -1706,121 +1535,10 @@ public class ContextHtmlPrinter extends PrintEngine {
     this.includeClassDiagrams = includeClassDiagrams;
   }
 
-  private void printTitle() {
-
-    String title = contextProperties.getTitle();
-    String mediaType = contextProperties.getMediaType();
-    String rdfType = (root==null) ? null : root.getUri();
-    String contextURI = context==null ? null : context.getContextURI();
-    String contextHref = namer.getJsonContextFileName(context);
-    String status = contextProperties == null ? null : contextProperties
-        .getStatus();
-    String date = contextProperties.getDate();
-    
-    List<String> editorList = contextProperties == null ? null
-        : contextProperties.getEditors();
-    List<String> authorList = contextProperties == null ? null
-        : contextProperties.getAuthors();
+  
 
 
-    String subtitle = 
-        (status !=null && date !=null) ? status + " " + date :
-        (status != null) ? status :
-        (date != null) ? date :
-        null; 
-    
-    indent().print("<H1>");
-    print(title);
-    println("</H1>");
 
-    if (subtitle != null) {
-      indent().print("<DIV");
-      printAttr("class", "subtitle");
-      print(">").print(subtitle).print("</DIV>");
-    }
-    
-    String rdfTypeHref = null;
-    if (umlFileManager != null) {
-
-      String path = namer.getIndexFileName();
-      File sourceFile = streamFactory.getOutputFile(path);
-      if (sourceFile != null && root!=null) {
-        rdfTypeHref = umlFileManager.getTypeRelativePath(sourceFile, root);
-      }
-    }
-    
-    if (defaultTemplate) {
-      indent().print("<TABLE");
-      printAttr("class", "mediaTypeProperties");
-      println(">");
-      pushIndent();
-      indent().println("<TR>");
-      pushIndent();
-      indent().println("<TH>Media Type</TH>");
-      indent().print("<TD>").print(mediaType).println("</TD>");
-      popIndent();
-      indent().println("</TR>");
-      indent().println("<TR>");
-      pushIndent();
-      indent().println("<TH>RDF Type</TH>");
-     
-      indent().print("<TD>");
-      if (rdfTypeHref == null) {
-        print(rdfType);
-      } else {
-        print("<a ");
-        printAttr("href", rdfTypeHref);
-        print(">");
-        print(rdfType);
-        print("</a>");
-      }
-      
-      println("</TD>");
-      popIndent();
-      indent().println("</TR>");
-      indent().println("<TR>");
-      pushIndent();
-      indent().println("<TH>JSON-LD</TH>");
-      indent().print("<TD>");
-      print("<A");
-      printAttr("HREF", contextHref);
-      print(">").print(contextURI).println("</A></TD>");
-      popIndent();
-      indent().println("</TR>");
-      popIndent();
-      indent().println("</TABLE>");
-    }
-    
-    if (contextProperties.hasHistoryLink()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">See Also: <a href=\"index.html?history\">Version History</a></DIV>");
-    }
-    
-    if (editorList != null && !editorList.isEmpty()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">Editors</DIV>");
-      for (String editor : editorList) {
-        indent().print("<DIV");
-        printAttr("class", "contributor");
-        print(">").print(editor).println("</DIV>");
-      }
-    }
-    if (authorList != null && !authorList.isEmpty()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">Authors</DIV>");
-      for (String author : authorList) {
-        indent().print("<DIV");
-        printAttr("class", "contributor");
-        print(">").print(author).println("</DIV>");
-      }
-    }
-
-    indent().println("<HR/>");
-
-  }
 
   private void beginHTML() {
     println("<HTML>");
@@ -2054,24 +1772,6 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private void beginHeading(Heading heading) {
-    print(heading);
-    currentHeading = heading;
-
-  }
-
-  private void endHeading() {
-    switch (currentHeading.getLevel()) {
-    case H2:
-      h3 = 0;
-      break;
-      
-    case H1:
-      h2 = 0;
-      
-    }
-    currentHeading = currentHeading.getParent();
-  }
 
 
 
@@ -2086,7 +1786,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     
     if (term != null) {    
       termName = term.getTermName();
-      heading = createHeading(termName);
+      heading = documentPrinter.createHeading(termName);
     } else {
       // This datatype does not have a JSON-LD term defined in the
       // context.  
@@ -2097,15 +1797,15 @@ public class ContextHtmlPrinter extends PrintEngine {
       
       TreeNode node = NodeUtil.createDefaultTypeNode(typeManager, context, type.getUri());
       termName = node.getTypeName();
-      Level level = currentHeading.getLevel().getNextLevel();
+      Level level = documentPrinter.getCurrentHeading().getLevel().getNextLevel();
       String id = node.getTypeHref().substring(1);      
       heading = new Heading(level, termName, id);
-      currentHeading.add(heading);
+      documentPrinter.getCurrentHeading().add(heading);
       
     }
     
     heading.setClassName("rdfType");
-    print(heading);
+    documentPrinter.print(heading);
     
     String baseURI = typeManager.getXsdBaseURI(type);
    
@@ -2203,11 +1903,11 @@ public class ContextHtmlPrinter extends PrintEngine {
       Collections.sort(fieldList, nodeComparatorFactory.getComparator(frame.getUri()));
     }
 
-    Heading heading = createHeading(node.getTypeName());
+    Heading heading = documentPrinter.createHeading(node.getTypeName());
     String comment = node.getDescription();
     
     heading.setClassName("rdfType");
-    print(heading);
+    documentPrinter.print(heading);
 
     if (comment.length() > 0) {
       print("<div");
@@ -2678,63 +2378,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
 
-  static enum CaptionType {
-    Figure, Table
-  }
 
-  static class Caption {
-    private CaptionType type;
-    private String text;
-    private String number;
-    private String id;
-    private String uri;
-
-    public Caption(CaptionType type, String text, String id, String uri) {
-      this.type = type;
-      this.text = text;
-      this.id = id;
-      this.uri = uri;
-    }
-    
-
-    /**
-     * Returns the URI for the object represented in the figure or table.
-     * This is useful if you want to look-up a caption based on the URI.
-     */
-    public String getUri() {
-      return uri;
-    }
-
-    /**
-     * Sets the URI for the object represented in the figure or table.
-     */
-    public void setUri(String uri) {
-      this.uri = uri;
-    }
-
-
-
-    public String getNumber() {
-      return number;
-    }
-
-    public void setNumber(String number) {
-      this.number = number;
-    }
-
-    public CaptionType getType() {
-      return type;
-    }
-
-    public String getText() {
-      return text;
-    }
-
-    public String getId() {
-      return id;
-    }
-
-  }
+  
   
   static class CaptionManager {
     Map<String, Caption> uri2FigureCaption = new HashMap<String, Caption>();
@@ -2755,69 +2400,5 @@ public class ContextHtmlPrinter extends PrintEngine {
     
   }
 
-  static class Heading {
-    private Level level;
-    private String headingNumber;
-    private String headingText;
-    private String headingId;
-    private String className;
-    private List<Heading> children;
-    private Heading parent;
-
-    public Heading(Level level, String headingText, String headingId) {
-      this.level = level;
-      this.headingText = headingText;
-      this.headingId = headingId;
-    }
-
-    public void setHeadingNumber(String headingNumber) {
-      this.headingNumber = headingNumber;
-    }
-
-    public String getHeadingNumber() {
-      return headingNumber;
-    }
-
-    public String getHeadingText() {
-      return headingText;
-    }
-
-    public Level getLevel() {
-      return level;
-    }
-
-    public String getHeadingId() {
-      return headingId;
-    }
-
-    public void add(Heading subheading) {
-      if (children == null) {
-        children = new ArrayList<ContextHtmlPrinter.Heading>();
-      }
-      children.add(subheading);
-      subheading.parent = this;
-    }
-
-    public List<Heading> getChildren() {
-      return children;
-    }
-
-    public Heading getParent() {
-      return parent;
-    }
-
-    public void setParent(Heading parent) {
-      this.parent = parent;
-    }
-
-    public String getClassName() {
-      return className;
-    }
-
-    public void setClassName(String className) {
-      this.className = className;
-    }
-
-  }
 
 }

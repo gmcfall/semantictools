@@ -1,10 +1,12 @@
-package org.semantictools.context.renderer;
+package org.semantictools.context.view;
 
 import java.util.List;
 
+import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.model.HttpHeaderInfo;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
+import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.QueryParam;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
@@ -448,16 +450,20 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 
   private void printEditors() {
     
-    List<String> editorList = doc.getEditors();
+    List<Person> editorList = doc.getEditors();
 
     if (editorList != null && !editorList.isEmpty()) {
       indent().print("<DIV");
       printAttr("class", "contributorLabel");
       println(">Editors</DIV>");
-      for (String editor : editorList) {
+      for (Person editor : editorList) {
         indent().print("<DIV");
         printAttr("class", "contributor");
-        print(">").print(editor).println("</DIV>");
+        print(">").print(editor.getPersonName());
+        if (editor.getOrgName() != null) {
+          print(", ").print(editor.getOrgName());
+        }
+        println("</DIV>");
       }
     }
     

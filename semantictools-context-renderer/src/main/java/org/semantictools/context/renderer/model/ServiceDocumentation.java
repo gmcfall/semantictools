@@ -41,7 +41,7 @@ public class ServiceDocumentation implements ReferenceManager {
   private MethodDocumentation putDocumentation;
   private MethodDocumentation deleteDocumentation;
   
-  private List<String> editors = new ArrayList<String>();
+  private List<Person> editors = new ArrayList<Person>();
   private List<String> authors = new ArrayList<String>();
   private List<HttpMethod> methodList = new ArrayList<HttpMethod>();
   private List<QueryParam> queryParams = new ArrayList<QueryParam>();
@@ -207,10 +207,10 @@ public class ServiceDocumentation implements ReferenceManager {
   public void setIntroduction(String introduction) {
     this.introduction = introduction;
   }
-  public List<String> getEditors() {
+  public List<Person> getEditors() {
     return editors;
   }
-  public void setEditors(List<String> editors) {
+  public void setEditors(List<Person> editors) {
     this.editors = editors;
   }
   public List<String> getAuthors() {

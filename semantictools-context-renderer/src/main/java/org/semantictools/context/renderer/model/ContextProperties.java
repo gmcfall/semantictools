@@ -16,9 +16,8 @@ import org.semantictools.frame.api.TypeManager;
  * @author Greg McFall
  *
  */
-public class ContextProperties implements ReferenceManager, Comparable<ContextProperties> {
+public class ContextProperties implements ReferenceManager, Comparable<ContextProperties>, DocumentMetadata {
   
-  public static final String TEMPLATE_SIMPLE = "simple";
   
   private File sourceFile;
   private File contextFile;
@@ -31,9 +30,13 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   private String mediaTypeURI;
   private String mediaTypeRef;
   private String template;
+  private String purpose;
+  private String documentLocation;
   private String sampleText;
+  private String release;
   private String purlDomain;
-  private boolean historyLink;
+  private String footer;
+  private Boolean historyLink;
   private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
@@ -45,8 +48,9 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   private String date;
   private String abstactText;
   private String introduction;
-  private List<String> editors = new ArrayList<String>();
-  private List<String> authors = new ArrayList<String>();
+  private List<Person> editors;
+  private List<Person> authors;
+  private List<Person> coChairs;
   private Set<String> excludedTypes = new HashSet<String>();
   private Set<String> expandedValues = new HashSet<String>();
   private List<SampleJson> sampleJsonList = new ArrayList<SampleJson>();
@@ -115,7 +119,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
    * to the version history of the specification.
    * @return
    */
-  public boolean hasHistoryLink() {
+  public Boolean hasHistoryLink() {
     return historyLink;
   }
   
@@ -291,13 +295,20 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
 
 
 
-  public List<String> getEditors() {
+  public List<Person> getEditors() {
     return editors;
   }
 
-
-
-  public List<String> getAuthors() {
+  @Override
+  public void addAuthor(Person person) {
+    if (authors==null) {
+      authors = new ArrayList<Person>();
+    }
+    authors.add(person);
+  }
+  
+  @Override
+  public List<Person> getAuthors() {
     return authors;
   }
 
@@ -455,7 +466,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
    * </UL>
    * @return
    */
-  public String getTemplate() {
+  public String getTemplateName() {
     return template;
   }
 
@@ -468,7 +479,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
    * </UL>
    * @return
    */
-  public void setTemplate(String template) {
+  public void setTemplateName(String template) {
     this.template = template;
   }
 
@@ -485,7 +496,95 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   public void setContextFile(File contextFile) {
     this.contextFile = contextFile;
   }
+
+  @Override
+  public String getSubtitle() {
+    return null;
+  }
+
+  @Override
+  public String getVersion() {
+    return null;
+  }
+
+  @Override
+  public String getLegalNotice() {
+    return null;
+  }
+
+  @Override
+  public String getLogo() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String getLatestVersionURI() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<Person> getCoChairs() {
+    return coChairs;
+  }
+
+  @Override
+  public void addCoChair(Person person) {
+    if (coChairs == null) {
+      coChairs = new ArrayList<Person>();
+    }
+    coChairs.add(person);
+    
+  }
+
+  @Override
+  public void addEditor(Person person) {
+    if (editors == null) {
+      editors = new ArrayList<Person>();
+    }
+    editors.add(person);
+    
+  }
+
+  @Override
+  public String getRelease() {
+    return release;
+  }
+
+  public void setRelease(String release) {
+    this.release = release;
+  }
+
+  @Override
+  public String getPurpose() {
+    return purpose;
+  }
+
+  public void setPurpose(String purpose) {
+    this.purpose = purpose;
+  }
+
+  @Override
+  public String getDocumentLocation() {
+    return documentLocation;
+  }
+
+  public void setDocumentLocation(String documentLocation) {
+    this.documentLocation = documentLocation;
+  }
+
+  @Override
+  public String getFooter() {
+    return footer;
+  }
+
+  public void setFooter(String footer) {
+    this.footer = footer;
+  }
+
   
+
   
 
 }

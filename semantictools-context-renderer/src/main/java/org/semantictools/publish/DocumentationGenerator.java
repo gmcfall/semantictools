@@ -7,10 +7,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.semantictools.context.renderer.GlobalPropertiesReader;
 import org.semantictools.context.renderer.MediaTypeFileManager;
-import org.semantictools.context.renderer.ServiceDocumentationPrinter;
 import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ServiceFileManager;
+import org.semantictools.context.view.ServiceDocumentationPrinter;
 import org.semantictools.frame.api.ContextManager;
 import org.semantictools.frame.api.MediaTypeDocumenter;
 import org.semantictools.frame.api.OntologyManager;

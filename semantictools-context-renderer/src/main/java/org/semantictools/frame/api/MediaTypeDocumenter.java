@@ -12,9 +12,7 @@ import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.semantictools.context.renderer.ContextHtmlPrinter;
 import org.semantictools.context.renderer.MediaTypeFileManager;
-import org.semantictools.context.renderer.MediaTypeIndexPrinter;
 import org.semantictools.context.renderer.StreamFactory;
 import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.impl.DiagramGeneratorImpl;
@@ -22,6 +20,8 @@ import org.semantictools.context.renderer.impl.FileStreamFactory;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.JsonContext;
+import org.semantictools.context.view.ContextHtmlPrinter;
+import org.semantictools.context.view.MediaTypeIndexPrinter;
 import org.semantictools.uml.api.UmlFileManager;
 import org.semantictools.web.upload.AppspotUploadClient;
 import org.xml.sax.SAXException;
@@ -232,7 +232,7 @@ public class MediaTypeDocumenter {
     StreamFactory streamFactory = new FileStreamFactory(inputDir, baseDir);
     DiagramGeneratorImpl diagramManager = new DiagramGeneratorImpl(streamFactory);
     ContextHtmlPrinter contextPrinter = new ContextHtmlPrinter(
-        generatorProperties, typeManager, fileManager, streamFactory, diagramManager, umlFileManager);
+        global, generatorProperties, typeManager, fileManager, streamFactory, diagramManager, umlFileManager);
     contextPrinter.setIncludeOverviewDiagram(true);
     contextPrinter.setIncludeClassDiagrams(true);
     contextPrinter.printHtml(context, properties);

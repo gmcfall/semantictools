@@ -15,12 +15,12 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.semantictools.context.renderer.HtmlPrinter;
 import org.semantictools.context.renderer.URLRewriter;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
+import org.semantictools.context.view.HtmlPrinter;
 import org.semantictools.frame.api.LinkManager;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.Datatype;

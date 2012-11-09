@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.semantictools.context.renderer.HtmlPrinter;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
+import org.semantictools.context.view.HtmlPrinter;
 import org.semantictools.frame.api.LinkManager;
 import org.semantictools.index.model.SchemaReference;
 import org.semantictools.index.model.ServiceDocumentationList;
