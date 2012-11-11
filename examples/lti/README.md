@@ -6,10 +6,10 @@ creating your own REST service specification.
 # Getting Started
 To use this project, you must first build the following two projects:
 
-1. [semantictools-code-renderer] (http://githubenterprise.pearson.com/UMCFAG1/semantictools/tree/master/semantictools-context-renderer)
-2. [semantictools-maven-plugin] (http://githubenterprise.pearson.com/UMCFAG1/semantictools/tree/master/semantictools-maven-plugin)
+1. [semantictools-code-renderer] (http://github.com/gmcfall/semantictools/tree/master/semantictools-context-renderer)
+2. [semantictools-maven-plugin] (http://github.com/gmcfall/semantictools/tree/master/semantictools-maven-plugin)
 
-You must also add the [RDF Schema] (http://githubenterprise.pearson.com/UMCFAG1/semantictools/tree/master/semantictools-staruml)
+You must also add the [RDF Schema] (http://github.com/gmcfall/semantictools/tree/master/semantictools-staruml)
 plugin to your StarUML installation.
 
 # Understanding the Methodology
@@ -40,7 +40,7 @@ Unfortunately, most of the tools for constructing an RDF ontology require highly
 specialized knowledge.  To simplify the process, we start with UML since it is
 familiar to most software engineers.  In particular, we use StarUML to create a
 logical model of the resources, and then we generate the RDF ontologies using a
-custom template (the “RDF Schema” template discussed above).
+custom template (the ï¿½RDF Schemaï¿½ template discussed above).
 
 
 # Cookbook
@@ -80,7 +80,7 @@ You start by creating a UML model in StarUML.  In this example, `LTI_v2.uml` con
 the StarUML model that was created by the IMS LTI working group. Obviously, you'll be 
 creating your own UML model.
 
-See  [semantictools-staruml/README] (http://githubenterprise.pearson.com/UMCFAG1/semantictools/blob/master/semantictools-staruml/README.md) 
+See  [semantictools-staruml/README] (http://githube.com/gmcfall/semantictools/blob/master/semantictools-staruml/README.md) 
 for tips on how to build an effective UML model with StarUML. The RDF Schema generator assumes that
 you are following these modeling guidelines, and you may get surprising results if you deviate
 from the guidelines.
