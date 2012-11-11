@@ -50,7 +50,18 @@ TABLE.propertiesTable TH, TABLE.enumTable TH  {
   border: 1px solid #9B9B9B;
 }
 
-TABLE.propertiesTable TD, TABLE.enumTable TD {
+TABLE.about TH, TABLE.about TD {
+	text-align: left;
+	font-family: times;
+	font-size: 12pt;
+	padding-right: 1em;
+}
+
+TABLE.about TD:nth-child(2) {
+	padding-right: 4em;
+}
+
+TABLE.propertiesTable TD, TABLE.enumTable TD:first-child {
 	padding: 5px;
   border: 1px solid #9B9B9B;
 }
@@ -206,6 +217,11 @@ TABLE.propertiesTable TH {
 .mediatype {
 	margin-left: 2em;
 	font-family: courier;
+}
+
+.titlePageData, .legal {
+	font-family: times;
+	font-size: 9.0pt;
 }
 
 .status {

@@ -11,9 +11,12 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.semantictools.context.renderer.MediaTypeFileManager;
+import org.semantictools.context.renderer.model.BibliographicReference;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.DocumentMetadata;
 import org.semantictools.context.renderer.model.FrameConstraints;
 import org.semantictools.context.renderer.model.Person;
+import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.SampleJson;
 
 public class ContextManager {
@@ -54,10 +57,11 @@ public class ContextManager {
   private MediaTypeFileManager fileManager;
   private Map<String, ContextProperties> contextMap = new HashMap<String, ContextProperties>();
   
+  private DocumentMetadata defaultMetadata;
   
-  
-  public ContextManager(MediaTypeFileManager fileManager) {
+  public ContextManager(DocumentMetadata defaultMetadata, MediaTypeFileManager fileManager) {
     this.fileManager = fileManager;
+    this.defaultMetadata = defaultMetadata;
   }
   
   public MediaTypeFileManager getMediaTypeFileManager() {
@@ -136,7 +140,7 @@ public class ContextManager {
   }
 
   private void parseProperties(File sourceFile, Properties properties) {
-    ContextProperties sink = new ContextProperties(properties);
+    ContextProperties sink = new ContextProperties(defaultMetadata, properties);
     sink.setSourceFile(sourceFile);
     
     for (Map.Entry<Object, Object> e : properties.entrySet()) {
@@ -322,51 +326,97 @@ public class ContextManager {
   private void setDefaults(ContextProperties sink) {
     setTitle(sink);
     setMediaTypeDocFile(sink);
-    setJsonLdContextReference(sink);
+    setMediaTypeReference(sink);
+//    setJsonLdContextReference(sink);
+    
+    
+  }
+  
+  private void setMediaTypeReference(ContextProperties properties) {
+    ReferenceManager manager = properties.getReferenceManager();
+    if (manager == null) return;
+    
+    String mediaType = properties.getMediaType();
+    String mediaTypeRef = properties.getMediaTypeRef();
+    if (mediaTypeRef == null) {
+      String[] array = mediaType.split("\\./\\+");
+      String rdfType = properties.getRdfTypeURI();
+      if (rdfType != null) {
+        String localName = TypeManager.getLocalName(rdfType);
+        String suffix = getSuffix(localName, array);
+        mediaTypeRef = "[" + localName + suffix + "-Media-Type" + "]";
+        properties.setMediaTypeRef(mediaTypeRef);
+      }
+    }
+    if (mediaTypeRef == null) {
+      mediaTypeRef = "[" + mediaType + "]";
+    }
+    File localFile = fileManager.getMediaTypeDocumentationFile(mediaType);
+    properties.setLocalFile(localFile);
+   
+    BibliographicReference ref = new BibliographicReference();
+    ref.setLabel(mediaTypeRef);
+    ref.setAuthor(properties.getEditors());
+    ref.setTitle(properties.getTitle());
+    ref.setDate(properties.getDate());
+    ref.setEdition(properties.getStatus());
+    ref.setLocalFile(localFile);
+    
+    manager.add(ref);
     
     
   }
 
-  private void setJsonLdContextReference(ContextProperties sink) {
-    String contextRef = sink.getContextRef();
-    if (contextRef == null) return;
-    contextRef = contextRef.replace(" ", "&nbsp;");
-    
-    if (sink.getReference(contextRef) != null) return;
-    
-    StringBuilder builder = new StringBuilder();
-    List<Person> authors = sink.getAuthors();
-    String comma = "";
-    for (Person author : authors) {
-      builder.append(comma);
-      builder.append(author.getPersonName());
-      comma = ", ";
-    }
-    builder.append("| ");
-    String rdfTypeURI = sink.getRdfTypeURI();
-    String typeName = TypeManager.getLocalName(rdfTypeURI);
-    String title = "JSON-LD Context for " + typeName + " Resources";
-    builder.append(title);
-    builder.append("| ");
-    String status = sink.getStatus();
-    if (status != null) {
-      builder.append(status);
-    }
-    String date = sink.getDate();
-    if (date != null) {
-      if (status != null) {
-        builder.append(", ");
+private String getSuffix(String localName, String[] array) {
+    for (int i=0; i<array.length-1; i++) {
+      if (localName.equals(array[i])) {
+        return "-" + array[i+1];
       }
-      builder.append(date);
     }
-    builder.append("| ");
-    builder.append("URL: ");
-    String contextURL = sink.getContextURI();
-    builder.append(contextURL);
-    
-    sink.putReference(contextRef, builder.toString());
-    
+    return "";
   }
+
+//
+//  private void setJsonLdContextReference(ContextProperties sink) {
+//    String contextRef = sink.getContextRef();
+//    if (contextRef == null) return;
+//    contextRef = contextRef.replace(" ", "&nbsp;");
+//    
+//    if (sink.getReference(contextRef) != null) return;
+//    
+//    StringBuilder builder = new StringBuilder();
+//    List<Person> authors = sink.getAuthors();
+//    String comma = "";
+//    for (Person author : authors) {
+//      builder.append(comma);
+//      builder.append(author.getPersonName());
+//      comma = ", ";
+//    }
+//    builder.append("| ");
+//    String rdfTypeURI = sink.getRdfTypeURI();
+//    String typeName = TypeManager.getLocalName(rdfTypeURI);
+//    String title = "JSON-LD Context for " + typeName + " Resources";
+//    builder.append(title);
+//    builder.append("| ");
+//    String status = sink.getStatus();
+//    if (status != null) {
+//      builder.append(status);
+//    }
+//    String date = sink.getDate();
+//    if (date != null) {
+//      if (status != null) {
+//        builder.append(", ");
+//      }
+//      builder.append(date);
+//    }
+//    builder.append("| ");
+//    builder.append("URL: ");
+//    String contextURL = sink.getContextURI();
+//    builder.append(contextURL);
+//    
+//    sink.putReference(contextRef, builder.toString());
+//    
+//  }
 
   private void setMediaTypeDocFile(ContextProperties sink) {
     File file = fileManager.getIndexFile(sink.getMediaType());

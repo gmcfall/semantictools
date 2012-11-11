@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,8 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
@@ -32,7 +29,6 @@ import org.semantictools.context.renderer.StreamFactory;
 import org.semantictools.context.renderer.TermNotFoundException;
 import org.semantictools.context.renderer.TreeGenerator;
 import org.semantictools.context.renderer.impl.NodeComparatorFactoryImpl;
-import org.semantictools.context.renderer.model.ChainedDocumentMetadata;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.CreateDiagramRequest;
 import org.semantictools.context.renderer.model.GlobalProperties;
@@ -177,7 +173,6 @@ public class ContextHtmlPrinter extends PrintEngine {
     jsonManager = new JsonManager(typeManager, context);
     nodeComparatorFactory = new NodeComparatorFactoryImpl(jsonManager);
     
-    addDefaultReferences();
 
     beginHTML();
     pushIndent();
@@ -199,14 +194,13 @@ public class ContextHtmlPrinter extends PrintEngine {
   
   private DocumentPrinter createDocumentPrinter() {
     DocumentPrinter printer = null;
-    ChainedDocumentMetadata metadata = new ChainedDocumentMetadata(contextProperties, global);
-    String template = metadata.getTemplateName();
+    String template = contextProperties.getTemplateName();
     if (DocumentPrinter.TEMPLATE_IMS.equalsIgnoreCase(template)) {
       printer = new IMSDocumentPrinter(getPrintContext());
     } else {
       printer = new DefaultDocumentPrinter(getPrintContext());
     }
-    printer.setMetadata(metadata);
+    printer.setMetadata(contextProperties);
     printer.setClassificationPrinter(new MyClassificationPrinter());
    
     return printer;
@@ -302,34 +296,6 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
 
-  private void addDefaultReferences() {
-   
-    addDefaultReference(
-        "[JSON-LD-syntax]",
-        "Manu Sporny, Dave Longley, Gregg Kellogg, Markus Lanthaler, Mark Birbeck| Json-LD Syntax 1.0| " +
-        "Unofficial Draft 19| March 2012| W3C Community Group Recommendation| " +
-        "URL: http://json-ld.org/spec/latest/json-ld-syntax/");
-    
-    addDefaultReference(
-        "[RFC4627]",
-        "D. Crockford| The application/json Media Type for JavaScript Object Notation (JSON)|" +
-        "July 2006| Internet RFC 4627| URL: http://www.ietf.org/rfc/rfc4627.txt");
-    
-    addDefaultReference(
-        "[CURIE-syntax]", 
-        "Mark Birbeck, Shane McCarron| CURIE Syntax 1.0| W3C Working Group Note| 16 December 2010| " +
-        "URL: http://www.w3.org/TR/curie/");
-     
-    
-  }
-
-  private void addDefaultReference(String key, String value) {
-    if (contextProperties!=null && contextProperties.getReference(key)==null) {
-      contextProperties.putReference(key, value);
-    }
-    
-    
-  }
 
   
 
@@ -469,7 +435,8 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private void writeOutput() throws IOException {
 
-    String text = documentPrinter.getText();
+    documentPrinter.insertTableOfContents();
+    String text = documentPrinter.popText();
 
     String path = namer.getIndexFileName();
     OutputStream stream = streamFactory.createOutputStream(path);
@@ -489,35 +456,6 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
 
-  private void printHeadings(List<Heading> toc) {
-    if (toc == null)
-      return;
-    indent().print("<UL");
-    printAttr("class", "toc");
-    println(">");
-    pushIndent();
-    for (Heading heading : toc) {
-      String number = heading.getHeadingNumber();
-      String text = heading.getHeadingText();
-      String href = "#" + heading.getHeadingId();
-      indent().print("<LI");
-      printAttr("class", "tocline");
-      print(">");
-      print("<span");
-      printAttr("class", "secno");
-      print(">");
-      print(number);
-      print("</span>");
-      print(" <a");
-      printAttr("href", href);
-      print(">").print(text).print("</a>");
-      println("</LI>");
-      printHeadings(heading.getChildren());
-    }
-    popIndent();
-    println("</UL>");
-
-  }
 
   private void printAbstract() {
     if (!defaultTemplate) return;

@@ -16,9 +16,11 @@ import com.ibm.icu.util.StringTokenizer;
 public class MediaTypeFileManager {
   
   private File mediaTypeDir;
+  private File baseDir;
   
     
-  public MediaTypeFileManager(File mediaTypeDir) {
+  public MediaTypeFileManager(File baseDir, File mediaTypeDir) {
+    this.baseDir = baseDir;
     this.mediaTypeDir = mediaTypeDir;
   }
   
@@ -81,6 +83,14 @@ public class MediaTypeFileManager {
   public String getJsonContextFileName(JsonContext context) {
     
     return  "context.json";
+  }
+  
+  public File getMediaTypeDocumentationFile(String mediaType) {
+
+    File parentDir = new File(baseDir, pathToMediaTypeDir(mediaType));
+    parentDir.mkdirs();
+    
+    return new File(parentDir, getIndexFileName());
   }
   
   public String getServiceDocumentationFileName() {

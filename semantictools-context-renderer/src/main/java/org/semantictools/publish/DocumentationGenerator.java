@@ -140,8 +140,8 @@ public class DocumentationGenerator {
     };
     
     ServiceFileManager serviceFileManager = new ServiceFileManager(umlDir, umlCss);
-    MediaTypeFileManager mediatypeFileManager = new MediaTypeFileManager(mediaTypeDir);
-    ContextManager contextManager = new ContextManager(mediatypeFileManager);
+    MediaTypeFileManager mediatypeFileManager = new MediaTypeFileManager(mediaTypeDir, mediaTypeDir);
+    ContextManager contextManager = new ContextManager(global, mediatypeFileManager);
     MediaTypeDocumenter documenter = new MediaTypeDocumenter(contextManager, umlFileManager, global);
     documenter.loadAll(rdfDir);
     typeManager.analyzeOntologies();
@@ -150,7 +150,7 @@ public class DocumentationGenerator {
     }
     
     ServiceDocumentationPrinter servicePrinter = new ServiceDocumentationPrinter(rewriter);
-    ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(contextManager, serviceFileManager, servicePrinter);
+    ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(global, contextManager, serviceFileManager, servicePrinter);
     serviceManager.scan(rdfDir);
     if (generate) {
       serviceManager.writeAll();

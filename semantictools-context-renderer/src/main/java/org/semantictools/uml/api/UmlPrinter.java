@@ -16,10 +16,17 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.BaseDocumentMetadata;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
+import org.semantictools.context.view.Caption;
+import org.semantictools.context.view.CaptionType;
+import org.semantictools.context.view.DefaultDocumentPrinter;
+import org.semantictools.context.view.DocumentPrinter;
+import org.semantictools.context.view.DocumentPrinterFactory;
+import org.semantictools.context.view.Heading;
 import org.semantictools.context.view.HtmlPrinter;
 import org.semantictools.frame.api.LinkManager;
 import org.semantictools.frame.api.TypeManager;
@@ -52,6 +59,8 @@ public class UmlPrinter extends HtmlPrinter {
   private AppspotUploadClient uploadClient;
   private LinkManager uploadLinkManager;
   private GlobalProperties global;
+  private BaseDocumentMetadata metadata;
+  private DocumentPrinter printer;
   
   public UmlPrinter(
       GlobalProperties global,
@@ -106,22 +115,30 @@ public class UmlPrinter extends HtmlPrinter {
   
   private void init(OntologyInfo info) {
 
-    this.init(new ReferenceMap());
+    this.init();
     this.ontologyURI = info.getUri();
     linkManager.setOntology(ontologyURI);
     
   }
 
   private void printXmlSchema(OntologyInfo info) throws IOException {
-    
+
+    String templateName = global.getTemplateName();
+    metadata = new BaseDocumentMetadata(global);
+    printer = DocumentPrinterFactory.getDefaultFactory().createPrinter(templateName);
+    printer.setMetadata(metadata);
+    setPrintContext(printer.getPrintContext());
+    setCss();
     setXmlSchemaTitle(info);
-    beginHTML();
-    printTitle();
-    printTocMarker();
+    printer.beginHTML();
+    printer.printTitlePage();
+    printer.printTableOfContentsMarker();
+    println("<hr/>");
     printDatatypes(info);
-    endHTML();
+    printer.printFooter();
+    printer.endHTML();
     
-    insertTableOfContents();
+    printer.insertTableOfContents();
     
     writeFile();
     
@@ -145,6 +162,8 @@ public class UmlPrinter extends HtmlPrinter {
       ontologyTitle = info.getPrefix().toUpperCase() + " XML Schema";
     }
     
+    metadata.setTitle(ontologyTitle);
+    
   }
 
   private List<Datatype> listDataTypes(String uri) {
@@ -165,7 +184,7 @@ public class UmlPrinter extends HtmlPrinter {
 
   private void printDatatype(Datatype type) {
       
-    Heading heading = createHeading(type.getLocalName());
+    Heading heading = printer.createHeading(type.getLocalName());
     
     
     heading.setClassName("rdfType");
@@ -173,12 +192,12 @@ public class UmlPrinter extends HtmlPrinter {
     
     String baseURI = type.getBase().getUri();
    
-    beginTable("propertiesTable");
+    printer.beginTable("propertiesTable");
     
-    beginRow();
-    printTH("Restriction&nbsp;Base");
-    printTD(baseURI);
-    endRow();
+    printer.beginRow();
+    printer.printTH("Restriction&nbsp;Base");
+    printer.printTD(baseURI);
+    printer.endRow();
     
     printStringFacet("pattern", type.getPattern());
     printNumberFacet("length", type.getLength());
@@ -191,7 +210,7 @@ public class UmlPrinter extends HtmlPrinter {
     printNumberFacet("totalDigits", type.getTotalDigits());
     printNumberFacet("fractionDigits", type.getFractionDigits());
     
-    endTable();
+    printer.endTable();
 //    
 //    String captionText = "Facets of " + termName;
 //    Caption caption = new Caption(CaptionType.Table, captionText, termName, type.getUri());
@@ -205,19 +224,19 @@ public class UmlPrinter extends HtmlPrinter {
   private void printNumberFacet(String name, Number value) {
     
     if (value == null) return;
-    beginRow();
-    printTH(name);
-    printTD(value.toString());
-    endRow();
+    printer.beginRow();
+    printer.printTH(name);
+    printer.printTD(value.toString());
+    printer.endRow();
     
   }
 
   private void printStringFacet(String name, String value) {
     if (value == null) return;
-    beginRow();
-    printTH(name);
-    printTD(value);
-    endRow();
+    printer.beginRow();
+    printer.printTH(name);
+    printer.printTD(value);
+    printer.endRow();
     
   }
   
@@ -262,40 +281,57 @@ public class UmlPrinter extends HtmlPrinter {
     
   }
 
-  static class ReferenceMap implements ReferenceManager {
-
-    
-    @Override
-    public String getReference(String key) {
-      // TODO Auto-generated method stub
-      return null;
-    }
-    
-  }
   
   public void printOntology(String ontologyURI) throws IOException {
     // TODO: use a proper reference map.
     
-    
+    String templateName = global.getTemplateName();
+    metadata = new BaseDocumentMetadata(global);
+    printer = DocumentPrinterFactory.getDefaultFactory().createPrinter(templateName);
+    printer.setMetadata(metadata);
+    setPrintContext(printer.getPrintContext());
+    setCss();
     setTitle();
-    beginHTML();
-    printTitle();
-    printTocMarker();
+    printer.beginHTML();
+    printer.printTitlePage();
+    printer.printTableOfContentsMarker();
     printDataModel();
-    endHTML();
+    printer.printFooter();
+    printer.endHTML();
     
-    insertTableOfContents();
+    printer.insertTableOfContents();
     
     writeFile();
   }
 
-  private void setTitle() {
+  private void setCss() {
+    // TODO: should delegate to UmlFileManager
+    
+    String ontoPath = linkManager.getOntologyDir().getAbsolutePath();
+    String basePath = linkManager.getRootDir().getAbsolutePath();
+    
+    String relativePath = ontoPath.substring(basePath.length());
+    relativePath = relativePath.replace('\\', '/');
+    int count = dirCount(relativePath);
+    StringBuilder builder = new StringBuilder();
+    for (int i=0; i<count; i++) {
+      builder.append("../");
+    }
+    builder.append(UML_CSS);
+    
+    String css = builder.toString();
+    metadata.setCss(css);
+  }
 
+  private void setTitle() {
     OntologyInfo info = umlManager.getTypeManager().getOntologyByUri(ontologyURI);
     ontologyTitle =  ontologyURI;
     if (info != null && info.getLabel()!=null) {
       ontologyTitle = info.getLabel();
     }
+    
+    metadata.setTitle(ontologyTitle);
+    
     
   }
 
@@ -303,7 +339,7 @@ public class UmlPrinter extends HtmlPrinter {
     
     File file = getOntologyIndexFile();
     file.getParentFile().mkdirs();
-    String text = popText();
+    String text = printer.popText();
     
     FileWriter writer = new FileWriter(file);
     try {
@@ -385,7 +421,7 @@ public class UmlPrinter extends HtmlPrinter {
     
     println("<HR/>");
     
-    Heading heading = createHeading(localName, linkManager.getTypeId(umlClass.getType()));
+    Heading heading = printer.createHeading(localName, linkManager.getTypeId(umlClass.getType()));
     print(heading);
     pushIndent();
     
@@ -408,9 +444,9 @@ public class UmlPrinter extends HtmlPrinter {
     List<UmlAssociation> list = umlClass.getParentList();
     if (list == null || list.isEmpty()) return;
     
-    beginDiv("list-heading");
+    printer.beginDiv("list-heading");
     print("Known Uses:");    
-    endDiv();
+    printer.endDiv();
     indent();
     println("<UL>");
     pushIndent();
@@ -423,13 +459,13 @@ public class UmlPrinter extends HtmlPrinter {
       
       indent();
       print("<LI>");
-      printAnchor(classHref, className);
+      printer.printAnchor(classHref, className);
       if (field != null) {
         Property property = field.getProperty();
         String fieldName = field.getLocalName();
         String fieldHref = linkManager.getPropertyHref(end.getParticipant(), property);
         print(".");
-        printAnchor(fieldHref, fieldName);
+        printer.printAnchor(fieldHref, fieldName);
       }
       
     }
@@ -454,28 +490,28 @@ public class UmlPrinter extends HtmlPrinter {
     if (count==0) return;
 
 
-    beginDiv("list-heading");
+    printer.beginDiv("list-heading");
     print("See Also:");
-    endDiv();
+    printer.endDiv();
     println("<UL>");
     pushIndent();
     
     for (int i=0; i<list.size(); i++) {
       
       ServiceDocumentation doc = list.get(i);
-      String title = doc.getTitle();
+      String title = doc.getTitle().replace("<br>", " ").replace("<br/>", " ");
 
       String serviceHref = linkManager.relativize(doc.getServiceDocumentationFile());
       indent();
       print("<LI>");
-      printAnchor(serviceHref, title);
+      printer.printAnchor(serviceHref, title);
     }
     for (ContextProperties context : mediaTypeList) {
       String mediaType = context.getMediaType();
       String href = linkManager.relativize(context.getMediaTypeDocFile());
       indent();
       print("<LI>");
-      printAnchor(href, mediaType);
+      printer.printAnchor(href, mediaType);
     }
     popIndent();    
     println("</UL>");
@@ -487,7 +523,7 @@ public class UmlPrinter extends HtmlPrinter {
 
     String description = umlClass.getDescription();
     if (exists(description)) {
-      printParagraph(description);
+      printer.printParagraph(description);
     }
 
     
@@ -497,10 +533,10 @@ public class UmlPrinter extends HtmlPrinter {
     List<UmlClass> superList = umlClass.getSupertypeList();
     if (superList == null || superList.isEmpty()) return;
     
-    beginDiv("list-heading");
+    printer.beginDiv("list-heading");
     print("Direct Known Supertypes:");
-    endDiv();
-    beginDiv("running-list");
+    printer.endDiv();
+    printer.beginDiv("running-list");
     String comma = "";
     for (UmlClass supertype : superList) {
       print(comma);
@@ -508,7 +544,7 @@ public class UmlPrinter extends HtmlPrinter {
       comma = ", ";
     }
     
-    endDiv();
+    printer.endDiv();
     
   }
 
@@ -516,10 +552,10 @@ public class UmlPrinter extends HtmlPrinter {
     List<UmlClass> subList = umlClass.getSubtypeList();
     if (subList == null || subList.isEmpty()) return;
     
-    beginDiv("list-heading");
+    printer.beginDiv("list-heading");
     print("Direct Known Subtypes:");
-    endDiv();
-    beginDiv("running-list");
+    printer.endDiv();
+    printer.beginDiv("running-list");
     String comma = "";
     for (UmlClass subtype : subList) {
       print(comma);
@@ -527,7 +563,7 @@ public class UmlPrinter extends HtmlPrinter {
       comma = ", ";
     }
     
-    endDiv();
+    printer.endDiv();
     
   }
 
@@ -556,11 +592,11 @@ public class UmlPrinter extends HtmlPrinter {
     if (list==null || list.isEmpty()) return;
     
     String title = "Properties inherited from " + superclass.getLocalName();
-    beginTable("propertiesTable");
-    beginRow();
-    printTH(title);
-    endRow();
-    beginRow();
+    printer.beginTable("propertiesTable");
+    printer.beginRow();
+    printer.printTH(title);
+    printer.endRow();
+    printer.beginRow();
     indent();
     print("<TD>");
     
@@ -586,9 +622,9 @@ public class UmlPrinter extends HtmlPrinter {
     println("</TD>");
     
     
-    endRow();
+    printer.endRow();
     
-    endTable();
+    printer.endTable();
     
     
   }
@@ -609,7 +645,7 @@ public class UmlPrinter extends HtmlPrinter {
 //    
 //    assignNumber(caption);
     
-    printFigure(src, null);
+    printer.printFigure(src, null);
     
   }
 
@@ -627,16 +663,16 @@ public class UmlPrinter extends HtmlPrinter {
       }
     });
     
-    beginDiv("list-heading");
+    printer.beginDiv("list-heading");
     print("Known Instances:");
-    endDiv();
-    beginTable("propertiesTable");
-    beginRow();
+    printer.endDiv();
+    printer.beginTable("propertiesTable");
+    printer.beginRow();
     println("<TH>Simple Name</TH><TH> Description / URI</TH>");
-    endRow();
+    printer.endRow();
     for (NamedIndividual n : list) {
       String comment = n.getComment();
-      beginRow();
+      printer.beginRow();
       print("<TD>");
       print(n.getLocalName());
       print("</TD>");
@@ -650,9 +686,9 @@ public class UmlPrinter extends HtmlPrinter {
       print(n.getUri());
       print("</code>");
       print("</TD>");
-      endRow();
+      printer.endRow();
     }
-    endTable();
+    printer.endTable();
     
   }
 
@@ -670,16 +706,16 @@ public class UmlPrinter extends HtmlPrinter {
     String captionText = format("{0} Properties", umlClass.getLocalName());
     Caption caption = new Caption(CaptionType.Table, captionText, tableId, null);
     
-    assignNumber(caption);
+    printer.assignNumber(caption);
     
     String title = format("Properties of class {0}", umlClass.getLocalName());
     
     
-    beginTable("propertiesTable");
+    printer.beginTable("propertiesTable");
 
-    beginRow();
+    printer.beginRow();
     println("<TH colspan=\"3\">" + title + "</TH>");
-    endRow();
+    printer.endRow();
     
     TypeManager typeManager = umlManager.getTypeManager();
     
@@ -697,21 +733,21 @@ public class UmlPrinter extends HtmlPrinter {
       
       String propertyId = linkManager.getPropertyId(umlClass, field.getProperty());
       
-      beginRow();
+      printer.beginRow();
       indent();
       print("<TD>");
-      beginDiv("propertyName", propertyId);
+      printer.beginDiv("propertyName", propertyId);
       indent();
       print(field.getLocalName());
-      endDiv();
-      beginDiv("description");
+      printer.endDiv();
+      printer.beginDiv("description");
       indent();
       print(field.getComment());
-      endDiv();
+      printer.endDiv();
       print("</TD>");
-      printTD("propertyType", link);
-      printTD("multiplicity", field.getMultiplicity());
-      endRow();
+      printer.printTD("propertyType", link);
+      printer.printTD("multiplicity", field.getMultiplicity());
+      printer.endRow();
     }
     
 //    beginRow();
@@ -739,28 +775,10 @@ public class UmlPrinter extends HtmlPrinter {
 //      endRow();
 //    }
     
-    endTable();
+    printer.endTable();
     
   }
 
-  @Override
-  protected String getPathToStyleSheet() {
-    // TODO: should delegate to UmlFileManager
-    
-    String ontoPath = linkManager.getOntologyDir().getAbsolutePath();
-    String basePath = linkManager.getRootDir().getAbsolutePath();
-    
-    String relativePath = ontoPath.substring(basePath.length());
-    relativePath = relativePath.replace('\\', '/');
-    int count = dirCount(relativePath);
-    StringBuilder builder = new StringBuilder();
-    for (int i=0; i<count; i++) {
-      builder.append("../");
-    }
-    builder.append(UML_CSS);
-    
-    return builder.toString();
-  }
 
   private int dirCount(String relativePath) {
     int count = 0;

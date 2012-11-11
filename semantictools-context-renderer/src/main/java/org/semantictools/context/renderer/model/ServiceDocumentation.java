@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ServiceDocumentation implements ReferenceManager {
+public class ServiceDocumentation extends BaseDocumentMetadata  {
 
   
   private List<ContextProperties> contextPropertiesList = new ArrayList<ContextProperties>();
@@ -16,11 +16,6 @@ public class ServiceDocumentation implements ReferenceManager {
   private String postResponseMediaType;
   private String postResponseMediaTypeRef;
   
-  private String title;
-  private String subtitle;
-  private String status;
-  private String date;
-  private boolean versionHistory;
   private String abstactText;
   private String introduction;
   private String representationHeading;
@@ -41,38 +36,25 @@ public class ServiceDocumentation implements ReferenceManager {
   private MethodDocumentation putDocumentation;
   private MethodDocumentation deleteDocumentation;
   
-  private List<Person> editors = new ArrayList<Person>();
-  private List<String> authors = new ArrayList<String>();
   private List<HttpMethod> methodList = new ArrayList<HttpMethod>();
   private List<QueryParam> queryParams = new ArrayList<QueryParam>();
   private List<String> putRules = new ArrayList<String>();
   
-  private String cssHref;
   private Map<String, String> referenceMap = new HashMap<String, String>();
   private Map<String, String> mediaTypeUriMap = new HashMap<String, String>();
+  
+  public ServiceDocumentation(DocumentMetadata global) {
+    super(global);
+  }
 
   public File getServiceDocumentationFile() {
     return serviceDocumentationFile;
   }
   public void setServiceDocumentationFile(File serviceDocumentationFile) {
     this.serviceDocumentationFile = serviceDocumentationFile;
+    this.setLocalFile(serviceDocumentationFile);
   }
 
-  /**
-   * Specifies whether the documentation for the service should contain a link
-   * to the version history of the specification.
-   */
-  public void setHistoryLink(boolean value) {
-    versionHistory = value;
-  }
-  
-  /**
-   * Returns true if the documentation for the service should contain a link
-   * to the version history of the specification.
-   */
-  public boolean hasHistoryLink() {
-    return versionHistory;
-  }
   
   /**
    * Returns true if the REST Service supports content negotiation.
@@ -131,12 +113,6 @@ public class ServiceDocumentation implements ReferenceManager {
   }
   
   
-  public String getDate() {
-    return date;
-  }
-  public void setDate(String date) {
-    this.date = date;
-  }
   /**
    * Returns the text that describes the text/html representation of the resource.
    */
@@ -176,25 +152,7 @@ public class ServiceDocumentation implements ReferenceManager {
   public void setAllowArbitraryFormat(boolean allowArbitraryFormat) {
     this.allowArbitraryFormat = allowArbitraryFormat;
   }
-  public String getTitle() {
-    return title;
-  }
-  public void setTitle(String title) {
-    this.title = title;
-  }
   
-  public String getSubtitle() {
-    return subtitle;
-  }
-  public void setSubtitle(String subtitle) {
-    this.subtitle = subtitle;
-  }
-  public String getStatus() {
-    return status;
-  }
-  public void setStatus(String status) {
-    this.status = status;
-  }
   public String getAbstactText() {
     return abstactText;
   }
@@ -207,26 +165,6 @@ public class ServiceDocumentation implements ReferenceManager {
   public void setIntroduction(String introduction) {
     this.introduction = introduction;
   }
-  public List<Person> getEditors() {
-    return editors;
-  }
-  public void setEditors(List<Person> editors) {
-    this.editors = editors;
-  }
-  public List<String> getAuthors() {
-    return authors;
-  }
-  public void setAuthors(List<String> authors) {
-    this.authors = authors;
-  }
-
-  public String getReference(String key) {
-    return referenceMap.get(key);
-  }
-  
-  public void putReference(String key, String value) {
-    referenceMap.put(key, value);
-  }
   
   public void add(ContextProperties context) {
     contextPropertiesList.add(context);
@@ -235,12 +173,6 @@ public class ServiceDocumentation implements ReferenceManager {
     return contextPropertiesList;
   }
   
-  public String getCssHref() {
-    return cssHref;
-  }
-  public void setCssHref(String cssHref) {
-    this.cssHref = cssHref;
-  }
   public String getRepresentationHeading() {
     return representationHeading;
   }

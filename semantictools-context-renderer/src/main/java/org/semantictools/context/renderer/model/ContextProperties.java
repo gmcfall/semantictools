@@ -16,7 +16,7 @@ import org.semantictools.frame.api.TypeManager;
  * @author Greg McFall
  *
  */
-public class ContextProperties implements ReferenceManager, Comparable<ContextProperties>, DocumentMetadata {
+public class ContextProperties extends BaseDocumentMetadata implements Comparable<ContextProperties> {
   
   
   private File sourceFile;
@@ -29,37 +29,25 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
   private String mediaType;
   private String mediaTypeURI;
   private String mediaTypeRef;
-  private String template;
-  private String purpose;
-  private String documentLocation;
   private String sampleText;
-  private String release;
   private String purlDomain;
-  private String footer;
-  private Boolean historyLink;
   private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
   private Set<String> requiresId = new HashSet<String>();
   private List<String> graphTypes = new ArrayList<String>();
   private Set<String> setProperty = new HashSet<String>();
-  private String title;
-  private String status;
-  private String date;
   private String abstactText;
   private String introduction;
-  private List<Person> editors;
-  private List<Person> authors;
-  private List<Person> coChairs;
   private Set<String> excludedTypes = new HashSet<String>();
   private Set<String> expandedValues = new HashSet<String>();
   private List<SampleJson> sampleJsonList = new ArrayList<SampleJson>();
-  private Map<String, String> referenceMap = null;
   private Map<String, FrameConstraints> uri2FrameConstraints = new HashMap<String, FrameConstraints>();
   private Properties rawProperties;
   
   
-  public ContextProperties(Properties rawProperties) {
+  public ContextProperties(DocumentMetadata parent, Properties rawProperties) {
+    super(parent);
     this.rawProperties = rawProperties;
   }
   
@@ -105,24 +93,6 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     return graphTypes;
   }
 
-
-  /**
-   * Specifies whether the documentation for the media type should contain a link
-   * to the version history of the specification.
-   */
-  public void setHistoryLink(boolean value) {
-    historyLink = value;
-  }
-  
-  /**
-   * Returns true if the documentation for the media type should contain a link
-   * to the version history of the specification.
-   * @return
-   */
-  public Boolean hasHistoryLink() {
-    return historyLink;
-  }
-  
   /**
    * Returns the local name for one property whose value is described by the media type.
    * This must be the name of a property belonging to the class identified by the rdfTypeURI.
@@ -158,15 +128,6 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.mediaTypeDocFile = mediaTypeDocFile;
   }
 
-
-  public String getDate() {
-    return date;
-  }
-
-
-  public void setDate(String date) {
-    this.date = date;
-  }
 
 
   /**
@@ -243,36 +204,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.sourceFile = sourceFile;
   }
 
-
-
-  public String getStatus() {
-    return status;
-  }
-
-
-  public void setReferences(Map<String,String> references) {
-    referenceMap = references;
-  }
   
-  public String getReference(String key) {
-    if (referenceMap == null) return null;
-    return referenceMap.get(key);
-  }
-  
-  public void putReference(String key, String value) {
-    if (referenceMap == null) {
-      referenceMap = new HashMap<String, String>();
-    }
-    referenceMap.put(key, value);
-  }
-
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-
-
   public String getIntroduction() {
     return introduction;
   }
@@ -291,25 +223,6 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
 
   public void setAbstactText(String abstactText) {
     this.abstactText = abstactText;
-  }
-
-
-
-  public List<Person> getEditors() {
-    return editors;
-  }
-
-  @Override
-  public void addAuthor(Person person) {
-    if (authors==null) {
-      authors = new ArrayList<Person>();
-    }
-    authors.add(person);
-  }
-  
-  @Override
-  public List<Person> getAuthors() {
-    return authors;
   }
 
 
@@ -402,20 +315,6 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.rdfTypeRef = rdfTypeRef;
   }
 
-
-
-  public String getTitle() {
-    return title;
-  }
-
-
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-
-
   public String getMediaTypeURI() {
     return mediaTypeURI;
   }
@@ -457,31 +356,6 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.sampleText = sampleText;
   }
 
-  /**
-   * Returns the name of the template to use when generating documentation.
-   * At the present time, only two templates are supported.  The supported names are:
-   * <UL>
-   *   <LI> default
-   *   <LI> simple
-   * </UL>
-   * @return
-   */
-  public String getTemplateName() {
-    return template;
-  }
-
-  /**
-   * Sets the name of the template to use when generating documentation.
-   * At the present time, only two templates are supported.  The supported names are:
-   * <UL>
-   *   <LI> default
-   *   <LI> simple
-   * </UL>
-   * @return
-   */
-  public void setTemplateName(String template) {
-    this.template = template;
-  }
 
   /**
    * Returns the output file that contains the generated JSON-LD context.
@@ -497,94 +371,7 @@ public class ContextProperties implements ReferenceManager, Comparable<ContextPr
     this.contextFile = contextFile;
   }
 
-  @Override
-  public String getSubtitle() {
-    return null;
-  }
-
-  @Override
-  public String getVersion() {
-    return null;
-  }
-
-  @Override
-  public String getLegalNotice() {
-    return null;
-  }
-
-  @Override
-  public String getLogo() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getLatestVersionURI() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<Person> getCoChairs() {
-    return coChairs;
-  }
-
-  @Override
-  public void addCoChair(Person person) {
-    if (coChairs == null) {
-      coChairs = new ArrayList<Person>();
-    }
-    coChairs.add(person);
-    
-  }
-
-  @Override
-  public void addEditor(Person person) {
-    if (editors == null) {
-      editors = new ArrayList<Person>();
-    }
-    editors.add(person);
-    
-  }
-
-  @Override
-  public String getRelease() {
-    return release;
-  }
-
-  public void setRelease(String release) {
-    this.release = release;
-  }
-
-  @Override
-  public String getPurpose() {
-    return purpose;
-  }
-
-  public void setPurpose(String purpose) {
-    this.purpose = purpose;
-  }
-
-  @Override
-  public String getDocumentLocation() {
-    return documentLocation;
-  }
-
-  public void setDocumentLocation(String documentLocation) {
-    this.documentLocation = documentLocation;
-  }
-
-  @Override
-  public String getFooter() {
-    return footer;
-  }
-
-  public void setFooter(String footer) {
-    this.footer = footer;
-  }
-
   
 
-  
 
 }

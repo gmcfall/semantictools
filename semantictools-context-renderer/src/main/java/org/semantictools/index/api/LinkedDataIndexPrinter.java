@@ -8,8 +8,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.DocumentMetadata;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
-import org.semantictools.context.view.HtmlPrinter;
+import org.semantictools.context.view.DefaultDocumentPrinter;
 import org.semantictools.frame.api.LinkManager;
 import org.semantictools.index.model.SchemaReference;
 import org.semantictools.index.model.ServiceDocumentationList;
@@ -21,7 +23,7 @@ import org.semantictools.index.model.ServiceDocumentationList;
  * @author Greg McFall
  *
  */
-public class LinkedDataIndexPrinter extends HtmlPrinter {
+public class LinkedDataIndexPrinter extends DefaultDocumentPrinter {
   
   private LinkedDataIndex index;
   private LinkManager linkManager;
@@ -36,10 +38,14 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
     linkManager = new LinkManager();
     linkManager.setBaseURI(pubDir.toString().replace("\\", "/") + "/");
     pubDir.mkdirs();
+    
+    DocumentMetadata metadata = new GlobalProperties();
+    metadata.setCss("uml/uml.css");
+    setMetadata(metadata);
   }
   
   public void printIndex() throws IOException {
-    init();
+    clear();
     
     beginHTML();
     pushIndent();
@@ -216,9 +222,5 @@ public class LinkedDataIndexPrinter extends HtmlPrinter {
     
   }
 
-  @Override
-  protected String getPathToStyleSheet() {
-    return "uml/uml.css";
-  }
 
 }

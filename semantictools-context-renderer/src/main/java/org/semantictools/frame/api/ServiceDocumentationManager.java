@@ -14,11 +14,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.semantictools.context.renderer.model.BibliographicReference;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.DocumentMetadata;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
 import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.QueryParam;
+import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.context.renderer.model.ServiceFileManager;
@@ -62,13 +65,16 @@ public class ServiceDocumentationManager {
   private ContextManager contextManager;
   private ServiceFileManager serviceFileManager;
   private ServiceDocumentationPrinter printer;
+  private DocumentMetadata global;
   
   
   public ServiceDocumentationManager(
+      DocumentMetadata global,
       ContextManager contextManager, 
       ServiceFileManager fileManager, 
       ServiceDocumentationPrinter printer
   ) {
+    this.global = global;
     this.contextManager = contextManager;
     serviceFileManager = fileManager;
     this.printer = printer;
@@ -110,7 +116,7 @@ public class ServiceDocumentationManager {
   
 
   private void parseProperties(Properties properties) {
-    ServiceDocumentation sink = new ServiceDocumentation();
+    ServiceDocumentation sink = new ServiceDocumentation(global);
     
     sink.setDefaultMediaType(properties.getProperty(DEFAULT_MEDIA_TYPE));
     
@@ -361,18 +367,6 @@ public class ServiceDocumentationManager {
   
   
   
-  
-
-  
-
-  private void copyLines(List<String> source, List<String> sink) {
-    for (String value : source) {
-      if (!sink.contains(value)) {
-        sink.add(value);
-      }
-    }
-    
-  }
 
   private String getLocalName(String uri) {
 
@@ -404,7 +398,6 @@ public class ServiceDocumentationManager {
     setPutDoc(doc, typeName);
     setDeleteDoc(doc, typeName);
     setGetResponseDefault(doc);
-    addMediaTypeCitation(doc);
   }
   
 
@@ -413,7 +406,7 @@ public class ServiceDocumentationManager {
     File htmlFile = doc.getServiceDocumentationFile();
     String cssPath = serviceFileManager.getRelativeCssPath(htmlFile);
     
-    doc.setCssHref(cssPath);
+    doc.setCss(cssPath);
     
   }
 
@@ -428,67 +421,6 @@ public class ServiceDocumentationManager {
       doc.add(HttpMethod.PUT);
       doc.add(HttpMethod.DELETE);
     }
-    
-  }
-
-  private void addMediaTypeCitation(ServiceDocumentation doc) {
-    
-    for (ContextProperties context : doc.listContextProperties()) {
-      String key = context.getMediaTypeRef();
-      String ref = doc.getReference(key);
-      if (ref == null) {
-        doc.putReference(key, createMediaTypeCitation(context));
-      }
-    }
-   
-    
-  }
-
-  private String createMediaTypeCitation(ContextProperties context) {
-    StringBuilder builder = new StringBuilder();
-    addAuthors(builder, context);
-    addTitle(builder, context);
-    addStatus(builder, context);
-    addURL(builder, context);
-    
-    return builder.toString();
-  }
-
-  private void addURL(StringBuilder builder, ContextProperties context) {
-    String url = context.getMediaTypeURI();
-    if (url != null) {
-      builder.append("URL: ");
-      builder.append(url);
-    }
-    
-  }
-
-  private void addStatus(StringBuilder builder, ContextProperties context) {
-    String status = context.getStatus();
-    if (status != null) {
-      builder.append(status);
-      builder.append("|");
-    }
-    
-  }
-
-  private void addTitle(StringBuilder builder, ContextProperties context) {
-    String title = context.getTitle().replaceAll("<BR/?>", " ");
-    builder.append(title);
-    builder.append("|");
-    
-    
-  }
-
-  private void addAuthors(StringBuilder builder, ContextProperties context) {
-    String delim = "";
-    if (context.getAuthors()!=null) {
-      for (Person person : context.getAuthors()) {
-        builder.append(delim);
-        builder.append(person.getPersonName());
-      }
-    }
-    builder.append("|");
     
   }
 

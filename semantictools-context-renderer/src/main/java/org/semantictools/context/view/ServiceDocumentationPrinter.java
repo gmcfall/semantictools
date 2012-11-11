@@ -3,6 +3,8 @@ package org.semantictools.context.view;
 import java.util.List;
 
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.DocumentMetadata;
+import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.HttpHeaderInfo;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
@@ -14,6 +16,7 @@ import org.semantictools.context.renderer.model.ServiceDocumentation;
 public class ServiceDocumentationPrinter extends HtmlPrinter {
 
   private ServiceDocumentation doc;
+  private DocumentPrinter printer;
   
   public ServiceDocumentationPrinter(URLRewriter rewriter) {
     super(rewriter);
@@ -21,41 +24,32 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   
   public String print(ServiceDocumentation doc) {
     this.doc = doc;
-    init(doc);
+    init();
     
-    beginHTML();
+    String templateName = doc.getTemplateName();
+    printer = DocumentPrinterFactory.getDefaultFactory().createPrinter(templateName);
+    printer.setMetadata(doc);
+    setPrintContext(printer.getPrintContext());
+    
+    
+    printer.beginHTML();
     printStatus();
-    printTitle();
-    printSubtitle();
-    printStatusDate();
-    printVersionHistoryLink();
-    printEditors();
-    printAuthors();
+    printer.printTitlePage();
     printAbstract();
-    printTocMarker();
+    printer.printTableOfContentsMarker();
     printIntroduction();
     printRepresentation();
     printUrlTemplates();
     printServiceMethods();
-    printReferences();
-    endHTML();
+    printer.printReferences();
+    printer.printFooter();
+    printer.endHTML();
     
-    insertTableOfContents();
+    printer.insertTableOfContents();
     
-    return popText();
+    return printer.popText();
   }
 
-
-  private void printVersionHistoryLink() {
-
-    if (doc.hasHistoryLink()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">See Also: <a href=\"index.html?history\">Version History</a></DIV>");
-    }
-    
-    
-  }
 
   private void printStatus() {
     String status = doc.getStatus();
@@ -73,7 +67,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     String text = doc.getUrlTemplateText();
     if (text == null) return;
     
-    Heading heading = createHeading("URL Templates");
+    Heading heading = printer.createHeading("URL Templates");
     beginHeading(heading);
     print(text);
     endHeading();
@@ -81,7 +75,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   }
 
   private void printServiceMethods() {
-    Heading heading = createHeading("Service Methods");
+    Heading heading = printer.createHeading("Service Methods");
     beginHeading(heading);
     printPostMethod();
     printGetMethod();
@@ -93,7 +87,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 
   private void printGetMethod() {
     if (!doc.contains(HttpMethod.GET)) return;
-    Heading heading = createHeading("GET");
+    Heading heading = printer.createHeading("GET");
     print(heading);
     MethodDocumentation method = doc.getGetDocumentation();
     print(method.getSummary());
@@ -108,7 +102,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     List<QueryParam> paramList = doc.getQueryParams();
     if (!paramList.isEmpty()) {
       queryParamsCaption = new Caption(CaptionType.Table, "Query Parameters", "queryParams", null);
-      assignNumber(queryParamsCaption);
+      printer.assignNumber(queryParamsCaption);
       indent().print("<LI>The request may contain the query parameters specified in ");
       printLink(queryParamsCaption);
       println(".</LI>");
@@ -117,30 +111,30 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for GET Request", "getHeader", null);
-      assignNumber(requestHeadersCaption);
+      printer.assignNumber(requestHeadersCaption);
       indent().print("<LI>The request must contain the HTTP headers as specified in ");
-      printLink(requestHeadersCaption);
+      printer.printLink(requestHeadersCaption);
       println(".</LI>");
       
     }
     
-    printListItem(method.getRequestBodyRequirement());
+    printer.printListItem(method.getRequestBodyRequirement());
     
     popIndent();
     indent().println("</UL>");
     
     if (!paramList.isEmpty()) {
-      printParagraph("&nbsp;");
+      printer.printParagraph("&nbsp;");
       printQueryParams(paramList, queryParamsCaption);
       
     }
    
-    printParagraph("&nbsp;");
+    printer.printParagraph("&nbsp;");
     printRequestHeaders(method, requestHeadersCaption);
     
     
-    beginParagraph();
-    printParagraph("&nbsp;");
+    printer.beginParagraph();
+    printer.printParagraph("&nbsp;");
     
     printResponse(method, "GET");
     
@@ -148,7 +142,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 
   private void printPutMethod() {
     if (!doc.contains(HttpMethod.PUT)) return;
-    Heading heading = createHeading("PUT");
+    Heading heading = printer.createHeading("PUT");
     print(heading);
     MethodDocumentation method = doc.getPutDocumentation();
     print(method.getSummary());
@@ -169,24 +163,24 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for PUT Request", "getHeader", null);
-      assignNumber(requestHeadersCaption);
+      printer.assignNumber(requestHeadersCaption);
       indent().print("<LI>The request must contain the HTTP Headers listed in ");
       printLink(requestHeadersCaption);
       println(".</LI>");
       
     }
     
-    printListItem(method.getRequestBodyRequirement());
+    printer.printListItem(method.getRequestBodyRequirement());
     
     popIndent();
     indent().println("</UL>");
    
-    printParagraph("&nbsp;");
+    printer.printParagraph("&nbsp;");
     printRequestHeaders(method, requestHeadersCaption);
     
     
-    beginParagraph();
-    printParagraph("&nbsp;");
+    printer.beginParagraph();
+    printer.printParagraph("&nbsp;");
     
 
     String pattern = " describes the possible responses from the {0} method.  In all cases, the response body is empty.";
@@ -196,7 +190,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   
   private void printDeleteMethod() {
     if (!doc.contains(HttpMethod.DELETE)) return;
-    Heading heading = createHeading("DELETE");
+    Heading heading = printer.createHeading("DELETE");
     print(heading);
     MethodDocumentation method = doc.getDeleteDocumentation();
     print(method.getSummary());
@@ -209,24 +203,24 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for DELETE Request", "getHeader", null);
-      assignNumber(requestHeadersCaption);
+      printer.assignNumber(requestHeadersCaption);
       indent().print("<LI>The request must contain the HTTP Headers listed in ");
       printLink(requestHeadersCaption);
       println(".</LI>");
       
     }
     
-    printListItem(method.getRequestBodyRequirement());
+    printer.printListItem(method.getRequestBodyRequirement());
     
     popIndent();
     indent().println("</UL>");
    
-    printParagraph("&nbsp;");
+    printer.printParagraph("&nbsp;");
     printRequestHeaders(method, requestHeadersCaption);
     
     
-    beginParagraph();
-    printParagraph("&nbsp;");
+    printer.beginParagraph();
+    printer.printParagraph("&nbsp;");
     
 
     String pattern = " describes the possible responses from the {0} method.  In all cases, the response body is empty.";
@@ -245,24 +239,24 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 
     Caption responseCaption = new Caption(CaptionType.Table, 
         format("Possible responses from a {0} method", methodName), "postResponse", null);
-    assignNumber(responseCaption);
+    printer.assignNumber(responseCaption);
     printLink(responseCaption);
     print(format(pattern, methodName));
-    endParagraph();
+    printer.endParagraph();
     
-    beginTable("propertiesTable");
-    beginRow();
-    printTH("HTTP Status");
-    printTH("Description");
-    endRow();
+    printer.beginTable("propertiesTable");
+    printer.beginRow();
+    printer.printTH("HTTP Status");
+    printer.printTH("Description");
+    printer.endRow();
     for (ResponseInfo code : method.getStatusCodes()) {
-      beginRow();
-      printTD(code.getStatusCode() + "&nbsp;" + code.getLabel().replace(" ", "&nbsp;"));
-      printTD(code.getDescription());
-      endRow();
+      printer.beginRow();
+      printer.printTD(code.getStatusCode() + "&nbsp;" + code.getLabel().replace(" ", "&nbsp;"));
+      printer.printTD(code.getDescription());
+      printer.endRow();
     }
-    endTable();
-    printCaption(responseCaption);
+    printer.endTable();
+    printer.printCaption(responseCaption);
     
   }
 
@@ -270,7 +264,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   private void printPostMethod() {
     if (!doc.contains(HttpMethod.POST)) return;
     
-    Heading heading = createHeading("POST");
+    Heading heading = printer.createHeading("POST");
     print(heading);
     MethodDocumentation method = doc.getPostDocumentation();
     print(method.getSummary());
@@ -283,22 +277,22 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
     if (!requestHeaders.isEmpty()) {
       requestHeadersCaption = new Caption(CaptionType.Table, "Required HTTP Headers for POST Request", "postHeader", null);
-      assignNumber(requestHeadersCaption);
+      printer.assignNumber(requestHeadersCaption);
       indent().print("<LI>The request must contain the HTTP Headers listed in ");
       printLink(requestHeadersCaption);
       println(".</LI>");
       
     }
     
-    printListItem(method.getRequestBodyRequirement());
+    printer.printListItem(method.getRequestBodyRequirement());
     
     popIndent();
     indent().println("</UL>");
    
-    printParagraph("&nbsp;");
+    printer.printParagraph("&nbsp;");
     printRequestHeaders(method, requestHeadersCaption);
     
-    printParagraph("&nbsp;");
+    printer.printParagraph("&nbsp;");
     printResponse(method, "POST");
     
     String rules = doc.getPostProcessingRules();
@@ -358,7 +352,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     }
     popIndent();
     indent().println("</TABLE>");
-    printCaption(caption);
+    printer.printCaption(caption);
 
     
   }
@@ -393,12 +387,12 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
       }
       popIndent();
       indent().println("</TABLE>");
-      printCaption(caption);
+      printer.printCaption(caption);
     }
   }
 
   private void printRepresentation() {
-    Heading heading = createHeading(doc.getRepresentationHeading());
+    Heading heading = printer.createHeading(doc.getRepresentationHeading());
     print(heading);
     print(doc.getRepresentationText());
     
@@ -412,14 +406,13 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
 
   private void printIntroduction() {
     
-    Heading heading = createHeading("Introduction");
+    Heading heading = printer.createHeading("Introduction");
     print(heading);
     print(doc.getIntroduction());
     
   }
 
   private void printAbstract() {
-    println("<HR/>");
 
     String abstractText = doc.getAbstactText();
     if (abstractText == null)
@@ -432,88 +425,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     
   }
 
-  private void printAuthors() {
 
-    List<String> authorList = doc.getAuthors();
-    if (authorList != null && !authorList.isEmpty()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">Authors</DIV>");
-      for (String author : authorList) {
-        indent().print("<DIV");
-        printAttr("class", "contributor");
-        print(">").print(author).println("</DIV>");
-      }
-    }
-    
-  }
 
-  private void printEditors() {
-    
-    List<Person> editorList = doc.getEditors();
-
-    if (editorList != null && !editorList.isEmpty()) {
-      indent().print("<DIV");
-      printAttr("class", "contributorLabel");
-      println(">Editors</DIV>");
-      for (Person editor : editorList) {
-        indent().print("<DIV");
-        printAttr("class", "contributor");
-        print(">").print(editor.getPersonName());
-        if (editor.getOrgName() != null) {
-          print(", ").print(editor.getOrgName());
-        }
-        println("</DIV>");
-      }
-    }
-    
-  }
-
-  private void printStatusDate() {
-    String status = doc.getStatus();
-    String date = doc.getDate();
-    
-    if (status == null && date==null) return;
-
-    StringBuilder text = new StringBuilder();
-    if (status != null) {
-      text.append(status);
-    }
-    if (date != null) {
-      if (status != null) {
-        text.append(' ');
-      }
-      text.append(date);
-    }
-    print("<DIV");
-    printAttr("class", "subtitle");
-    print(">");
-    print(text.toString());
-    println("</DIV>");
-    
-    
-  }
-  private void printSubtitle() {
-    String subtitle = doc.getSubtitle();
-    if (subtitle == null) return;
-    print("<DIV");
-    printAttr("class", "subtitle");
-    print(">");
-    print(subtitle);
-    println("</DIV>");
-    
-    
-  }
-
-  private void printTitle() {
-    print("<H1>");
-    print(doc.getTitle());
-    println("</H1>");
-  }
-
-  @Override
-  protected String getPathToStyleSheet() {
-    return doc.getCssHref();
-  }
 
 }
