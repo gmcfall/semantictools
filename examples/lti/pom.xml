@@ -14,7 +14,7 @@
       <plugin>
         <groupId>org.semantictools</groupId>
         <artifactId>semantictools-maven-plugin</artifactId>
-        <version>1.9</version>
+        <version>1.11</version>
         <configuration>
           <version>2012-10-10</version>
           <publish>false</publish>
