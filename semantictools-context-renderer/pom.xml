@@ -1,12 +1,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/Schema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-context-renderer</artifactId>
 	<packaging>jar</packaging>
-	<version>1.11</version>
+	<version>1.13</version>
 	<name>SemanticTools Context Renderer</name>
+  <description>
+    A library used to generate documentation for media types associated with a JSON-LD context
+  </description>
+  <url>https://github.com/gmcfall/semantictools</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:gmcfall/semantictools.git</connection>
+    <url>scm:git:git@github.com:gmcfall/semantictools.git</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>gmcfall</id>
+      <name>Greg McFall</name>
+      <email>gregory.mcfall@gmail.com</email>
+    </developer>
+  </developers>
+  <distributionManagement>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Nexus Snapshots Repository</name>
+      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+  </distributionManagement>
+
 	
 	<properties>
 		<build.finalName>semantictools-context-renderer</build.finalName>
@@ -15,9 +50,9 @@
     <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
 	</properties>
 	
+<!-- AVOID RELEASE REPOSITORY / PLUGINREPOSITORY
 	<repositories>
 	
-
     <repository>
       <id>apache-repo-releases</id>
       <url>https://repository.apache.org/content/repositories/releases/</url>
@@ -39,7 +74,7 @@
 		</repository>
 
 	</repositories>
-
+ 
 	<pluginRepositories>
 		<pluginRepository>
 			<id>maven2-repository.dev.java.net</id>
@@ -53,6 +88,10 @@
 			<layout>legacy</layout>
 		</pluginRepository>
 	</pluginRepositories>
+  
+ -->
+ 
+ 
 	<dependencies>
 	
 	   <dependency>
@@ -64,7 +103,7 @@
     <dependency>
 	    <groupId>org.apache.httpcomponents</groupId>
 	    <artifactId>httpmime</artifactId>
-	    <version>4.0.1</version>
+	    <version>4.2.2</version>
     </dependency>
      
 	
@@ -106,6 +145,20 @@
 		<resources>
 		</resources>
 		<plugins>
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+          
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>
@@ -123,7 +176,32 @@
               <skipTests>true</skipTests>
             </configuration>
         </plugin>
+        
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
 		</plugins>
 	</build>
