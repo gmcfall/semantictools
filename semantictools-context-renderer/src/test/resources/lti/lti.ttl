@@ -498,20 +498,13 @@ lti:ToolProxyBinding rdf:type owl:Class ;
   ] ; 
   rdfs:comment "A <code>ToolProxyBinding</code> associates a ToolProxy with a learning Context (such as a Course Section).   This association must be established before the corresponding Tool can be used within the Context.  The <code>ToolProxyBinding</code> also serves as a container that holds tool settings associated with the learning Context." .
 
-lti:Property rdf:type owl:Class;
+lti:PropertySet rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      lti:name;
-    owl:allValuesFrom  lti-type:Name.Type;
-    owl:minCardinality  1;
-    rdfs:comment "This name of this Property."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:value;
-    owl:minCardinality  1;
-    rdfs:comment "The value of this Property."
+    owl:onProperty      lti:settings_owner;
+    owl:minCardinality  1
   ] ; 
-  rdfs:comment "A property that a Tool has attached to some resource within the Tool Consumer.  These  properties are known as \u201ctool settings.\u201d" .
+  rdfs:comment "An object that holds custom properties attached to some resource within the Tool Consumer.  These  properties, known as \u201ctool settings,\u201d  do not need to be defined in an ontology (or a JSON-LD context), but they may be so defined.  " .
 
 lti:LtiLink rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
@@ -533,7 +526,7 @@ lti:ToolSettingsContainer rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:custom;
-    rdfs:comment "A custom property that is stored in this container as a \u201ctool setting.\u201d"
+    rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource."
   ] ; 
   rdfs:comment "<code>ToolSettingsContainer</code> is the base class for all resources that encapsulate tool settings." .
 
@@ -791,7 +784,6 @@ lti:name rdf:type owl:FunctionalProperty ;
       lti:ResourceHandler
       lti:Parameter
       lti:Vendor
-      lti:Property
     )
   ] ;
   rdfs:range  [
@@ -799,7 +791,6 @@ lti:name rdf:type owl:FunctionalProperty ;
     owl:unionOf (
       lti:LocalizedName
       xsd:Name
-      lti-type:Name.Type
     )
   ] ;
   rdfs:comment "The name of the resource handler suitable for display in the TC user interface." .
@@ -953,10 +944,10 @@ lti:context rdf:type owl:FunctionalProperty ;
   rdfs:range lti:Context ;
   rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>." .
 
-lti:value rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:Property ;
-  rdfs:range xsd:string ;
-  rdfs:comment "The value of this Property." .
+lti:settings_owner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:PropertySet ;
+  rdfs:range lti:ToolSettingsContainer ;
+  owl:inverseOf lti:custom .
 
 lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:LtiLink ;
@@ -971,8 +962,9 @@ lti:sourcedId rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
 
-lti:custom rdf:type rdf:Property ;
+lti:custom rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
-  rdfs:range lti:Property ;
-  rdfs:comment "A custom property that is stored in this container as a \u201ctool setting.\u201d" .
+  rdfs:range lti:PropertySet ;
+  owl:inverseOf lti:settings_owner ;
+  rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource." .
 

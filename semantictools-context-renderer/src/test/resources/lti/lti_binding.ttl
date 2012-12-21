@@ -204,8 +204,10 @@ lti:ToolProxyBinding rdfs:subClassOf
     bind:onProperty lti:context ;
     bind:associationType bind:Aggregation
   ] .
+lti:PropertySet rdf:type bind:Addressable .
 lti:LtiLink rdf:type bind:Addressable .
 lti:Context rdf:type bind:Addressable .
+lti:ToolSettingsContainer rdf:type bind:AbstractClass .
 lti:ToolSettingsContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:custom ;

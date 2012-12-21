@@ -122,9 +122,9 @@ public class TreeGenerator {
     return root;
   }
   
-  public TreeNode generateGraph(List<Frame> frameList) {
+  public TreeNode generateGraph(List<Frame> frameList, int maxDepth) {
     memory = new HashSet<String>();
-    this.maxDepth = 5;
+    this.maxDepth = maxDepth;
     TreeNode root = new TreeNode();
     root.setDescription("");
     root.setKind(Kind.FRAME);
@@ -137,15 +137,24 @@ public class TreeGenerator {
     graph.setMaxCardinality(-1);
     graph.setKind(Kind.PROPERTY);
     graph.setLocalName("@graph");
-    graph.setTypeName("");
-    graph.setBranchStyle(BranchStyle.OBLIQUE);
     
-    for (Frame frame : frameList) {
-      TreeNode node = createBasicFrameNode(frame);
-      graph.add(node);
-      addTypeNode(node, frame, 1);
-      addProperties(node, frame, 0);
+    if (frameList.size() == 1) {
+      Frame frame = frameList.get(0);
+      graph.setTypeName(frame.getLocalName());
+      addProperties(graph, frame, 0);
+      
+    } else {
+      graph.setTypeName("");
+      graph.setBranchStyle(BranchStyle.OBLIQUE);
+
+      for (Frame frame : frameList) {
+        TreeNode node = createBasicFrameNode(frame);
+        graph.add(node);
+        addTypeNode(node, frame, 1);
+        addProperties(node, frame, 0);
+      }
     }
+    
     memory = null;
     
     return root;
@@ -249,7 +258,14 @@ public class TreeGenerator {
       setContainer.setTypeName("");
       setContainer.setKind(Kind.PROPERTY);
     } else {
-      node.setLocalName(context.rewrite(uri));
+      String localName = context.rewrite(uri);
+      if (contextProperties.usePrefix(uri)) {
+        String namespace = typeManager.getNamespace(uri);
+        String prefix = context.rewrite(namespace);
+        node.setLocalName(prefix + ":" + localName);
+      } else {
+        node.setLocalName(localName);
+      }
     }
     
     
@@ -404,6 +420,7 @@ public class TreeGenerator {
       node.setTypeName(typeName);
       node.setTypeURI(subtype.getUri());
       node.setBranchStyle(BranchStyle.RECTILINEAR);
+      addConcreteTypeNode(node, subtype, depth);
       addProperties(node, subtype, depth);
       
       return;
@@ -430,12 +447,30 @@ public class TreeGenerator {
       String typeName = info.getTermName();
       String href = "#" + typeName;
       child.setTypeHref(href);
+      addConcreteTypeNode(child, sub, depth+1);
       addProperties(child, sub, depth+1);
     }
     
     
     
     
+  }
+
+  private void addConcreteTypeNode(TreeNode node, Frame subtype, int depth) {
+
+    if (maxDepth>=0 && depth >= maxDepth) return;
+    TreeNode typeNode = new TreeNode();
+    node.add(typeNode);
+    typeNode.setLocalName("@type");
+    typeNode.setTypeName("owl:Class");
+    typeNode.setKind(Kind.PROPERTY);
+    typeNode.setDescription(
+        "A simple name that identifies the type of this resource.  The value should be <code>" +
+        subtype.getLocalName() + "</code>."
+    );
+    typeNode.setMaxCardinality(1);
+    typeNode.setMinCardinality(1);
+    typeNode.setObjectPresentation(ObjectPresentation.SIMPLE_NAME);
   }
 
   private void filterSubtypes(List<Frame> list) {

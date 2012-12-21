@@ -959,7 +959,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     
     List<Frame> graphTypes = getGraphTypes();
     TreeNode node = (graphTypes == null) ? 
-        treeGenerator.generateRoot(root, 1) : treeGenerator.generateGraph(graphTypes);
+        treeGenerator.generateRoot(root, 1) : treeGenerator.generateGraph(graphTypes, 1);
         
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
 //
@@ -1560,7 +1560,7 @@ public class ContextHtmlPrinter extends PrintEngine {
       List<Frame> graphTypes = getGraphTypes();
       TreeNode node = (graphTypes == null) ? 
           treeGenerator.generateRoot(root, rdfProperty, -1) :
-          treeGenerator.generateGraph(graphTypes);
+          treeGenerator.generateGraph(graphTypes, -1);
           
       sortAll(node);
       

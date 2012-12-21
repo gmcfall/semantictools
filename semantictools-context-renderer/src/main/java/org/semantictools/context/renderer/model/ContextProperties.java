@@ -59,6 +59,7 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
   private List<SampleJson> sampleJsonList = new ArrayList<SampleJson>();
   private Map<String, FrameConstraints> uri2FrameConstraints = new HashMap<String, FrameConstraints>();
   private Properties rawProperties;
+  private Set<String> usePrefix = new HashSet<String>();
   
   
   public ContextProperties(DocumentMetadata parent, Properties rawProperties) {
@@ -73,6 +74,22 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
     setProperty.add(propertyURI);
   }
   
+  /**
+   * Register a property whose name must include the namespace prefix.
+   * @param propertyURI
+   */
+  public void addUsePrefix(String propertyURI) {
+    usePrefix.add(propertyURI);
+  }
+  
+  
+  /**
+   * Return true if the name for the specified property must include the namespace
+   * prefix, and false otherwise.
+   */
+  public boolean usePrefix(String propertyURI) {
+    return usePrefix.contains(propertyURI);
+  }
   /**
    * Returns true if the specified property uses the "@set" keyword.
    */

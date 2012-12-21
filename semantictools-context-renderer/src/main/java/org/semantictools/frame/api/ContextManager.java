@@ -47,6 +47,7 @@ public class ContextManager {
   private static final String CONTEXTURI = "contextURI";
   private static final String CONTEXTREF = "contextRef";
   private static final String GRAPH_TYPES = "graphTypes";
+  private static final String USE_PREFIX = "usePrefix";
   private static final String SET = "@set";
   private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
   private static final String IDREF = "idref";
@@ -183,6 +184,8 @@ public class ContextManager {
         sink.setMediaTypeURI(value);
       } else if (MEDIATYPEREF.equals(key)) {
         sink.setMediaTypeRef(value);
+      } else if (USE_PREFIX.equals(key)) {
+        setUsePrefix(sink, value);
       } else if (RDFTYPE.equals(key)) {
         sink.setRdfTypeURI(value);
       } else if (RDFTYPE_REF.equals(key)) {
@@ -237,6 +240,13 @@ public class ContextManager {
   }
 
 
+
+  private void setUsePrefix(ContextProperties sink, String value) {
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.addUsePrefix(tokenizer.nextToken());
+    }    
+  }
 
   private void setSetProperties(ContextProperties sink, String value) {
     StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");

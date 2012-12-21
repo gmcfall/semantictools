@@ -507,6 +507,7 @@ function ModelBuilder_createFieldFromAssociation(declaringClass, fieldType, conn
   }
   
   logger.debug("declaringClass=" + declaringClass.name + ", package=" + declaringClass.umlPackage);
+
   var field = new Field(null, declaringClass, declaringClass.umlPackage, this.universe);
   field.type = fieldType;
   field.name = fieldName;
@@ -584,8 +585,10 @@ function ModelBuilder_handleParticipantAttachment(field, key, value) {
     field.domainURI = value;
   } if (key == "uri") {
     field.uri = value;
+  } if (key == "preserveRestriction" && "true"==value) {
+    field.preserveRestriction = true;
   }
-}
+} 
 
 
 
@@ -722,7 +725,7 @@ function UmlObject(uml, parent, umlPackage, universe) {
   if (umlPackage) {
     umlPackage.localType[this.name] = this;
   }
-  if (umlPackage && universe && (this.constructor != Model)) {
+  if (umlPackage && universe && (this.constructor != Model) && (this.constructor != EnumLiteral)) {
     this.uri = umlPackage.uri + this.name;
     universe.putUmlObject(this.uri, this);
   }
@@ -845,6 +848,7 @@ function EnumType(uml, parent, umlPackage, universe) {
   logger.debug("new EnumType " + uml.Name);
   this.UmlObject = UmlObject;
   this.UmlObject(uml, parent, umlPackage, universe);
+  this.superTypes = null;
   append(umlPackage.enumList, this);
   this.literalList = new Array();
   if (uml) {
@@ -1385,12 +1389,13 @@ function OntologyWriter_printQualifier(qualifier) {
 
 
 function OntologyWriter_printRestrictions(delim, rdfClass) {
+  var list = rdfClass.restrictions;
+  if (!list || list.length==0) return;
+  
   logger.debug("printRestrictions " + rdfClass.name + "(" + rdfClass.restrictions.length + ")");
   
 
 
-  var list = rdfClass.restrictions;
-  if (!list || list.length==0) return;
   
   for (var i=0; i<list.length; i++) {
     var r = list[i];
@@ -1404,10 +1409,8 @@ function OntologyWriter_printRestrictions(delim, rdfClass) {
       var maxCardinality = "owl:maxCardinality  ";
       if (r.range) {
         this.println(";");
-        this.indent().print("owl:onClass         ");
+        this.indent().print("owl:allValuesFrom  ");
         this.printQName(r.range);
-        minCardinality = "owl:minQualifiedCardinality  ";
-        maxCardinality = "owl:maxQualifiedCardinality  ";
       }
       if (r.minCardinality != 0) {
         this.println(";");
@@ -1662,7 +1665,12 @@ function OntologyWriter_printList(listType) {
   this.indent().println("[ rdf:type owl:Restriction ;")
   this.pushIndent();
     this.indent().println("owl:onProperty rdf:rest ;");
-    this.indent().print("owl:allValuesFrom ").printQName(listType).println(" ;");
+    this.indent().println("owl:allValuesFrom [");
+    this.indent().println("  owl:unionOf (");
+    this.indent().println("    [ owl:oneOf ( rdf:nil ) ]");
+    this.indent().print  ("    ").printQName(listType).println();
+    this.indent().println("  )");
+    this.indent().println("]");
   this.popIndent();
   this.indent().println("] .");
   this.popIndent();
@@ -1696,7 +1704,7 @@ function OntologyWriter_printSubClassOf(rdfClass) {
   var rList = rdfClass.restrictionList;
   var rLength = rList ? rList.length : 0;
   var count = superLength + rLength;
-  if (count == 0) {
+  if (count == 0 && rdfClass.restrictions) {
     if (rdfClass.restrictions.length>0) {
       this.println(";");
       this.indent().print("rdfs:subClassOf ")
@@ -1704,6 +1712,8 @@ function OntologyWriter_printSubClassOf(rdfClass) {
     }
     return;
   }
+  logger.debug("supertype count: " + count);
+  if (count == 0) return;
   this.println(" ;");
   this.indent().print("rdfs:subClassOf ");
   var delim = "";
@@ -1780,8 +1790,10 @@ function OntologyWriter_printEnum(rdfEnum) {
   
   this.println();
   this.indent().printQName(rdfEnum);
-  this.indent().println(" a owl:Class ;");
+  this.indent().print(" a owl:Class ");
   this.pushIndent();
+  this.printSubClassOf(rdfEnum);
+  this.println(" ;");
   this.indent().println("owl:equivalentClass [");
   this.pushIndent();
     this.indent().println("owl:oneOf (");
@@ -2286,6 +2298,7 @@ function RdfClass_getMaxCardinalityRestriction(propertyUri) {
 
 function RdfEnum(ontology, name, extensible, documentation) {
   logger.debug("new RdfEnum " + name);
+  this.superTypes = null;
   this.ontology = ontology;
   this.name = name;
   this.uri = ontology.uri + name;
@@ -2319,11 +2332,14 @@ function RdfIndividual(ontology, name, type, documentation) {
   this.uri = ontology.uri + name;
   this.type = type;
   this.documentation = documentation;
-  ontology.universe.putRdfObject(this.uri, this);
 }
 
 function RdfProperty(ontology, name, umlField) {
   logger.debug("new RdfProperty " + name);
+  if (!ontology) {
+    logger.error("ontology is not defined for property '" + name + "'");
+    return;
+  }
   this.removeDuplicates = RdfProperty_removeDuplicates;
   this.normalize = RdfProperty_normalize;
   this.setType = RdfProperty_setType;
@@ -2609,6 +2625,7 @@ function OntologyBuilder_buildIndividuals(pkg, ontology) {
     var type = this.universe.getRdfObject(path);
     var documentation = umlObject.documentation;
     var individual = new RdfIndividual(ontology, name, type, documentation);
+    ontology.universe.putRdfObject(individual.uri, individual);
     append(ontology.individualList, individual);
     
   }
@@ -2668,6 +2685,7 @@ function OntologyBuilder_finishAllClasses() {
   var list = this.universe.ontologyList;
   for (var i=0; i<list.length; i++) {
     var ontology = list[i];
+    
     this.finishClasses(ontology);
     this.setListElemTypes(ontology);
   }
@@ -2676,6 +2694,12 @@ function OntologyBuilder_finishAllClasses() {
 function OntologyBuilder_finishClasses(ontology) {
   logger.trace("finishClasses " + ontology.prefix);
   var list = ontology.classList;
+
+  logger.debug("enumList.length=" + ontology.enumList.length);
+  for (var i=0; i<ontology.enumList.length; i++) {
+    this.setSuperTypes(ontology.enumList[i].umlEnum);
+  }
+  
   for (var i=0; i<list.length; i++) {
     list[i].buildAssociationQualifierMap();
     /* deprecated
@@ -2787,7 +2811,6 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   this.addImport(map, ont);
   for (var i=0; i<list.length; i++) {
     var property = list[i];
-
     this.addOntologyImportsFromList(map, property.domainList);
     this.addOntologyImportsFromList(map, property.rangeList);
     
@@ -2810,10 +2833,11 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   logger.debug("Add imports for supertypes");
   for (var i=0; i<list.length; i++) {
     var type = list[i];
-    if (!type.superTypes) continue;
-    for (var j=0; j<type.superTypes.length; j++) {
-      var s = type.superTypes[j];
-      this.addImport(map, s.ontology);
+    if (type.superTypes) {
+      for (var j=0; j<type.superTypes.length; j++) {
+        var s = type.superTypes[j];
+        this.addImport(map, s.ontology);
+      }
     }
     logger.debug("Compute imports for restrictions on " + type.name);
     var rlist = type.restrictions;
@@ -2844,6 +2868,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   }
   
   logger.debug("end computeImportedOntologies");
+  
+}
+
+function OntologyBuilder_addImportsFromRestrictions(map, type) {
   
 }
 
@@ -2915,6 +2943,18 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   }
 
   
+  if (field.stereotypeName == "list") {
+    var listURI = objectUri + "List";
+    var listName = object.name + "List";
+    var listType = universe.getRdfObject(listURI);
+    if (listType == null) {
+      listType = new RdfList(object.ontology, listName, null);
+      listType.elemType = object;
+    }
+    object = listType;
+  }
+  
+  
   var subject = rdfClass;
   if (field.domainURI) {
     subject = universe.getRdfObject(field.domainURI);
@@ -2952,6 +2992,8 @@ function OntologyBuilder_buildEnums(umlPackage) {
   for (var i=0; i<list.length; i++) {
     var umlEnum = list[i];
     var rdfEnum = new RdfEnum(this.ontology, umlEnum.name, umlEnum.isExtensible, umlEnum.documentation);
+    umlEnum.rdfClass = rdfEnum;
+    rdfEnum.umlEnum = umlEnum;
     this.universe.putRdfObject(umlEnum.Pathname, rdfEnum);
     for (var j=0; j<umlEnum.literalList.length; j++) {
       var value = umlEnum.literalList[j].name;
@@ -4263,20 +4305,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4251):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4293):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4251):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4293):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4251):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4293):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4307,20 +4349,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4261):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4303):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4261):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4303):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4261):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4303):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4342,8 +4384,9 @@ currentItemStack.push(currentItem);
   writer = new XsdWriter(universe);
     
   var list = universe.simpleTypeSchemas;
-  
   for (var i=0; i<list.length; i++) {
+    
+    logger.debug("preparing to print XSD ... " + list[i].uri);
   
     if (list[i].uri.indexOf("http://www.w3.org/")==0) continue;
     
@@ -4365,20 +4408,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4285):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4328):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4285):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4328):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4285):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4328):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4407,20 +4450,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4293):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4336):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4293):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4336):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4293):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4336):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4452,20 +4495,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4304):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4347):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4304):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4347):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4304):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4347):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4495,13 +4538,13 @@ currentItemStack.push(currentItem);
 try {
     eval('var rootElem = currentItem');
 }catch (ex) {
-    log('template.cot(4313):<@REPEAT@> Error exists in  path expression.');
+    log('template.cot(4356):<@REPEAT@> Error exists in  path expression.');
     throw ex
 }
 try {
     eval('var elemArr1 = getAllElements(false, rootElem, \'UMLModel\', \'\', \'\')');
 }catch (ex) {
-    log('template.cot(4313):<@REPEAT@> Error exists in path, type, collection name.');
+    log('template.cot(4356):<@REPEAT@> Error exists in path, type, collection name.');
     throw ex
 }
 try {
@@ -4516,20 +4559,20 @@ try {
         try {
             eval('currentItem = currentItem');
         } catch (ex) {
-            log('template.cot(4314):<@DISPLAY@> Error exists in path expression.');
+            log('template.cot(4357):<@DISPLAY@> Error exists in path expression.');
             throw ex;
         }
         var value;
         try {
             eval('value = OUTPUT');
         } catch (ex) {
-            log('template.cot(4314):<@DISPLAY@> Error exists in arguments.');
+            log('template.cot(4357):<@DISPLAY@> Error exists in arguments.');
             throw ex;
         }
         try {
            print(value);
         } catch (ex) {
-            log('template.cot(4314):<@DISPLAY@> Error exists in command.');
+            log('template.cot(4357):<@DISPLAY@> Error exists in command.');
             throw ex;
         }
         currentItem = currentItemStack.pop();
@@ -4540,7 +4583,7 @@ try {
 
     }
 } catch (ex) {
-    log('template.cot(4313):<@REPEAT@> Error exists in command.');
+    log('template.cot(4356):<@REPEAT@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();

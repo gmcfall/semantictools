@@ -29,14 +29,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.semantictools.context.renderer.model.BibliographicReference;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.DocumentMetadata;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
 import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.QueryParam;
-import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.context.renderer.model.ServiceFileManager;
@@ -47,6 +45,7 @@ import org.semantictools.index.model.ServiceDocumentationList;
 public class ServiceDocumentationManager {
 
   private static final String TITLE = "title";
+  private static final String SUBTITLE = "subtitle";
   private static final String CONTENT_NEGOTIATION = "contentNegotiation";
   private static final String MEDIATYPE = "mediaType";
   private static final String RDFTYPE = "rdfType";
@@ -150,6 +149,8 @@ public class ServiceDocumentationManager {
         setMediaType(sink, value, properties);
       } else if (TITLE.equals(key)) {
         sink.setTitle(value);
+      } else if (SUBTITLE.equals(key)) {
+        sink.setSubtitle(value);
       } else if (RDFTYPE.equals(key)) {
         setRdfType(sink, value);
       } else if (CONTENT_NEGOTIATION.equals(key)) {
