@@ -1,0 +1,45 @@
+{
+  "@context" : "http://purl.org/pearson/paf/v1/ctx/core/SequenceNodeRich",
+  "@type" : "SequenceNode",
+  "@id" : "http://hub.paf.pearson.com/resources/sequences/2378476/nodes/3",
+  "nodeIndex" : 3,
+  "nodeResult" : [ 
+    "http://hub.paf.pearson.com/resources/sequences/2378476/nodes/3/results/1",
+    "http://hub.paf.pearson.com/resources/sequences/2378476/nodes/3/results/2"
+  ],
+  "player" : "http://hub.paf.pearson.com/resources/players/68380",
+  "startTime" : "2012-10-31T11:25:46-04:00",
+  "endTime" : "2012-10-31T11:26:15-04:00",
+  "aggregateResult" : {
+    "templateVariables" : [
+      { "identifier" : "a", "value" : 15 },
+      { "identifier" : "b", "value" : 20 }
+    ]
+  },
+  "targetBinding" : {
+    "@id" : "http://repo.paf.pearson.com/resources/activity/514344/bindings/31",
+    "activityTitle" : "Question 2",
+    "activityFormat" : "application/vnd.pearson.qti.v2.asi+xml",
+    "boundActivity" : "<xml>...</xml>",
+    "credit" : "ForCredit",
+    "scoreConstraints" : {
+        "normalMaximum" : 10,
+        "extraCreditMaximum" : 2,
+        "totalMaximum" : 12
+    }
+  },
+  "player" : {
+    "frameFrontend" : "http://example.com/myplayer",
+    "widgetStartPage" : "http://hub.paf.pearson.com/widgets/83282736384572/index.html"
+  },
+  "parentSequence" : {
+    "@id" : "http://hub.paf.pearson.com/resources/sequences/78776",
+    "user" : "http://idm.api.pearson.com/resources/identities/29d32894735b731",
+    "learningContext" : {
+      "@type" : "CourseSection",
+      "@id" : "urn:udson:pearson.com/sms/prod:course/jsmith38271"
+    },
+    "overallActivity" : "http://repo.paf.pearson.com/resources/activity/3314583736548363"
+  },
+  "resultCollection" : "http://hub.paf.pearson.com/resources/sequences/2378476/nodes/3/results"
+}

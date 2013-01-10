@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2012 Pearson Education
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://purl.org/pearson/core/v1/vocab/datatypes#"
+  targetNamespace="http://purl.org/pearson/core/v1/vocab/datatypes#"
+  elementFormDefault="qualified">
+  <xsd:annotation>
+    <xsd:appinfo>
+      <label>Pearson Core Datatypes</label>
+      <prefix>lisd</prefix>
+    </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:simpleType id="GUID.Type" name="GUID.Type">
+    <xsd:restriction base="xsd:normalizedString">
+      <xsd:pattern value="\S*"/>
+      <xsd:maxLength value="64"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType id="Label.Type" name="Label.Type">
+    <xsd:restriction base="xsd:normalizedString">
+      <xsd:maxLength value="512"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType id="Version.Type" name="Version.Type">
+    <xsd:restriction base="xsd:normalizedString">
+      <xsd:pattern value="\S*"/>
+      <xsd:maxLength value="64"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>
+

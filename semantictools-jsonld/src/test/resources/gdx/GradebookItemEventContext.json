@@ -1,0 +1,118 @@
+{
+  "@id" : "http://purl.org/pearson/core/v1/ctx/outcomes/GradebookItemEvent",
+  "@context" : {
+    "lisd" : "http://purl.org/pearson/core/v1/vocab/datatypes#",
+    "lti" : "http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#",
+    "owl" : "http://www.w3.org/2002/07/owl#",
+    "pe" : "http://purl.org/pearson/core/v1/vocab/enterprise#",
+    "pm" : "http://purl.org/pearson/core/v1/vocab/message#",
+    "po" : "http://purl.org/pearson/core/v1/vocab/outcomes#",
+    "rdfs" : "http://www.w3.org/2000/01/rdf-schema#",
+    "xs" : "http://www.w3.org/2001/XMLSchema#",
+    "Assignment" : "po:Assignment",
+    "AssignmentAdministration" : "po:AssignmentAdministration",
+    "AssignmentType" : "po:AssignmentType",
+    "Capability" : "lti:Capability",
+    "ContentItem" : "po:ContentItem",
+    "CourseSection" : "pe:CourseSection",
+    "GradebookItem" : "po:GradebookItem",
+    "GradebookItemEvent" : "po:GradebookItemEvent",
+    "MessageHeader" : "pm:MessageHeader",
+    "NumericLimits" : "po:NumericLimits",
+    "ProductFamily" : "lti:ProductFamily",
+    "ResultValueSpec" : "po:ResultValueSpec",
+    "Thing" : "owl:Thing",
+    "ValueList" : "po:ValueList",
+    "assignment" : "po:assignment",
+    "assignmentAdministration" : "po:assignmentAdministration",
+    "assignmentType" : "po:assignmentType",
+    "body" : "pm:body",
+    "contentLocation" : {
+      "@id" : "po:contentLocation",
+      "@type" : "@id"
+    },
+    "context" : {
+      "@id" : "po:context",
+      "@type" : "@id"
+    },
+    "conversationId" : {
+      "@id" : "pm:conversationId",
+      "@type" : "lisd:GUID.Type"
+    },
+    "conversationStart" : {
+      "@id" : "pm:conversationStart",
+      "@type" : "xs:dateTime"
+    },
+    "conversationType" : {
+      "@id" : "pm:conversationType",
+      "@type" : "xs:anyURI"
+    },
+    "destinationId" : {
+      "@id" : "pm:destinationId",
+      "@type" : "xs:anyURI"
+    },
+    "enabledCapability" : "po:enabledCapability",
+    "endDateTime" : {
+      "@id" : "po:endDateTime",
+      "@type" : "xs:dateTime"
+    },
+    "extraCreditMaximum" : {
+      "@id" : "po:extraCreditMaximum",
+      "@type" : "xs:float"
+    },
+    "includedInGrade" : {
+      "@id" : "po:includedInGrade",
+      "@type" : "xs:boolean"
+    },
+    "integrationContract" : {
+      "@id" : "po:integrationContract",
+      "@type" : "@id"
+    },
+    "label" : {
+      "@id" : "rdfs:label",
+      "@type" : "lisd:Label.Type"
+    },
+    "lastModified" : {
+      "@id" : "po:lastModified",
+      "@type" : "xs:dateTime"
+    },
+    "metadata" : "pm:metadata",
+    "msgId" : {
+      "@id" : "pm:msgId",
+      "@type" : "lisd:GUID.Type"
+    },
+    "normalMaximum" : {
+      "@id" : "po:normalMaximum",
+      "@type" : "xs:float"
+    },
+    "originalMsgId" : {
+      "@id" : "pm:originalMsgId",
+      "@type" : "lisd:GUID.Type"
+    },
+    "resultValueSpec" : "po:resultValueSpec",
+    "sourceId" : {
+      "@id" : "pm:sourceId",
+      "@type" : "xs:anyURI"
+    },
+    "startDateTime" : {
+      "@id" : "po:startDateTime",
+      "@type" : "xs:dateTime"
+    },
+    "taxon" : {
+      "@id" : "po:taxon",
+      "@type" : "@id"
+    },
+    "timestamp" : {
+      "@id" : "pm:timestamp",
+      "@type" : "xs:dateTime"
+    },
+    "totalMaximum" : {
+      "@id" : "po:totalMaximum",
+      "@type" : "xs:float"
+    },
+    "version" : {
+      "@id" : "pm:version",
+      "@type" : "lisd:Version.Type"
+    }
+  }
+}

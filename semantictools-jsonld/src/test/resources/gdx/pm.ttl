@@ -1,0 +1,128 @@
+@prefix pm: <http://purl.org/pearson/core/v1/vocab/message#> .
+@prefix po: <http://purl.org/pearson/core/v1/vocab/outcomes#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix lisd: <http://purl.org/pearson/core/v1/vocab/datatypes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.org/pearson/core/v1/vocab/message#> a owl:Ontology  ;
+  rdfs:label "Message Ontology" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "pm" .
+
+pm:MessageHeader rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pm:version;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pm:msgId;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pm:timestamp;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pm:sourceId;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "A container that holds header information (metadata) about the Message." .
+
+pm:Message rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      pm:metadata;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      pm:body;
+    owl:onClass         owl:Thing;
+    owl:minQualifiedCardinality  1
+  ] ; 
+  rdfs:comment "An envelope that separates the payload of a message from its header." .
+
+pm:HttpAction a owl:Class ;
+  owl:equivalentClass [
+    owl:oneOf (
+      pm:GET 
+      pm:POST 
+      pm:PUT 
+      pm:DELETE
+    )
+  ] .
+
+pm:body rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      po:GradebookItemEvent
+      pm:Message
+    )
+  ] ;
+  rdfs:range  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      po:GradebookItem
+      owl:Thing
+    )
+  ] ;
+  rdfs:comment "The GradebookItem that is being created or updated." .
+
+pm:version rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range lisd:Version.Type ;
+  rdfs:comment "The version of the header information." .
+
+pm:msgId rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range lisd:GUID.Type ;
+  rdfs:comment "A globally unique identifier for this Message." .
+
+pm:originalMsgId rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range lisd:GUID.Type ;
+  rdfs:comment "This value is used in response messages. It identifies the original message that was sent in the request for which the current Message is a response." .
+
+pm:timestamp rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time when the message was created." .
+
+pm:conversationId rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range lisd:GUID.Type ;
+  rdfs:comment "A globally unique identifier for the set of related messages that make up a conversation between two or more parties participating in a workflow.  The party initiating the conversation (i.e. the party that started the workflow) determinses the value of the conversationId.  This identifier is used as a correlation id so that all messages in the conversation can be related to each other.  This is especially useful during troubleshooting." .
+
+pm:conversationType rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "This property uniquely identifies the type of conversation of which the message is a part.  This value facilites searches within a logging index such as Splunk." .
+
+pm:conversationStart rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "The date and time when the conversation started." .
+
+pm:sourceId rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "An identifier for the party that sent the message." .
+
+pm:destinationId rdf:type rdf:Property ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "Identifier(s) for the recipient(s) of the message." .
+
+pm:action rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:MessageHeader ;
+  rdfs:range pm:HttpAction .
+
+pm:metadata rdf:type owl:FunctionalProperty ;
+  rdfs:domain pm:Message ;
+  rdfs:range pm:MessageHeader ;
+  rdfs:comment "A container that holds metadata about the message." .
+

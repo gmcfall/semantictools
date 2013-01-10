@@ -1,0 +1,12 @@
+{
+  "@context" : "http://purl.org/pearson/core/v1/ctx/outcomes/GradebookItemEvent",
+  "@type" : "GradebookItemEvent",
+
+  "metadata" : {
+    "version" : "1.0",
+    "msgId" : "11ecf52f-d88b-4ce1-a33b-5566d2f53733",
+    "timestamp" : "2012-04-11T12:38:59-04:00",
+    "sourceId" : "urn:udson:pearson.com/xl",
+    "destinationId" : "urn:udson:pearson.com/eclg"
+  }
+}
