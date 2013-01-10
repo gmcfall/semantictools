@@ -18,10 +18,15 @@ package org.semantictools.plugin;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.semantictools.publish.DocumentationGenerator;
 
 /**
@@ -60,6 +65,16 @@ public class DocumentationPlugin extends AbstractMojo {
    * @parameter expression="${basedir}/target/generated-sources/rdf"
    */
   private File outputDir;
+  
+  /**
+   * The directory to use as the local RDF repository.
+   * <p>The default location for this directory is</p>
+   * <pre>
+   *   target/repo
+   * </pre>
+   * @parameter expression="${basedir}/target/repo"
+   */
+  private File repoDir;
   
   /**
    * A flag that specifies whether or not the generated artifacts should
@@ -107,11 +122,18 @@ public class DocumentationPlugin extends AbstractMojo {
       version = dateFormat.format(new Date());
     }
     
-    DocumentationGenerator generator = new DocumentationGenerator(rdfDir, outputDir, publish);
+    Logger logger = Logger.getLogger("mavenLogger");
+    logger.setUseParentHandlers(false);
+    logger.addHandler(new MavenLogHandler(getLog()));
+    
+    DocumentationGenerator generator = new DocumentationGenerator(rdfDir, outputDir, repoDir, publish);
+    generator.setLogger(logger);
+    
     generator.setUploadEndpoint(publishEndpoint);
     generator.setVersion(version);
     generator.setGenerate(generate);
     generator.setIndexFileName(indexFileName);
+    
     
     try {
       generator.run();
@@ -119,6 +141,38 @@ public class DocumentationPlugin extends AbstractMojo {
       throw new MojoExecutionException("Failed to generate documentation", e);
     }
 
+  }
+  
+  
+  static class MavenLogHandler extends Handler {
+    private boolean severe = false;
+    private Log log;
+
+    public MavenLogHandler(Log log) {
+      this.log = log;
+    }
+
+    @Override
+    public void publish(LogRecord record) {
+      
+      Level level = record.getLevel();
+      if (level == Level.SEVERE) {
+        log.error(record.getMessage(), record.getThrown());
+        severe = true;
+      } else {
+        log.warn(record.getMessage());
+      }
+      
+    }
+
+    @Override
+    public void flush() {
+    }
+
+    @Override
+    public void close() throws SecurityException {
+    }
+    
   }
 
 }

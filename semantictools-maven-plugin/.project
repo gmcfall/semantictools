@@ -1,6 +1,6 @@
 <projectDescription>
   <name>semantictools-maven-plugin</name>
-  <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <comment>A Maven plugin used to generate documentation for a REST API based on RDF schemas. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects/>
   <buildSpec>
     <buildCommand>
