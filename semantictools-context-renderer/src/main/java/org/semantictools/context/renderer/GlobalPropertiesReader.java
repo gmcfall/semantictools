@@ -46,6 +46,7 @@ public class GlobalPropertiesReader {
   private static final String RELEASE = "release";
   private static final String PURPOSE = "purpose";
   private static final String FOOTER = "footer";
+  private static final String VALIDATE_JSON_SAMPLES = "validateJsonSamples";
   private static final String DOCUMENT_LOCATION = "documentLocation";
   
   private OntologyManager ontologyManager;
@@ -117,6 +118,8 @@ public class GlobalPropertiesReader {
         global.setDocumentLocation(value);
       } else if (RELEASE.equals(key)) {
         global.setRelease(value);
+      } else if (VALIDATE_JSON_SAMPLES.equals(key)) {
+        global.setValidateJsonSamples("true".equalsIgnoreCase(value));
       }
     }
     return global;

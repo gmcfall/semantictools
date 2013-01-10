@@ -13,8 +13,9 @@ public class DocumentationTest {
   public void test() throws Exception {
 
     boolean publish = false;
-    File rdfDir = new File("src/test/resources/lti");
-    File pubDir = new File("target/lti");
+    File rdfDir = new File("src/test/resources/paf");
+    File pubDir = new File("target/paf");
+    File repoDir = new File("target/repo");
     String endpointURL = "http://127.0.0.1:8888/admin/upload.do";
 //    String endpointURL = "http://semantic-tools.appspot.com/admin/upload.do";
     String indexFile = "index.html";
@@ -23,7 +24,7 @@ public class DocumentationTest {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     String version = dateFormat.format(new Date());
     
-    DocumentationGenerator generator = new DocumentationGenerator(rdfDir, pubDir, publish);
+    DocumentationGenerator generator = new DocumentationGenerator(rdfDir, pubDir, repoDir, publish);
     generator.setIndexFileName(indexFile);
     generator.setVersion(version);
     generator.setUploadEndpoint(endpointURL);

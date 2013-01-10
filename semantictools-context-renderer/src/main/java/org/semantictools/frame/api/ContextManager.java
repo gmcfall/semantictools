@@ -69,6 +69,7 @@ public class ContextManager {
   private static final String EXPANDED_VALUE = "expandedValue";
   private static final String CAPTION_SUFFIX = ".caption";
   private static final String TEMPLATE = "template";
+  private static final String VALIDATE_JSON_SAMPLES = "validateJsonSamples";
   
   private MediaTypeFileManager fileManager;
   private Map<String, ContextProperties> contextMap = new HashMap<String, ContextProperties>();
@@ -232,6 +233,8 @@ public class ContextManager {
         setExpandedValue(sink, value);
       } else if (TEMPLATE.equals(key)) {
         sink.setTemplateName(value);
+      } else if (VALIDATE_JSON_SAMPLES.equals(key)) {
+        sink.setValidateJsonSamples("true".equalsIgnoreCase(value));
       }
     }
     validate(sink);

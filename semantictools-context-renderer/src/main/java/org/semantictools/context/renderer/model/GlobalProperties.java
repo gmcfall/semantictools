@@ -24,7 +24,6 @@ public class GlobalProperties  extends BaseDocumentMetadata {
   private Set<String> ignoredOntology = new HashSet<String>();
   
   
-  
   public GlobalProperties() {
     authorList = new ArrayList<Person>();
     editorList = new ArrayList<Person>();
@@ -32,6 +31,9 @@ public class GlobalProperties  extends BaseDocumentMetadata {
     refManager = new DefaultReferenceManager();
     createDefaultReferences();
   }
+  
+
+
 
   private void createDefaultReferences() {
 

@@ -403,7 +403,5 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
     this.contextFile = contextFile;
   }
 
-  
-
 
 }

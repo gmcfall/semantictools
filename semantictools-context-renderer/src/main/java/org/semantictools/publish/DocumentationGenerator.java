@@ -17,13 +17,21 @@ package org.semantictools.publish;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.semantictools.context.renderer.GlobalPropertiesReader;
 import org.semantictools.context.renderer.MediaTypeFileManager;
 import org.semantictools.context.renderer.URLRewriter;
+import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.GlobalProperties;
+import org.semantictools.context.renderer.model.SampleJson;
 import org.semantictools.context.renderer.model.ServiceFileManager;
 import org.semantictools.context.view.ServiceDocumentationPrinter;
 import org.semantictools.frame.api.ContextManager;
@@ -34,6 +42,14 @@ import org.semantictools.frame.api.ServiceDocumentationManager;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.index.api.LinkedDataIndexPrinter;
 import org.semantictools.index.api.impl.LinkedDataIndexImpl;
+import org.semantictools.jsonld.LdAsset;
+import org.semantictools.jsonld.LdProcessor;
+import org.semantictools.jsonld.LdPublishException;
+import org.semantictools.jsonld.LdValidationMessage;
+import org.semantictools.jsonld.LdValidationReport;
+import org.semantictools.jsonld.LdValidationResult;
+import org.semantictools.jsonld.impl.LdContentType;
+import org.semantictools.jsonld.io.LdParseException;
 import org.semantictools.uml.api.UmlFileManager;
 import org.semantictools.uml.api.UmlPrinter;
 import org.semantictools.uml.model.UmlManager;
@@ -49,9 +65,13 @@ import org.xml.sax.SAXException;
  *
  */
 public class DocumentationGenerator {
+  
+  private static final Logger defaultLogger = Logger.getLogger(DocumentationGenerator.class.getName());
 
+  private Logger logger;
   private File rdfDir;
   private File pubDir;
+  private File repoDir;
   private boolean publish = false;
   private String uploadEndpoint=null;
   private String version=null;
@@ -63,15 +83,31 @@ public class DocumentationGenerator {
    * Creates a new DocumentationGenerator.
    * @param sourceDir  Directory containing the RDF sources plus properties files that drive the generator.
    * @param targetDir  The output directory in which artifacts will be stored locally.
+   * @param repoDir The directory that will serve as a local repository for schemas and contexts.
    * @param publish    A flag that specifies whether artifacts should be published to semantictools.appspot.com.
    */
-  public DocumentationGenerator(File sourceDir, File targetDir, boolean publish) {
+  public DocumentationGenerator(File sourceDir, File targetDir, File repoDir, boolean publish) {
     this.rdfDir = sourceDir;
     this.pubDir = targetDir;
+    this.repoDir = repoDir;
     this.publish = publish;
   }
   
   
+  public Logger getLogger() {
+    return logger==null ? defaultLogger : logger;
+  }
+
+
+
+
+  public void setLogger(Logger logger) {
+    this.logger = logger;
+  }
+
+
+
+
   /**
    * Returns true if this DocumentationGenerator is configured to generate documentation, and
    * false if it is configured merely to publish documentation that was previously generated.
@@ -194,12 +230,140 @@ public class DocumentationGenerator {
       uploader.uploadAll(pubDir);
     }
     
+    validate(contextManager);
+    
     ontoManager.scan(rdfDir);
     ontoManager.upload();
     ontoManager.uploadJsonLdContextFiles(contextManager.listContextProperties());
     ontoManager.publishToLocalRepository(contextManager.listContextProperties());
+  }
+  
+  private void validate(ContextManager manager) {
+    if (repoDir == null) return;
+    deleteDir(repoDir);
+    repoDir.mkdirs();
+    
+    LdProcessor processor = new LdProcessor(rdfDir, repoDir, false);
+    
+    List<ContextProperties> list = manager.listContextProperties();
+    // Need to publish all the contexts first because some contexts
+    // might depend on other contexts.
+    for (ContextProperties context : list) {
+      publishJsonLdContext(processor, context);
+    }
+    // Now we can perform the validation.
+    for (ContextProperties context : list) {
+      if (context.getValidateJsonSamples()) {
+        validate(processor, context);
+      }
+    }
+    
+
+  }
+
+
+
+
+  private void publishJsonLdContext(LdProcessor processor,
+      ContextProperties context) {
+
+    File contextFile = context.getContextFile();
+    try {
+      String contextURI = context.getContextURI();
+      URL url = contextFile.toURI().toURL();
+      LdAsset asset = new LdAsset(contextURI, LdContentType.JSON_LD_CONTEXT, url);
+      asset.loadContent();
+      processor.publish(asset);
+      
+    } catch (Exception e) {
+      getLogger().severe("Failed to add context to repo: " + contextFile);
+    } 
     
     
+  }
+
+
+  private void validate(LdProcessor processor, ContextProperties context) {
+    List<SampleJson> list = context.getSampleJsonList();
+    File baseDir = context.getSourceFile().getParentFile();
+    if (list.isEmpty()) {
+      File defaultFile = new File(baseDir, "sample.json");
+      if (defaultFile.exists()) {
+        list = new ArrayList<SampleJson>();
+        SampleJson sample = new SampleJson();
+        sample.setFileName("sample.json");
+        list.add(sample);
+      }
+    }
+    
+    for (SampleJson sample : list) {
+      File file = new File(baseDir, sample.getFileName());
+      try {
+        URL url = file.toURI().toURL();
+        LdValidationReport report = processor.validate(url);
+        log(file, report);
+        
+      } catch (MalformedURLException e) {
+        getLogger().log(Level.SEVERE, "Failed to validate JSON sample " + file);
+        getLogger().log(Level.SEVERE, e.getMessage());
+      } catch (LdParseException e) {
+        getLogger().log(Level.SEVERE, "Failed to validate JSON sample " + file);
+        getLogger().log(Level.SEVERE, e.getMessage());
+      } catch (IOException e) {
+        getLogger().log(Level.SEVERE, "Failed to validate JSON sample " + file);
+        getLogger().log(Level.SEVERE, e.getMessage());
+      } catch (Throwable e) {
+        getLogger().log(Level.SEVERE, "Failed to validate JSON sample " + file);
+        getLogger().log(Level.SEVERE, e.getMessage());
+      }
+    }
+    
+  }
+
+
+  private void log(File file, LdValidationReport report) {
+    if (!hasProblem(report)) return;
+    
+    Logger logger = getLogger();
+    
+    logger.warning("Detected problems in file " + file);
+    
+    for (LdValidationMessage message : report.listMessages()) {
+      LdValidationResult result = message.getResult();
+      Level level = 
+          (result == LdValidationResult.ERROR) ? Level.SEVERE :
+          (result == LdValidationResult.WARNING) ? Level.WARNING :
+          null;
+      
+      if (level != null) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(message.getPath());
+        builder.append(": ");
+        builder.append(message.getText());
+        String text = builder.toString();
+        logger.log(level, text);
+      }
+    }
+    
+  }
+  
+  private boolean hasProblem(LdValidationReport report) {
+    for (LdValidationMessage msg : report.listMessages()) {
+      if (msg.getResult() != LdValidationResult.OK) return true;
+    }
+    return false;
+  }
+
+
+  private void deleteDir(File file) {
+    if (!file.exists()) return;
+    if (file.isDirectory()) {
+      File[] list = file.listFiles();
+      for (File doomed : list) {
+        deleteDir(doomed);
+      }
+    }
+    file.delete();
     
   }
 
