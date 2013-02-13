@@ -318,7 +318,9 @@ public class LdContext implements Serializable {
       for (LdTerm term : termList) {
 //        if (term.getProperty() != null) return true;
         if (
-            (term.getRdfClass() != null) ||
+            // TODO: The special case handling of owl:Thing is forced by a hack that added this RDF class by brute force.
+            // Eliminate this hack.
+            (term.getRdfClass() != null && !"http://www.w3.org/2002/07/owl#Thing".equals(term.getRdfClass().getURI())) ||
             (term.getDatatype()!=null) ||
             (term.getProperty()!=null)
             

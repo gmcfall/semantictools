@@ -162,10 +162,12 @@ public class LdValidationServiceImpl implements LdValidationService {
       Integer minCardinality = restriction.getMinCardinality();
       Integer maxCardinality = restriction.getMaxCardinality();
       
+     
+      
       int cardinality = getCardinality(field);
       
       if (minCardinality != null) {
-        validateMinCardinality(fieldPath, minCardinality, cardinality);
+        validateMinCardinality(object.getNode(), propertyURI, fieldPath, minCardinality, cardinality);
       }
       
       if (maxCardinality != null) {
@@ -193,7 +195,7 @@ public class LdValidationServiceImpl implements LdValidationService {
       Integer maxCardinality = qr.getMaxCardinality();
 
       if (minCardinality != null) {
-        validateMinCardinality(fieldPath, minCardinality, cardinality);
+        validateMinCardinality(field.getOwner(), field.getPropertyURI(), fieldPath, minCardinality, cardinality);
       }
       
       if (maxCardinality != null) {
@@ -223,7 +225,10 @@ public class LdValidationServiceImpl implements LdValidationService {
     validateDomain(path, field);
     
     if (value.isObject()) {    
-      validateObject(path, value.asObject());
+      LdTerm term = field.getOwner().getContext().getTerm(field.getPropertyURI());
+      if (term != null && !"@id".equals(term.getRawTypeIRI())) {
+        validateObject(path, value.asObject());
+      }
       
     } else if (value.isContainer()) {
       validateContainer(path, value.asContainer());
@@ -272,7 +277,17 @@ public class LdValidationServiceImpl implements LdValidationService {
         // Let's test that hypothesis.
         
         LdTerm typeTerm = context.getTerm(typeIRI);
+        if (typeTerm == null) {
+          error(path, "Term not found: " + typeIRI);
+          return;
+        }
         LdClass rdfClass = typeTerm.getRdfClass();
+        
+        if ("http://www.w3.org/2002/07/owl#Thing".equals(typeIRI)) {
+          // Special handling for properties of type owl:Thing.
+          return;
+        }
+        
         if (rdfClass != null) {
           String msg = "Expected an embedded object but found an IRI reference";
           warn(path, msg);
@@ -392,6 +407,15 @@ public class LdValidationServiceImpl implements LdValidationService {
     int index = 0;
     Iterator<LdNode> sequence = container.iterator();
     LdField field = container.owner();
+    LdObject ownerObject = field.getOwner();
+    LdContext context = ownerObject.getContext();
+    
+    boolean idref = false;
+    LdTerm term = context.getTerm(field.getPropertyURI());
+    if (term != null && "@id".equals(term.getRawTypeIRI())) {
+      idref = true;
+    }
+    
     while (sequence.hasNext()) {
       LdNode node = sequence.next();
       String elemPath = path + "[" + index + "]";
@@ -400,7 +424,12 @@ public class LdValidationServiceImpl implements LdValidationService {
         validateObject(elemPath, node.asObject());
         
       } if (node.isLiteral()) {
-        validateLiteral(elemPath, field, node.asLiteral());
+        
+        if (idref && !node.asLiteral().isStringValue()) {
+          warn(elemPath, "Expected an IRI reference");
+        } else {
+          validateLiteral(elemPath, field, node.asLiteral());
+        }
       }
       
       
@@ -451,7 +480,17 @@ public class LdValidationServiceImpl implements LdValidationService {
 
 
   private void validateMinCardinality(
-      String fieldPath, int minCardinality, int cardinality) {
+      LdObject object, String propertyURI, String fieldPath, int minCardinality, int cardinality) {
+    
+    /**
+     * Check to see if the minimum cardinality has an override in the
+     * JSON-LD context.
+     */
+    LdContext context = object.getContext();
+    LdTerm term = context.getTerm(propertyURI);
+    if (term.getMinCardinality() != null) {
+      minCardinality = term.getMinCardinality();
+    }
     
     if (cardinality < minCardinality) {
       String message =

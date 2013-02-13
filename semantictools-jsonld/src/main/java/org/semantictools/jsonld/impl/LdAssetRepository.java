@@ -145,9 +145,24 @@ public class LdAssetRepository extends LdAssetManagerImpl implements LdPublisher
     if (assetDir.exists()) {
       try {
         Properties properties = getAssetProperties(assetDir);
-        String formatName = (format==null) ? properties.getProperty(DEFAULT) : format.name();
-        
-        String fileName = properties.getProperty(formatName);
+       
+        String formatName = null;
+        String fileName = null;
+        if (format != null) {
+          formatName = format.name();
+          fileName = properties.getProperty(format.name());
+          
+        } else {
+          // If there is an XSD file, use it by default.
+          formatName = LdContentType.XSD.name();
+          fileName = properties.getProperty(formatName);
+          if (fileName == null) {
+            // There is no XSD file, so use the declared default format.
+            formatName = properties.getProperty(DEFAULT);
+            fileName = properties.getProperty(formatName);
+          }
+        }
+           
         File contentFile = new File(assetDir, fileName);
         URL location = contentFile.toURI().toURL();
         

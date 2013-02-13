@@ -19,7 +19,7 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-jsonld</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1</version>
+	<version>1.17</version>
 	<name>SemanticTools JSON-LD</name>
 
 	<properties>
@@ -122,6 +122,14 @@
 			       <target>1.6</target>
 			   </configuration>
 			</plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.10</version>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+        </plugin>
 
 		</plugins>
 	</build>

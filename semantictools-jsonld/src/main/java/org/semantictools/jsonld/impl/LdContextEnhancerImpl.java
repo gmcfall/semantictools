@@ -111,9 +111,9 @@ public class LdContextEnhancerImpl implements LdContextEnhancer {
         buildDatatypes();
         addFunctionalPropertyRestrictions();
         
-        if (errorBuilder.length()>0) {
-          throw new LdContextEnhanceException(errorBuilder.toString());
-        }
+//        if (errorBuilder.length()>0) {
+//          throw new LdContextEnhanceException(errorBuilder.toString());
+//        }
         
       } finally {
         release();

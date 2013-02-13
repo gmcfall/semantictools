@@ -49,6 +49,13 @@ public class LdLiteral implements LdNode {
   }
   
   /**
+   * Returns true if this literal holds a string value.
+   */
+  public boolean isStringValue() {
+    return stringValue != null;
+  }
+  
+  /**
    * Sets the String representation of this literal.
    * Setting a Long or Double value automatically makes a String value
    * accessible via getStringValue.  Thus, if you call setLongValue or setDoubleValue,

@@ -35,6 +35,7 @@ public class LdTerm implements Serializable {
   private LdClass rdfClass;
   private LdDatatype datatype;
   private LdProperty property;
+  private Integer minCardinality;
   
   
   /**
@@ -211,6 +212,21 @@ public class LdTerm implements Serializable {
     return shortName;
   }
   
+  /**
+   * Sets an override for the minimum cardinality of the property associated with this term.
+   * This cardinality constraint applies only within the associated JSON-LD context.
+   * This is an extension of the JSON-LD standard.
+   */
+  public void setMinCardinality(Integer value) {
+    minCardinality = value;
+  }
   
+  /**
+   * Returns an override for the minimum cardinality of this property associated with this term,
+   * or null if there is no override.
+   */
+  public Integer getMinCardinality() {
+    return minCardinality;
+  }
   
 }

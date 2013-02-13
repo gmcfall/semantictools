@@ -136,6 +136,9 @@ public class LdContextReaderImpl implements LdContextReader {
         } else if ("@container".equals(fieldName)) {
           term.setContainerType(readContainerType(parser));
           
+        } else if ("@minCardinality".equals(fieldName)) {
+          term.setMinCardinality(Integer.parseInt(readString(parser)));
+          
         } else if ("datatype".equals(fieldName)) {
           parseDatatype(parser, term);
           
@@ -552,6 +555,7 @@ public class LdContextReaderImpl implements LdContextReader {
     
     if (context != null) {
       context.close();
+      prepareOwlClasses(context);
       
       // We don't need to resolve references if the context is external
       // and obtained from the LdContextManager.
@@ -562,6 +566,23 @@ public class LdContextReaderImpl implements LdContextReader {
     }
     
     return context;
+  }
+
+  /** Add RDF class for owl:Thing if it is referenced explicitly.
+   * This method is a bit of a hack.
+   * TODO: Find a more elegant solution.
+   * @param context
+   */
+  private void prepareOwlClasses(LdContext context) {
+    LdTerm term = context.getTerm("http://www.w3.org/2002/07/owl#Thing");
+    if (term == null) return;
+    
+    LdClass type = term.getRdfClass();
+    if (type == null) {
+      type = new LdClass(term.getIRI());
+      term.setRdfClass(type);
+    }
+    
   }
 
   private void resolveRefereces(LdContext context) {
