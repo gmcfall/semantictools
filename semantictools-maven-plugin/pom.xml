@@ -9,7 +9,7 @@
   <groupId>org.semantictools</groupId>
   <artifactId>semantictools-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.16</version>
+  <version>1.17</version>
   <name>semantictools maven plugin</name>
   <description>A Maven plugin used to generate documentation for a REST API based on RDF schemas</description>
   <url>https://github.com/gmcfall/semantictools</url>
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.semantictools</groupId>
       <artifactId>semantictools-context-renderer</artifactId>
-      <version>1.15</version>
+      <version>1.17</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
