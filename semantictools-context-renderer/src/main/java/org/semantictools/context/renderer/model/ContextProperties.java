@@ -48,6 +48,7 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
   private String purlDomain;
   private File mediaTypeDocFile;
   private List<String> idRefList = new ArrayList<String>();
+  private List<String> optional = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
   private Set<String> requiresId = new HashSet<String>();
   private List<String> graphTypes = new ArrayList<String>();
@@ -80,6 +81,22 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
    */
   public void addUsePrefix(String propertyURI) {
     usePrefix.add(propertyURI);
+  }
+  
+  /**
+   * Add a property whose cardinality constraint is relaxed in this JSON-LD context so
+   * that the property is optional (instead of being required as declared in the RDF schema).
+   * @param propertyURI The URI for the property that is declared to be optional in this context.
+   */
+  public void addOptional(String propertyURI) {
+    optional.add(propertyURI);
+  }
+  
+  /**
+   * Returns the list of properties that are declared to be optional in this JSON-LD context.
+   */
+  public List<String> getOptionalProperties() {
+    return optional;
   }
   
   

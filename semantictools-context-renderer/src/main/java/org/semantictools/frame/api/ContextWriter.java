@@ -83,6 +83,11 @@ public class ContextWriter {
           writer.println(",");
           writeProperty(writer, indent, "@container", "@list");
         }
+        Integer minCardinality = value.getMinCardinality();
+        if (minCardinality != null) {
+          writer.println(",");
+          writeProperty(writer, indent, "@minCardinality", minCardinality.toString());
+        }
         indent -= tabSize;
         writer.println();
         endObject(writer, indent);

@@ -74,27 +74,28 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class ContextHtmlPrinter extends PrintEngine {
-  
-  private static Logger logger = LoggerFactory.getLogger(ContextHtmlPrinter.class);
+
+  private static Logger logger = LoggerFactory
+      .getLogger(ContextHtmlPrinter.class);
 
   private static final String TOC_MARKER = "<!-- TOC -->";
-//  private static final String XMLSCHEMA_URI = "http://www.w3.org/2001/XMLSchema#";
+  // private static final String XMLSCHEMA_URI =
+  // "http://www.w3.org/2001/XMLSchema#";
   private static final String VOWEL = "aeiou";
 
+  // private static final String[] STANDARD_URI = { XMLSCHEMA_URI,
+  // "http://www.w3.org/2002/07/owl#",
+  // "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  // "http://www.w3.org/2000/01/rdf-schema#",
+  // "http://purl.org/semantictools/v1/vocab/bind#" };
 
-//  private static final String[] STANDARD_URI = { XMLSCHEMA_URI,
-//      "http://www.w3.org/2002/07/owl#",
-//      "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-//      "http://www.w3.org/2000/01/rdf-schema#",
-//      "http://purl.org/semantictools/v1/vocab/bind#" };
-
-//  private static boolean isStandard(String uri) {
-//    for (int i = 0; i < STANDARD_URI.length; i++) {
-//      if (uri.startsWith(STANDARD_URI[i]))
-//        return true;
-//    }
-//    return false;
-//  }
+  // private static boolean isStandard(String uri) {
+  // for (int i = 0; i < STANDARD_URI.length; i++) {
+  // if (uri.startsWith(STANDARD_URI[i]))
+  // return true;
+  // }
+  // return false;
+  // }
 
   private TypeManager typeManager;
   private MediaTypeFileManager namer;
@@ -124,15 +125,10 @@ public class ContextHtmlPrinter extends PrintEngine {
   private GlobalProperties global;
   private DocumentPrinter documentPrinter;
 
-  public ContextHtmlPrinter(
-      GlobalProperties global,
-      GeneratorProperties properties, 
-      TypeManager typeManager,
-      MediaTypeFileManager namer, 
-      StreamFactory streamFactory,
-      DiagramGenerator generator,
-      UmlFileManager umlFileManager
-   ) {
+  public ContextHtmlPrinter(GlobalProperties global,
+      GeneratorProperties properties, TypeManager typeManager,
+      MediaTypeFileManager namer, StreamFactory streamFactory,
+      DiagramGenerator generator, UmlFileManager umlFileManager) {
     super(new PrintContext());
     this.global = global;
     generatorProperties = properties;
@@ -144,7 +140,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     this.typeManager = typeManager;
     this.namer = namer;
   }
-  
+
   public List<Frame> getGraphTypes() {
     if (graphTypes == null) {
       List<String> uriList = contextProperties.getGraphTypes();
@@ -174,20 +170,19 @@ public class ContextHtmlPrinter extends PrintEngine {
       throws IOException {
     this.contextProperties = properties;
     this.context = context;
-    
-    
+
     documentPrinter = createDocumentPrinter();
-    
+
     defaultTemplate = isDefaultTemplate();
     treeGenerator = new TreeGenerator(typeManager, context, properties);
     sampleGenerator = new JsonSampleGenerator(typeManager);
-    root = context == null ? null : typeManager.getFrameByUri(context.getRootType());
-    
+    root = context == null ? null : typeManager.getFrameByUri(context
+        .getRootType());
+
     overviewDiagram = overviewDiagramCaption();
     captionManager = new CaptionManager();
     jsonManager = new JsonManager(typeManager, context);
     nodeComparatorFactory = new NodeComparatorFactoryImpl(jsonManager);
-    
 
     beginHTML();
     pushIndent();
@@ -206,7 +201,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     writeOutput();
 
   }
-  
+
   private DocumentPrinter createDocumentPrinter() {
     DocumentPrinter printer = null;
     String template = contextProperties.getTemplateName();
@@ -217,27 +212,26 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
     printer.setMetadata(contextProperties);
     printer.setClassificationPrinter(new MyClassificationPrinter());
-   
+
     return printer;
   }
-  
+
   class MyClassificationPrinter implements ClassificationPrinter {
 
     @Override
     public void printClassifiers() {
 
       String mediaType = contextProperties.getMediaType();
-      String rdfType = (root==null) ? null : root.getUri();
-      String contextURI = context==null ? null : context.getContextURI();
+      String rdfType = (root == null) ? null : root.getUri();
+      String contextURI = context == null ? null : context.getContextURI();
       String contextHref = namer.getJsonContextFileName(context);
-      
 
       String rdfTypeHref = null;
       if (umlFileManager != null) {
 
         String path = namer.getIndexFileName();
         File sourceFile = streamFactory.getOutputFile(path);
-        if (sourceFile != null && root!=null) {
+        if (sourceFile != null && root != null) {
           rdfTypeHref = umlFileManager.getTypeRelativePath(sourceFile, root);
         }
       }
@@ -255,7 +249,7 @@ public class ContextHtmlPrinter extends PrintEngine {
       indent().println("<TR>");
       pushIndent();
       indent().println("<TH>RDF Type</TH>");
-     
+
       indent().print("<TD>");
       if (rdfTypeHref == null) {
         print(rdfType);
@@ -266,7 +260,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         print(rdfType);
         print("</a>");
       }
-      
+
       println("</TD>");
       popIndent();
       indent().println("</TR>");
@@ -283,11 +277,9 @@ public class ContextHtmlPrinter extends PrintEngine {
       indent().println("</TABLE>");
       indent().println("<p></p>");
     }
-      
 
   }
 
-  
   public void printTitlePage() {
     documentPrinter.printTitlePage();
   }
@@ -303,43 +295,42 @@ public class ContextHtmlPrinter extends PrintEngine {
   private Caption overviewDiagramCaption() {
     String text = null;
     if (root == null) {
-      text = "Graphical representation of the " + contextProperties.getMediaType() + " media type";
+      text = "Graphical representation of the "
+          + contextProperties.getMediaType() + " media type";
     } else {
       text = "Complete JSON representation of " + root.getLocalName();
     }
-    return new Caption(CaptionType.Figure,  text, "completeRep", null);
+    return new Caption(CaptionType.Figure, text, "completeRep", null);
   }
 
-
-
-  
-
-
   private void printDataBindings() throws IOException {
-    if (!defaultTemplate) return;
-    
+    if (!defaultTemplate)
+      return;
+
     Heading heading = documentPrinter.createHeading("JSON Data Bindings");
-    
+
     documentPrinter.beginSection(heading);
     printOverviewDiagram();
     printFrames();
     printDatatypes();
     documentPrinter.endSection();
-    
+
   }
 
   private void printDatatypes() {
     for (Datatype type : datatypeList) {
-      
-      if (typeManager.isStandardDatatype(type.getNamespace())) continue;
+
+      if (typeManager.isStandardDatatype(type.getNamespace()))
+        continue;
       printDatatype(type);
     }
-    
+
   }
 
   private void printMediaTypeConformance() {
     documentPrinter.endSection();
-    // TODO: move the endHeading call to the same scope where the heading begins.
+    // TODO: move the endHeading call to the same scope where the heading
+    // begins.
     if (context == null) {
       return;
     }
@@ -347,105 +338,112 @@ public class ContextHtmlPrinter extends PrintEngine {
     String typeName = context.rewrite(root.getUri());
     String mediaType = contextProperties.getMediaType();
     String contextRef = contextProperties.getContextRef();
-    
-    Heading heading = documentPrinter.createHeading(headingTemplate.replace("{0}", typeName));
+
+    Heading heading = documentPrinter.createHeading(headingTemplate.replace(
+        "{0}", typeName));
     documentPrinter.print(heading);
-    
-    String text = 
-        "The following list defines the necessary and sufficient conditions for a document " +
-        "to conform to the <code>{0}</code> media type.";
-       
+
+    String text = "The following list defines the necessary and sufficient conditions for a document "
+        + "to conform to the <code>{0}</code> media type.";
+
     printParagraph(text.replace("{0}", mediaType));
     indent().print("<OL");
     printAttr("class", "uncondensed");
     println(">");
     pushIndent();
-    
+
     printListItem("The document MUST be a valid JSON document, in accordance with [RFC4627].");
-    
-    printListItem("The document MUST contain either a single top-level JSON object, or an array " +
-      "of top-level JSON objects.  The first object encountered (either the single top-level object or " +
-      "the first element of the array) is called the <em>root</em> object.");
-    
-    text = "The root object must have a <code>@type</code> property whose value is \"<code>{0}</code>\".";
+
+    printListItem("The document MUST contain either a single top-level JSON object, or an array "
+        + "of top-level JSON objects.  The first object encountered (either the single top-level object or "
+        + "the first element of the array) is called the <em>root</em> object.");
+
+    boolean hasSubtypes = root.getSubtypeList().size() > 1;
+    if (hasSubtypes) {
+      text = "The root object must have a <code>@type</code> property whose value is \"<code>{0}</code>\" or a "
+          + "subtype of <code>{0}</code>.";
+    } else {
+      text = "The root object must have a <code>@type</code> property whose value is \"<code>{0}</code>\".";
+    }
     printListItem(text.replace("{0}", typeName));
-    
-    text = "Every top-level object MUST have a <code>@context</code> property that references one or more " +
-        "JSON-LD contexts (either by URI or by value).";
+
+    text = "Every top-level object MUST have a <code>@context</code> property that references one or more "
+        + "JSON-LD contexts (either by URI or by value).";
     printListItem(text);
-    
-    text = "Collectively, the set of contexts imported by the root object MUST contain all of the " +
-      "terms found in the <em>standard context</em> {0}.  In particular, the set of imported contexts must " +
-      "contain all the simple names that appear in the standard context, and those simple names must " +
-      "resolve to the same values that appear in the standard context.  This requirement may be " +
-      "satisfied by ensuring that the root object imports the standard context explicitly, or by " +
-      "importing a collection of other contexts that contain equivalent terms.";
+
+    text = "Collectively, the set of contexts imported by the root object MUST contain all of the "
+        + "terms found in the <em>standard context</em> {0}.  In particular, the set of imported contexts must "
+        + "contain all the simple names that appear in the standard context, and those simple names must "
+        + "resolve to the same values that appear in the standard context.  This requirement may be "
+        + "satisfied by ensuring that the root object imports the standard context explicitly, or by "
+        + "importing a collection of other contexts that contain equivalent terms.";
     printListItem(text.replace("{0}", contextRef));
-    
-    text = "The set of contexts imported by the root object MAY include additional terms that do not " +
-      "appear in the standard context {0}.";
+
+    text = "The set of contexts imported by the root object MAY include additional terms that do not "
+        + "appear in the standard context {0}.";
     printListItem(text.replace("{0}", contextRef));
-    
-    text = "Duplicate mappings for names among the imported contexts MUST be overwritten on a " +
-      "last-defined-overrides basis.";
+
+    text = "Duplicate mappings for names among the imported contexts MUST be overwritten on a "
+        + "last-defined-overrides basis.";
     printListItem(text);
-    
-    text = "If the JSON-LD context coerces a property to a URI reference, then values of that " +
-      "property MUST be expressed as a fully-qualified URI reference, or a CURIE  or a simple name " +
-      "declared by the context.";
+
+    text = "If the JSON-LD context coerces a property to a URI reference, then values of that "
+        + "property MUST be expressed as a fully-qualified URI reference, or a CURIE  or a simple name "
+        + "declared by the context.";
     printListItem(text);
-    
-    text = "A <em>collection property</em> is any property whose maximum cardinality is greater than 1. " +
-        "Except for the <code>@context</code> property, " +
-        "a non-empty collection MUST always be represented as a JSON array whose values are enclosed " +
-        "in square brackets. Whereas, in general, the JSON-LD syntax specification allows a collection " +
-        "containing a single value to omit the square brackets, the <code>" + mediaType + "</code> media type " +
-        "requires square brackets for all non-empty collections other than the <code>@context</code> property.";
+
+    text = "A <em>collection property</em> is any property whose maximum cardinality is greater than 1. "
+        + "Except for the <code>@context</code> property, "
+        + "a non-empty collection MUST always be represented as a JSON array whose values are enclosed "
+        + "in square brackets. Whereas, in general, the JSON-LD syntax specification allows a collection "
+        + "containing a single value to omit the square brackets, the <code>"
+        + mediaType
+        + "</code> media type "
+        + "requires square brackets for all non-empty collections other than the <code>@context</code> property.";
     printListItem(text);
-    
-    text = "An empty collection property may be represented either by an empty array (i.e. square brackets " +
-        "containing no elements), or by omitting the property altogether.";
+
+    text = "An empty collection property may be represented either by an empty array (i.e. square brackets "
+        + "containing no elements), or by omitting the property altogether.";
     printListItem(text);
-    
-    text = "Like all other properties, the <code>@id</code> property of a given object is mandatory " +
-      "if the minimum cardinality of that property, as defined by this specification, is greater than " +
-      "zero. The <code>@id</code> property is optional for all other objects (even if it is not " +
-      "explicitly listed in the set of properties for an object).  Conforming implementations SHOULD " +
-      "include the <code>@id</code> property for all addressable objects.";
+
+    text = "Like all other properties, the <code>@id</code> property of a given object is mandatory "
+        + "if the minimum cardinality of that property, as defined by this specification, is greater than "
+        + "zero. The <code>@id</code> property is optional for all other objects (even if it is not "
+        + "explicitly listed in the set of properties for an object).  Conforming implementations SHOULD "
+        + "include the <code>@id</code> property for all addressable objects.";
     printListItem(text);
-    
-    text = "If the <code>@id</code> property is mandatory, then the value MUST NOT treat the object as " +
-      "a blank node.  In this case, the <code>@id</code> value MUST NOT be a CURIE with an underscore " +
-      "as the prefix.";
+
+    text = "If the <code>@id</code> property is mandatory, then the value MUST NOT treat the object as "
+        + "a blank node.  In this case, the <code>@id</code> value MUST NOT be a CURIE with an underscore "
+        + "as the prefix.";
     printListItem(text);
-    
+
     text = "Every top-level object MUST contain a <code>@type</code> property and a @context property.";
     printListItem(text);
-    
-    text = "An embedded object MUST contain a <code>@type</code> property if the object value is a " +
-      "subtype of the declared range of the property.";
+
+    text = "An embedded object MUST contain a <code>@type</code> property if the object value is a "
+        + "subtype of the declared range of the property.";
     printListItem(text);
-    
+
     text = "Values for properties named in the standard context {0}, MUST not utilize the String Internationalization or Typed Value syntax as described in [JSON-LD-syntax].";
     printListItem(text.replace("{0}", contextRef));
-    
-    text = "If the context does not coerce the value of an object property to a URI reference, " +
-      "then the object must be rendered as an embedded object.";
+
+    text = "If the context does not coerce the value of an object property to a URI reference, "
+        + "then the object must be rendered as an embedded object.";
     printListItem(text);
-    
-    text = "The properties of embedded objects must respect the cardinality constraints specified in " +
-      "the section titled JSON Data Bindings.";
+
+    text = "The properties of embedded objects must respect the cardinality constraints specified in "
+        + "the section titled JSON Data Bindings.";
     printListItem(text);
-    
+
     popIndent();
     indent().println("</OL>");
-    
-    
+
   }
 
   private void printListItem(String text) {
     indent().print("<LI>").print(text).println("</LI>");
-    
+
   }
 
   private void writeOutput() throws IOException {
@@ -464,16 +462,16 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printToc() {
-    if (!defaultTemplate) return;
+    if (!defaultTemplate)
+      return;
 
     println(TOC_MARKER);
 
   }
 
-
-
   private void printAbstract() {
-    if (!defaultTemplate) return;
+    if (!defaultTemplate)
+      return;
 
     String abstractText = contextProperties == null ? null : contextProperties
         .getAbstactText();
@@ -502,45 +500,42 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
 
     printSample();
-    
+
     if (defaultTemplate) {
       printHowToRead();
     }
-
 
   }
 
   private void printSample() throws IOException {
 
     String typeName = null;
-    
-    if (context != null && root!=null) {
+
+    if (context != null && root != null) {
       typeName = context.rewrite(root.getUri());
-    } 
+    }
     String defaultText = contextProperties.getSampleText();
-   
+
     if (defaultText == null) {
-    
+
       if (typeName == null) {
-        defaultText = 
-          "<p>Figure 1 shows the representation of a resource in the <code>" +
-              contextProperties.getMediaType() + "</code> format.</p>";
-        
+        defaultText = "<p>Figure 1 shows the representation of a resource in the <code>"
+            + contextProperties.getMediaType() + "</code> format.</p>";
+
       } else {
-        defaultText =
-          "<p>Figure 1 shows the representation of " +article(typeName) + typeName + " resource in the <code>" +
-           contextProperties.getMediaType() + "</code> format.</p>";
+        defaultText = "<p>Figure 1 shows the representation of "
+            + article(typeName) + typeName + " resource in the <code>"
+            + contextProperties.getMediaType() + "</code> format.</p>";
       }
     }
-    
-    
+
     List<SampleJson> list = contextProperties.getSampleJsonList();
     if (list.isEmpty()) {
       print(defaultText);
       printDefaultSample(typeName);
-      
+
     } else {
-      if (list.size()==1) {
+      if (list.size() == 1) {
         print(defaultText);
       } else {
         print("<p>The following ");
@@ -553,7 +548,7 @@ public class ContextHtmlPrinter extends PrintEngine {
       }
       printOtherSamples();
     }
-    
+
   }
 
   private void printHowToRead() throws IOException {
@@ -561,7 +556,8 @@ public class ContextHtmlPrinter extends PrintEngine {
       return;
     }
 
-    Heading heading = documentPrinter.createHeading("How To Read this Document");
+    Heading heading = documentPrinter
+        .createHeading("How To Read this Document");
     documentPrinter.print(heading);
 
     printSampleObject();
@@ -577,22 +573,21 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void printContextDiscussion() {
     Heading heading = documentPrinter.createHeading("The JSON-LD Context");
     documentPrinter.print(heading);
-    
 
     printContextSnippet();
     printTypeCoercionSample();
-    
+
   }
 
   private void printTypeCoercionSample() {
-    
-    TermInfo term = getTypeCoercionSample(new HashSet<String>(), root);
-    if (term == null) return;
 
-    printParagraph(
-        "A context may specify that the values of  certain object properties must be rendered as URI references.   " +
-        "The following snippet presents an example of such a rule.");
-    
+    TermInfo term = getTypeCoercionSample(new HashSet<String>(), root);
+    if (term == null)
+      return;
+
+    printParagraph("A context may specify that the values of  certain object properties must be rendered as URI references.   "
+        + "The following snippet presents an example of such a rule.");
+
     beginCodeSnippet();
     println("  {");
     println("    \"@context\" = {");
@@ -602,29 +597,33 @@ public class ContextHtmlPrinter extends PrintEngine {
     println("      ...");
     println("  }");
     endCodeSnippet();
-    
-    printParagraph(
-        "This rule is an example of <em>type coercion</em>.  " +
-        "For more details about the syntax of a JSON-LD context, see [JSON-LD-syntax].");
-    
+
+    printParagraph("This rule is an example of <em>type coercion</em>.  "
+        + "For more details about the syntax of a JSON-LD context, see [JSON-LD-syntax].");
+
   }
 
   private TermInfo getTypeCoercionSample(Set<String> history, Frame frame) {
-    if (history.contains(frame.getUri())) return null;
+    if (history.contains(frame.getUri()))
+      return null;
     history.add(frame.getUri());
-    
+
     List<Field> list = frame.listAllFields();
     for (Field field : list) {
       TermInfo term = context.getTermInfoByURI(field.getURI());
-      if (term == null) continue;
-      if (term.hasObjectValue() && "@id".equals(term.getObjectValue().getType())) return term;
+      if (term == null)
+        continue;
+      if (term.hasObjectValue()
+          && "@id".equals(term.getObjectValue().getType()))
+        return term;
       RdfType type = field.getRdfType();
       if (type != null && type.canAsFrame()) {
         term = getTypeCoercionSample(history, type.asFrame());
-        if (term != null) return term;
+        if (term != null)
+          return term;
       }
     }
-    
+
     return null;
   }
 
@@ -632,49 +631,45 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     String contextRef = contextProperties.getContextRef();
     String typeName = context.rewrite(root.getUri());
-    
 
     Field field = getSampleToken();
-    
-    String template = 
-        "In JSON-LD, a context is used to map simple names that appear in a JSON document " +
-        "to URI values for properties or data types in a formal vocabulary (typically an RDF ontology).  ";
-    
-    String example =
-        "For example, the standard context {0} for a {1} contains the following rewrite rules (among others):";
-    
+
+    String template = "In JSON-LD, a context is used to map simple names that appear in a JSON document "
+        + "to URI values for properties or data types in a formal vocabulary (typically an RDF ontology).  ";
+
+    String example = "For example, the standard context {0} for a {1} contains the following rewrite rules (among others):";
+
     if (field != null) {
-    
+
       example = example.replace("{0}", contextRef);
       template += example.replace("{1}", typeName);
     }
-    
+
     printParagraph(template);
-    
-    if (field == null) return;
-    
+
+    if (field == null)
+      return;
+
     TermInfo term = context.getTermInfoByURI(field.getURI());
     String namespace = field.getProperty().getNameSpace();
     String prefix = context.rewrite(namespace);
-    
+
     beginCodeSnippet();
     println("  {");
     println("    \"@context\" = {");
-    
-    
+
     if (!prefix.equals(namespace)) {
-      print("      \"").print(prefix).print("\" : \"").print(namespace).println("\",");
+      print("      \"").print(prefix).print("\" : \"").print(namespace)
+          .println("\",");
     }
     printTerm(term);
     println(",");
-    
+
     println("      ...");
     println("    }");
     println("  }");
     endCodeSnippet();
-    
-    
-    
+
   }
 
   private void printTerm(TermInfo term) {
@@ -690,19 +685,17 @@ public class ContextHtmlPrinter extends PrintEngine {
       print(term.getObjectValue().getType());
       println("\"");
       print("      }");
-      
-      
+
     } else {
-    
+
       print("      \"");
       print(term.getTermName());
       print("\" : \"");
       print(term.getIri());
       print("\"");
     }
-    
+
   }
-  
 
   private void beginCodeSnippet() {
     indent().print("<DIV");
@@ -710,63 +703,64 @@ public class ContextHtmlPrinter extends PrintEngine {
     println(">");
     println("<PRE>");
   }
-  
+
   private void endCodeSnippet() {
     println("</PRE>");
     indent().println("</DIV>");
-    
+
   }
 
   private Field getSampleToken() {
     List<Field> list = root.listAllFields();
     for (Field field : list) {
       TermInfo term = context.getTermInfoByURI(field.getURI());
-      if (term == null) continue;
-      if (!term.hasObjectValue()) return field;
+      if (term == null)
+        continue;
+      if (!term.hasObjectValue())
+        return field;
     }
-    
+
     return null;
   }
 
   private void printReservedTerms() {
     Heading heading = documentPrinter.createHeading("Reserved Terms");
     documentPrinter.print(heading);
-    printParagraph("The JSON-LD standard reserves a handful of property names and tokens " +
-      "that have special meaning.  These names and tokens, described below, begin with the '@' symbol.");
+    printParagraph("The JSON-LD standard reserves a handful of property names and tokens "
+        + "that have special meaning.  These names and tokens, described below, begin with the '@' symbol.");
     indent().println("<DL");
     printAttr("class", "reservedTerms");
     println(">");
     pushIndent();
-      printDefinition(
-          "@context",
-          "Used to reference (by URI or by value) a <em>context</em> which declares the simple names " +
-          "that appear throughout a JSON document.");
-      
-      printDefinition(
-          "@id",
-          "Used to uniquely identify things that are being described in the JSON document.  " +
-          "The value of an @id property is either a fully-qualified URI, a CURIE, or a simple name " +
-          "that expands to a fully-qualified URI by virtue of the rules defined in the JSON-LD Context." +
+    printDefinition(
+        "@context",
+        "Used to reference (by URI or by value) a <em>context</em> which declares the simple names "
+            + "that appear throughout a JSON document.");
 
-          "<P>The @id property may identify a so-called blank node by using a CURIE with an underscore " +
-          "as the prefix.  The binding of a JSON-LD document MAY include identifiers for blank nodes, " +
-          "but these identifiers are not required.");
-      
-      printDefinition(
-          "@type",
-          "Used to set the data type of an object or property value.");
-      
+    printDefinition(
+        "@id",
+        "Used to uniquely identify things that are being described in the JSON document.  "
+            + "The value of an @id property is either a fully-qualified URI, a CURIE, or a simple name "
+            + "that expands to a fully-qualified URI by virtue of the rules defined in the JSON-LD Context."
+            +
+
+            "<P>The @id property may identify a so-called blank node by using a CURIE with an underscore "
+            + "as the prefix.  The binding of a JSON-LD document MAY include identifiers for blank nodes, "
+            + "but these identifiers are not required.");
+
+    printDefinition("@type",
+        "Used to set the data type of an object or property value.");
+
     popIndent();
     indent().println("</DL>");
-   
-    String text =
-        "JSON-LD specifies four other reserved terms (@value, @language, @container, @list).  " +
-        "Ordinarily, these terms are not used in the JSON binding for <code>{0}</code> objects.  However, " +
-        "implementations that extend this specification by including additional properties may utilize " +
-        "these reserved terms in accordance with the rules defined by [JSON-LD-syntax].";
+
+    String text = "JSON-LD specifies four other reserved terms (@value, @language, @container, @list).  "
+        + "Ordinarily, these terms are not used in the JSON binding for <code>{0}</code> objects.  However, "
+        + "implementations that extend this specification by including additional properties may utilize "
+        + "these reserved terms in accordance with the rules defined by [JSON-LD-syntax].";
     String typeName = root.getLocalName();
     printParagraph(text.replace("{0}", typeName));
-    
+
   }
 
   private void printDefinition(String termName, String description) {
@@ -774,15 +768,13 @@ public class ContextHtmlPrinter extends PrintEngine {
     pushIndent();
     indent().print("<DD>").print(description).println("</DD>");
     popIndent();
-    
-  }
 
+  }
 
   private void printParagraph(String text) {
     indent().print("<P>").print(text).println("</P>");
-    
-  }
 
+  }
 
   private void printPropertyRepresentation() throws IOException {
 
@@ -790,11 +782,11 @@ public class ContextHtmlPrinter extends PrintEngine {
     // This is our first choice for the node that we'll use as the sample
     // property.
     Field field = getSimpleTypeField(new HashSet<String>(), root);
-  
+
     if (field == null) {
       field = getAnyField(root);
     }
-    
+
     indent()
         .print(
             "<P>Each box representing a property specifies the name and type of the property , as shown in ");
@@ -810,7 +802,6 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     if (diagramGenerator == null)
       return;
-    
 
     TreeNode node = treeGenerator.generateNode(field);
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
@@ -835,8 +826,8 @@ public class ContextHtmlPrinter extends PrintEngine {
             "<LI>The object may be identified by a fully-qualified URI reference.</LI>");
     indent()
         .println(
-            "<LI>The object may be identified by a Compact URI reference,  known as a CURIE " +
-            "[CURIE-syntax], that can be expanded to a fully qualified URI</LI>");
+            "<LI>The object may be identified by a Compact URI reference,  known as a CURIE "
+                + "[CURIE-syntax], that can be expanded to a fully qualified URI</LI>");
     indent()
         .println(
             "<LI>The object may be identified by a simple name that is mapped to a "
@@ -850,22 +841,19 @@ public class ContextHtmlPrinter extends PrintEngine {
       printUriRefDiscussion(uriRefField);
     }
     printSnRefDiscussion(snRefField);
-    
 
   }
-
 
   private void printUriRefDiscussion(Field field) throws IOException {
 
     Caption captionRef = captionManager.getFigureCaptionByURI(field.getURI());
-    
+
     Caption caption = null;
-    
+
     if (captionRef == null) {
       caption = captionRef = new Caption(CaptionType.Figure,
-      "Property whose value is a URI reference", "uriRef", field.getURI()); 
+          "Property whose value is a URI reference", "uriRef", field.getURI());
     }
-        
 
     indent()
         .println(
@@ -873,18 +861,20 @@ public class ContextHtmlPrinter extends PrintEngine {
                 + "representing the object will be decorated with the #uri hash tag, as shown in ");
     documentPrinter.printLink(captionRef);
     println(".</P>");
-    
-    if (caption == null) return;
+
+    if (caption == null)
+      return;
     assignNumber(caption);
 
     String src = namer.getImagesDir() + "/uriRef.png";
     TreeNode node = treeGenerator.generateNode(field);
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
-//    Node node = createNode(field);
-//
-//
-//    CreateDiagramRequest request = new CreateDiagramRequest(context, node, src,
-//        0, false, false);
+    // Node node = createNode(field);
+    //
+    //
+    // CreateDiagramRequest request = new CreateDiagramRequest(context, node,
+    // src,
+    // 0, false, false);
     diagramGenerator.generateDiagram(request);
     printFigure(src, caption);
 
@@ -893,18 +883,18 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void printSnRefDiscussion(Field field) throws IOException {
 
     String fieldURI = field == null ? null : field.getURI();
-        
+
     Caption captionRef = captionManager.getFigureCaptionByURI(fieldURI);
-    
+
     Caption caption = null;
     if (captionRef == null) {
-      
+
       captionRef = caption = new Caption(
           CaptionType.Figure,
           "Property whose value is a simple name reference for an individual object or enumerable value",
           "snRef", fieldURI);
       assignNumber(caption);
-      
+
     }
 
     indent()
@@ -913,13 +903,14 @@ public class ContextHtmlPrinter extends PrintEngine {
                 + "representing the corresponding property will be decorated with the #sn hash tag, as shown in ");
     documentPrinter.printLink(captionRef);
     println(".</P>");
-    
-    if (caption == null) return;
+
+    if (caption == null)
+      return;
 
     String src = namer.getImagesDir() + "/snRef.png";
-    
+
     TreeNode node = null;
-    
+
     if (field == null) {
       node = new TreeNode();
       node.setObjectPresentation(ObjectPresentation.SIMPLE_NAME);
@@ -932,10 +923,11 @@ public class ContextHtmlPrinter extends PrintEngine {
       node = treeGenerator.generateNode(field);
     }
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
-//    
-//    Node node = createNode(field);
-//    CreateDiagramRequest request = new CreateDiagramRequest(context, node, src,
-//        0, false, false);
+    //
+    // Node node = createNode(field);
+    // CreateDiagramRequest request = new CreateDiagramRequest(context, node,
+    // src,
+    // 0, false, false);
     diagramGenerator.generateDiagram(request);
     printFigure(src, caption);
 
@@ -956,15 +948,16 @@ public class ContextHtmlPrinter extends PrintEngine {
     println(".</P>");
 
     String src = namer.getImagesDir() + "/sampleObj.png";
-    
+
     List<Frame> graphTypes = getGraphTypes();
-    TreeNode node = (graphTypes == null) ? 
-        treeGenerator.generateRoot(root, 1) : treeGenerator.generateGraph(graphTypes, 1);
-        
+    TreeNode node = (graphTypes == null) ? treeGenerator.generateRoot(root, 1)
+        : treeGenerator.generateGraph(graphTypes, 1);
+
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
-//
-//    CreateDiagramRequest request = new CreateDiagramRequest(context, root, src,
-//        1, false, false);
+    //
+    // CreateDiagramRequest request = new CreateDiagramRequest(context, root,
+    // src,
+    // 1, false, false);
     diagramGenerator.generateDiagram(request);
     printFigure(src, caption);
 
@@ -991,8 +984,8 @@ public class ContextHtmlPrinter extends PrintEngine {
           comma = ", ";
         }
       }
-      print(").  A complete diagram would show branches emanating from the embedded objects to " +
-           "reveal their properties, and so on, recursively. For a complete representation, see ");
+      print(").  A complete diagram would show branches emanating from the embedded objects to "
+          + "reveal their properties, and so on, recursively. For a complete representation, see ");
       documentPrinter.printForwardRef(overviewDiagram);
       print(" below.</P>");
 
@@ -1027,19 +1020,19 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
 
   }
-  
+
   private String article(String text) {
     char c = Character.toLowerCase(text.charAt(0));
-    return VOWEL.indexOf(c)>=0 ? "an " : "a ";
+    return VOWEL.indexOf(c) >= 0 ? "an " : "a ";
   }
-
 
   private List<Field> listEmbeddedObjects(Frame frame) {
 
     List<Field> result = new ArrayList<Field>();
     List<Field> list = frame.listAllFields();
     for (Field field : list) {
-      if (isEmbeddedObject(field, field.getRdfType())  && isIncluded(frame, field)) {
+      if (isEmbeddedObject(field, field.getRdfType())
+          && isIncluded(frame, field)) {
         result.add(field);
       }
     }
@@ -1052,16 +1045,19 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private boolean isEmbeddedObject(Field field, RdfType type) {
-    if (type == null) return false;
+    if (type == null)
+      return false;
 
     if (type.canAsListType()) {
       return isEmbeddedObject(field, type.asListType().getElementType());
     }
-    if (!type.canAsFrame() || type.asFrame().getCategory()==RestCategory.ENUMERABLE) {
+    if (!type.canAsFrame()
+        || type.asFrame().getCategory() == RestCategory.ENUMERABLE) {
       return false;
     }
-    if (isShortCircuit(type.asFrame())) return false;
-    
+    if (isShortCircuit(type.asFrame()))
+      return false;
+
     TermInfo term = context.getTermInfoByURI(field.getURI());
     if (term != null && term.isCoercedAsIriRef()) {
       return false;
@@ -1071,10 +1067,11 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private boolean isShortCircuit(Frame frame) {
-    if (!frame.isAbstract()) return false;
+    if (!frame.isAbstract())
+      return false;
     List<Frame> frameList = frame.listAllSubtypes();
     List<Datatype> typeList = frame.getSubdatatypeList();
-    
+
     return frameList.size() + typeList.size() == 1;
   }
 
@@ -1104,15 +1101,15 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
 
     Caption captionRef = captionManager.getFigureCaptionByURI(field.getURI());
-    
+
     Caption caption = null;
-    
+
     if (captionRef == null) {
       captionRef = caption = new Caption(CaptionType.Figure,
-          "Example of a repeatable property", "repeatable-property", field.getURI());
+          "Example of a repeatable property", "repeatable-property",
+          field.getURI());
       assignNumber(caption);
     }
-    
 
     indent()
         .print(
@@ -1130,17 +1127,19 @@ public class ContextHtmlPrinter extends PrintEngine {
         + ".  Ordinarily, these values are encapsulated within a JSON array, but if it turns out that "
         + " only one value is present, then the square brackets for the array are optional.</P>");
 
-    if (caption == null) return;
-    
+    if (caption == null)
+      return;
+
     String src = namer.getImagesDir() + "/repeatableproperty.png";
-    
-//    Node node = new Node();
-//    node.setNameText(field.getLocalName());
-//    node.setTypeText(typeText);
-//    node.setModifier(Modifier.REPEATABLE);
-//    CreateDiagramRequest request = new CreateDiagramRequest(context, node, src,
-//        0, false, false);
-    
+
+    // Node node = new Node();
+    // node.setNameText(field.getLocalName());
+    // node.setTypeText(typeText);
+    // node.setModifier(Modifier.REPEATABLE);
+    // CreateDiagramRequest request = new CreateDiagramRequest(context, node,
+    // src,
+    // 0, false, false);
+
     TreeNode node = treeGenerator.generateNode(field);
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
     diagramGenerator.generateDiagram(request);
@@ -1154,18 +1153,17 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     if (field == null) {
       field = getAnyOptionalField(new HashSet<String>(), root);
-    } 
-    
+    }
+
     if (field == null) {
       return;
     }
 
-
     String fieldURI = field.getURI();
-    
+
     Caption captionRef = captionManager.getFigureCaptionByURI(fieldURI);
     Caption caption = null;
-    
+
     if (captionRef == null) {
       captionRef = caption = new Caption(CaptionType.Figure,
           "Example of an optional property", "optional-property", fieldURI);
@@ -1179,16 +1177,17 @@ public class ContextHtmlPrinter extends PrintEngine {
     documentPrinter.printLink(captionRef);
     println(".</P>");
 
-    if (caption == null) return;
-    
+    if (caption == null)
+      return;
+
     String src = namer.getImagesDir() + "/optionalproperty.png";
-   
+
     TreeNode node = null;
-    
+
     node = treeGenerator.generateNode(field);
-    
+
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
-    
+
     diagramGenerator.generateDiagram(request);
     printFigure(src, caption);
 
@@ -1211,15 +1210,13 @@ public class ContextHtmlPrinter extends PrintEngine {
       }
 
       RdfType type = field.getRdfType();
-      if (info.hasObjectValue() &&
-          "@id".equals(info.getObjectValue().getType()) &&
-          type != null &&
-          type.canAsFrame() &&
-          type.asFrame().getCategory() != RestCategory.ENUMERABLE
-      ) {
+      if (info.hasObjectValue()
+          && "@id".equals(info.getObjectValue().getType()) && type != null
+          && type.canAsFrame()
+          && type.asFrame().getCategory() != RestCategory.ENUMERABLE) {
         return field;
       }
-      
+
       if (type != null && type.canAsFrame()) {
         Field result = getUriRefField(history, type.asFrame());
         if (result != null)
@@ -1274,10 +1271,8 @@ public class ContextHtmlPrinter extends PrintEngine {
       if (field.getMaxCardinality() > 0 && field.getMaxCardinality() < 2)
         continue;
       String typeURI = field.getType().getURI();
-      if (
-          typeURI != null && 
-          typeManager.isStandardDatatype(field.getType().getNameSpace())
-      ) {
+      if (typeURI != null
+          && typeManager.isStandardDatatype(field.getType().getNameSpace())) {
         return field;
       }
       RdfType type = field.getRdfType();
@@ -1322,13 +1317,13 @@ public class ContextHtmlPrinter extends PrintEngine {
     history.add(frame.getUri());
 
     List<Field> list = frame.listAllFields();
-    if (list.isEmpty()) return null;
-    
+    if (list.isEmpty())
+      return null;
+
     for (Field field : list) {
-      if (field.getMinCardinality() == 0 && 
-          field.getMaxCardinality() == 1 && 
-          !field.getRdfType().canAsListType() &&
-          context.getTermInfoByURI(field.getURI()) != null) {
+      if (field.getMinCardinality() == 0 && field.getMaxCardinality() == 1
+          && !field.getRdfType().canAsListType()
+          && context.getTermInfoByURI(field.getURI()) != null) {
         return field;
       }
       RdfType type = field.getRdfType();
@@ -1349,7 +1344,8 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     List<Field> list = frame.listAllFields();
     for (Field field : list) {
-      if (context.getTermInfoByURI(field.getURI())==null) continue;
+      if (context.getTermInfoByURI(field.getURI()) == null)
+        continue;
       if (field.getRdfType().canAsListType()) {
         return field;
       }
@@ -1371,19 +1367,16 @@ public class ContextHtmlPrinter extends PrintEngine {
     List<Field> list = root.listAllFields();
     if (list.isEmpty())
       return null;
-    
+
     // Ideally, we'd rather not return an RDFS property (like "label")
     // or an OWL property (like "sameAs").
     // Better to return a property that is defined within a custom
     // namespace.
     for (Field field : list) {
       String uri = field.getType().getURI();
-      if (
-          uri != null &&
-          !uri.startsWith(RDFS.getURI()) &&
-          !uri.startsWith(OWL.NS) &&
-          context.getTermInfoByURI(field.getURI()) != null
-      ) {
+      if (uri != null && !uri.startsWith(RDFS.getURI())
+          && !uri.startsWith(OWL.NS)
+          && context.getTermInfoByURI(field.getURI()) != null) {
         return field;
       }
     }
@@ -1408,7 +1401,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void printCaption(Caption caption) {
 
     captionManager.add(caption);
-    
+
     indent().print("<DIV");
     printAttr("class", "caption");
     println(">");
@@ -1433,13 +1426,14 @@ public class ContextHtmlPrinter extends PrintEngine {
       if (typeURI == null)
         continue;
       TermInfo term = context.getTermInfoByURI(field.getURI());
-      if (typeManager.isStandardDatatype(field.getType().getNameSpace()) && term != null)
+      if (typeManager.isStandardDatatype(field.getType().getNameSpace())
+          && term != null)
         return field;
 
       RdfType type = field.getRdfType();
       if (type != null && type.canAsFrame()) {
         Field result = getSimpleTypeField(history, type.asFrame());
-        if (result != null){
+        if (result != null) {
           return result;
         }
       }
@@ -1464,16 +1458,13 @@ public class ContextHtmlPrinter extends PrintEngine {
     caption.setNumber(number);
 
   }
-  
-
-  
 
   public List<Frame> listFrames() {
     return frameList;
   }
 
   public boolean isIncludeOverviewDiagram() {
-    return includeOverviewDiagram && (context!=null);
+    return includeOverviewDiagram && (context != null);
   }
 
   public void setIncludeOverviewDiagram(boolean includeOverviewDiagram) {
@@ -1487,11 +1478,6 @@ public class ContextHtmlPrinter extends PrintEngine {
   public void setIncludeClassDiagrams(boolean includeClassDiagrams) {
     this.includeClassDiagrams = includeClassDiagrams;
   }
-
-  
-
-
-
 
   private void beginHTML() {
     println("<HTML>");
@@ -1524,20 +1510,18 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void printOverviewDiagram() throws IOException {
     if (!isIncludeOverviewDiagram())
       return;
-    
+
     String typeName = context.rewrite(root.getUri());
-    
-    String text = 
-        "{0} presents a complete graphical representation of the JSON binding for a {1} object. " +
-        "The subsections following this figure provide details about each object " +
-        "that appears in the JSON binding for a {1} object.";
+
+    String text = "{0} presents a complete graphical representation of the JSON binding for a {1} object. "
+        + "The subsections following this figure provide details about each object "
+        + "that appears in the JSON binding for a {1} object.";
 
     Caption caption = overviewDiagram;
     assignNumber(caption);
-    
+
     text = text.replace("{0}", caption.getNumber()).replace("{1}", typeName);
     printParagraph(text);
-    
 
     indent().print("<div");
     printAttr("class", "overviewDiagram");
@@ -1553,21 +1537,21 @@ public class ContextHtmlPrinter extends PrintEngine {
     println("</div>");
 
     printCaption(caption);
-    
+
     if (diagramGenerator != null) {
       String rdfProperty = contextProperties.getRdfProperty();
 
       List<Frame> graphTypes = getGraphTypes();
-      TreeNode node = (graphTypes == null) ? 
-          treeGenerator.generateRoot(root, rdfProperty, -1) :
-          treeGenerator.generateGraph(graphTypes, -1);
-          
+      TreeNode node = (graphTypes == null) ? treeGenerator.generateRoot(root,
+          rdfProperty, -1) : treeGenerator.generateGraph(graphTypes, -1);
+
       sortAll(node);
-      
-      CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
-      
-//      CreateDiagramRequest request = new CreateDiagramRequest(context, root,
-//          src, -1, true, true);
+
+      CreateDiagramRequest request = new CreateDiagramRequest(context, node,
+          src);
+
+      // CreateDiagramRequest request = new CreateDiagramRequest(context, root,
+      // src, -1, true, true);
       diagramGenerator.generateDiagram(request);
     }
 
@@ -1575,7 +1559,7 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   private void printDefaultSample(String typeName) throws IOException {
     String sampleText = getSampleText();
-    
+
     indent().print("<DIV");
     printAttr("class", "jsonSample");
     println(">");
@@ -1583,33 +1567,31 @@ public class ContextHtmlPrinter extends PrintEngine {
     println(sampleText);
     println("</PRE>");
     indent().print("</DIV>");
-    
-    
+
     String sampleCaptionText = null;
     if (typeName == null) {
-      sampleCaptionText =
-          "Example JSON document in the format " + contextProperties.getMediaType();
+      sampleCaptionText = "Example JSON document in the format "
+          + contextProperties.getMediaType();
     } else {
       sampleCaptionText = "Example JSON document containing {0} {1} object";
       sampleCaptionText = sampleCaptionText.replace("{0}", article(typeName));
       sampleCaptionText = sampleCaptionText.replace("{1}", typeName);
     }
-    
-    Caption sampleCaption = new Caption(CaptionType.Figure, sampleCaptionText, "completeSample", null);
+
+    Caption sampleCaption = new Caption(CaptionType.Figure, sampleCaptionText,
+        "completeSample", null);
     assignNumber(sampleCaption);
     printCaption(sampleCaption);
-    
+
   }
 
   private void printOtherSamples() throws IOException {
     List<SampleJson> list = contextProperties.getSampleJsonList();
-   
+
     for (SampleJson sample : list) {
       printSample(sample);
     }
-    
-    
-    
+
   }
 
   private void printSample(SampleJson sample) throws IOException {
@@ -1623,14 +1605,14 @@ public class ContextHtmlPrinter extends PrintEngine {
     StringBuilder builder = new StringBuilder();
     try {
       String line = null;
-      while (  (line=buffer.readLine()) != null) {
+      while ((line = buffer.readLine()) != null) {
         builder.append(line);
         builder.append("\n");
       }
     } finally {
       buffer.close();
     }
-    
+
     String sampleText = builder.toString();
     jsonManager.add(sampleText);
 
@@ -1641,27 +1623,28 @@ public class ContextHtmlPrinter extends PrintEngine {
     println(sampleText);
     println("</PRE>");
     indent().print("</DIV>");
-    
-    Caption sampleCaption = new Caption(CaptionType.Figure, sample.getCaption(), sample.getFileName(), null);
+
+    Caption sampleCaption = new Caption(CaptionType.Figure,
+        sample.getCaption(), sample.getFileName(), null);
     assignNumber(sampleCaption);
     printCaption(sampleCaption);
-    
+
   }
 
   private void sortAll(TreeNode node) {
     String typeURI = node.getTypeURI();
     List<TreeNode> kids = node.getChildren();
-    
+
     if (typeURI != null && kids != null && !kids.isEmpty()) {
       Collections.sort(kids, nodeComparatorFactory.getComparator(typeURI));
     }
-    
+
     if (kids != null) {
       for (TreeNode child : kids) {
         sortAll(child);
       }
     }
-    
+
   }
 
   private String getSampleText() throws IOException {
@@ -1670,63 +1653,58 @@ public class ContextHtmlPrinter extends PrintEngine {
     String result = null;
     if (input == null) {
       result = createJsonSample();
-      
+
     } else {
-    
+
       BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
       StringBuilder builder = new StringBuilder();
       try {
         String line = null;
-        while (  (line=buffer.readLine()) != null) {
+        while ((line = buffer.readLine()) != null) {
           builder.append(line);
           builder.append("\n");
         }
       } finally {
         buffer.close();
       }
-      
+
       result = builder.toString();
     }
-    
+
     jsonManager.add(result);
-    
+
     return result;
   }
 
   private String createJsonSample() throws IOException {
-    
-    ObjectNode node = sampleGenerator.generateSample(context, contextProperties);
-    
-    
+
+    ObjectNode node = sampleGenerator
+        .generateSample(context, contextProperties);
+
     String fileName = namer.getJsonSampleFileName();
     OutputStream out = streamFactory.createOutputStream(fileName);
     StringWriter buffer = new StringWriter();
     try {
-      ObjectMapper mapper = new ObjectMapper();  
+      ObjectMapper mapper = new ObjectMapper();
       ObjectWriter writer = mapper.writer(new JsonPrettyPrinter());
       mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
       writer.writeValue(out, node);
-      
+
       writer.writeValue(buffer, node);
     } finally {
       out.close();
     }
-    
+
     return buffer.toString();
   }
 
   private void printFrames() throws IOException {
 
-
     for (Frame frame : frameList) {
       printFrame(frame);
     }
 
-
   }
-
-
-
 
   private void printDatatype(Datatype type) {
     if (typeManager.isStandardDatatype(type.getNamespace())) {
@@ -1734,41 +1712,43 @@ public class ContextHtmlPrinter extends PrintEngine {
     }
     String termName = null;
     Heading heading = null;
-    
+
     TermInfo term = context.getTermInfoByURI(type.getUri());
-    
-    if (term != null) {    
+
+    if (term != null) {
       termName = term.getTermName();
       heading = documentPrinter.createHeading(termName);
     } else {
       // This datatype does not have a JSON-LD term defined in the
-      // context.  
-      
+      // context.
+
       if (typeManager.isStandardLiteralType(type.getUri())) {
         return;
       }
-      
-      TreeNode node = NodeUtil.createDefaultTypeNode(typeManager, context, type.getUri());
+
+      TreeNode node = NodeUtil.createDefaultTypeNode(typeManager, context,
+          type.getUri());
       termName = node.getTypeName();
-      Level level = documentPrinter.getCurrentHeading().getLevel().getNextLevel();
-      String id = node.getTypeHref().substring(1);      
+      Level level = documentPrinter.getCurrentHeading().getLevel()
+          .getNextLevel();
+      String id = node.getTypeHref().substring(1);
       heading = new Heading(level, termName, id);
       documentPrinter.getCurrentHeading().add(heading);
-      
+
     }
-    
+
     heading.setClassName("rdfType");
     documentPrinter.print(heading);
-    
+
     String baseURI = typeManager.getXsdBaseURI(type);
-   
+
     beginTable("propertiesTable");
-    
+
     beginRow();
     printTH("Restriction&nbsp;Base");
     printTD(baseURI);
     endRow();
-    
+
     printStringFacet("pattern", type.getPattern());
     printNumberFacet("length", type.getLength());
     printNumberFacet("minLength", type.getMinLength());
@@ -1779,34 +1759,36 @@ public class ContextHtmlPrinter extends PrintEngine {
     printNumberFacet("maxExclusive", type.getMaxExclusive());
     printNumberFacet("totalDigits", type.getTotalDigits());
     printNumberFacet("fractionDigits", type.getFractionDigits());
-    
+
     endTable();
-    
+
     String captionText = "Facets of " + termName;
-    Caption caption = new Caption(CaptionType.Table, captionText, termName, type.getUri());
+    Caption caption = new Caption(CaptionType.Table, captionText, termName,
+        type.getUri());
     assignNumber(caption);
     printCaption(caption);
-    
-    
+
   }
 
   private void printNumberFacet(String name, Number value) {
-    
-    if (value == null) return;
+
+    if (value == null)
+      return;
     beginRow();
     printTH(name);
     printTD(value.toString());
     endRow();
-    
+
   }
 
   private void printStringFacet(String name, String value) {
-    if (value == null) return;
+    if (value == null)
+      return;
     beginRow();
     printTH(name);
     printTD(value);
     endRow();
-    
+
   }
 
   protected void beginTable(String className) {
@@ -1815,50 +1797,51 @@ public class ContextHtmlPrinter extends PrintEngine {
     println(">");
     pushIndent();
   }
-  
+
   protected void endTable() {
     popIndent();
     indent().println("</TABLE>");
   }
-  
+
   protected void beginRow() {
     indent().println("<TR>");
     pushIndent();
-    
+
   }
+
   protected void endRow() {
     popIndent();
     indent().println("</TR>");
   }
-  
+
   protected void printTH(String value) {
     indent().print("<TH>").print(value).println("</TH>");
   }
-  
+
   protected void printTD(String value) {
     indent().print("<TD>").print(value).println("</TD>");
   }
-  
-  
+
   private void printFrame(Frame frame) throws IOException {
     println();
-    
-    TreeGenerator generator = new TreeGenerator(typeManager, context, contextProperties);
+
+    TreeGenerator generator = new TreeGenerator(typeManager, context,
+        contextProperties);
     List<Frame> graphTypes = getGraphTypes();
-    TreeNode node = (frame == root && graphTypes==null) ? 
-        generator.generateRoot(frame, 1) :
-        generator.generateNode(frame, 1);
-        
-        
+    boolean isRoot = isRoot(frame);
+    TreeNode node = (isRoot && graphTypes == null) ? generator
+        .generateRoot(frame, 1) : generator.generateNode(frame, 1);
+
     List<TreeNode> fieldList = node.getChildren();
-        
+
     if (fieldList != null) {
-      Collections.sort(fieldList, nodeComparatorFactory.getComparator(frame.getUri()));
+      Collections.sort(fieldList,
+          nodeComparatorFactory.getComparator(frame.getUri()));
     }
 
     Heading heading = documentPrinter.createHeading(node.getTypeName());
     String comment = node.getDescription();
-    
+
     heading.setClassName("rdfType");
     documentPrinter.print(heading);
 
@@ -1876,6 +1859,12 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
+  private boolean isRoot(Frame frame) {
+    if (frame == root) return true;
+    List<Frame> list = root.listAllSubtypes();
+    return list.contains(frame);
+  }
+
   private void printIndividuals(Frame frame) {
 
     if (frame.getCategory() != RestCategory.ENUMERABLE)
@@ -1885,7 +1874,7 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     if (list.isEmpty())
       return;
-    
+
     Collections.sort(list, new Comparator<NamedIndividual>() {
 
       @Override
@@ -1895,19 +1884,19 @@ public class ContextHtmlPrinter extends PrintEngine {
     });
 
     String typeName = context.rewrite(frame.getUri());
-    
+
     String text = "Known simple names for {0} objects".replace("{0}", typeName);
-    
-    Caption caption = new Caption(CaptionType.Table, text, typeName + "-known-sn", frame.getUri());
+
+    Caption caption = new Caption(CaptionType.Table, text, typeName
+        + "-known-sn", frame.getUri());
     assignNumber(caption);
-    
-    text = "<code>{0}</code> instances are enumerable, and they must be referenced by a simple name. " +
-      "The default vocabulary of simple names for instances of the <code>{0}</code> class are listed in {1}.";
-    
-   
-    
+
+    text = "<code>{0}</code> instances are enumerable, and they must be referenced by a simple name. "
+        + "The default vocabulary of simple names for instances of the <code>{0}</code> class are listed in {1}.";
+
     println();
-    printParagraph(text.replace("{0}", typeName).replace("{1}", caption.getNumber()));
+    printParagraph(text.replace("{0}", typeName).replace("{1}",
+        caption.getNumber()));
     indent().print("<TABLE");
     printAttr("class", "enumTable");
     println(">");
@@ -1926,11 +1915,10 @@ public class ContextHtmlPrinter extends PrintEngine {
       String comment = n.getComment();
       if (comment != null) {
         comment = comment.trim();
-        if (comment.length()==0) {
+        if (comment.length() == 0) {
           comment = null;
         }
       }
-      
 
       indent().println("<TR>");
       pushIndent();
@@ -1954,15 +1942,15 @@ public class ContextHtmlPrinter extends PrintEngine {
     if (!includeClassDiagrams)
       return;
     String src = namer.getClassDiagramPath(frame);
-    
-    String typeName = context.rewrite(frame.getUri());
-    
-    Caption caption = new Caption(CaptionType.Figure, typeName, typeName, frame.getUri());
-    assignNumber(caption);
-    
-    String jsonExample = getJsonSample(frame); 
 
-    
+    String typeName = context.rewrite(frame.getUri());
+
+    Caption caption = new Caption(CaptionType.Figure, typeName, typeName,
+        frame.getUri());
+    assignNumber(caption);
+
+    String jsonExample = getJsonSample(frame);
+
     if (jsonExample != null) {
       print("<PRE");
       printAttr("class", "jsonSnippet");
@@ -1970,7 +1958,7 @@ public class ContextHtmlPrinter extends PrintEngine {
       println(jsonExample);
       println("</PRE>");
     }
-    
+
     indent().print("<DIV");
     printAttr("class", "classDiagram");
     println(">");
@@ -1981,36 +1969,33 @@ public class ContextHtmlPrinter extends PrintEngine {
     printCaption(caption);
     popIndent();
     indent().println("</DIV>");
-    
-    
 
     if (diagramGenerator == null)
       return;
 
-//    boolean extras = (frame == root) ? true : false;
-//    CreateDiagramRequest request = new CreateDiagramRequest(context, frame,
-//        src, 1, extras, extras);
+    // boolean extras = (frame == root) ? true : false;
+    // CreateDiagramRequest request = new CreateDiagramRequest(context, frame,
+    // src, 1, extras, extras);
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
     diagramGenerator.generateDiagram(request);
 
   }
 
-
   private String getJsonSample(Frame frame) {
     String text = jsonManager.getJsonText(frame.getUri());
     if (text != null) {
-      text = text.replaceAll("\\[\\s*\\]", "[ ... ]").replaceAll("\\{\\s*\\}", "{ ... }");
+      text = text.replaceAll("\\[\\s*\\]", "[ ... ]").replaceAll("\\{\\s*\\}",
+          "{ ... }");
     }
     return text;
   }
 
   private void printProperties(TreeNode node) {
-    
-   
+
     List<TreeNode> list = node.getChildren();
-    if (list==null || list.isEmpty()) return;
-   
-    
+    if (list == null || list.isEmpty())
+      return;
+
     indent().print("<TABLE");
     printAttr("class", "propertiesTable");
     printAttr("border", "0");
@@ -2035,21 +2020,20 @@ public class ContextHtmlPrinter extends PrintEngine {
 
     indent().println("</TABLE>");
     String typeName = node.getTypeName();
-    
-    Caption caption = new Caption(CaptionType.Table, typeName + " properties", typeName + "-properties", null);
+
+    Caption caption = new Caption(CaptionType.Table, typeName + " properties",
+        typeName + "-properties", null);
     assignNumber(caption);
     printCaption(caption);
 
   }
 
-
-  
   private void printSubtypes(Frame frame) {
-    
+
     List<Frame> sublist = frame.listAllSubtypes();
-    if (sublist.isEmpty()) return;
-    
-    
+    if (sublist.isEmpty())
+      return;
+
     indent().print("<div");
     printAttr("class", "list-heading");
     println(">Direct Known Subtypes:</div>");
@@ -2061,34 +2045,33 @@ public class ContextHtmlPrinter extends PrintEngine {
     boolean addComma = false;
     for (Frame subtype : sublist) {
       TermInfo info = context.getTermInfoByURI(subtype.getUri());
-      if (info == null) continue;
-      
+      if (info == null)
+        continue;
+
       if (addComma) {
         println(",");
       }
       addComma = true;
-    
-     String href = "#" + info.getTermName();
-     String typeName = info.getTermName();
-     indent().print("<A ");
-     printAttr("href", href);
-     print(">");
-     print(typeName);
-     print("</a>");
+
+      String href = "#" + info.getTermName();
+      String typeName = info.getTermName();
+      indent().print("<A ");
+      printAttr("href", href);
+      print(">");
+      print(typeName);
+      print("</a>");
     }
     println();
-    
+
     popIndent();
     indent().println("</div>");
   }
 
   private void printField(TreeNode field) {
 
-    
     String localName = field.getLocalName();
     String mult = getMultiplicity(field);
     String description = field.getDescription();
-    
 
     String typeLabel = field.getTypeName();
     String href = field.getTypeHref();
@@ -2123,31 +2106,29 @@ public class ContextHtmlPrinter extends PrintEngine {
     if (href != null) {
       print("</A>");
     }
-    
+
     switch (field.getObjectPresentation()) {
-    
-    case MIXED_VALUE :
+
+    case MIXED_VALUE:
       print("<DIV");
       printAttr("class", "qualifier");
       println(">(Mixed - URI&nbsp;reference OR Embedded&nbsp;value)</DIV>");
       break;
-      
-    case URI_REFERENCE :
+
+    case URI_REFERENCE:
       print("<DIV");
       printAttr("class", "qualifier");
       println(">(URI&nbsp;reference)</DIV>");
       break;
-      
-    case SIMPLE_NAME :
+
+    case SIMPLE_NAME:
       print("<DIV");
       printAttr("class", "qualifier");
       println(">(Simple&nbsp;Name&nbsp;reference)</DIV>");
       break;
-      
-      
-      
+
     }
-    
+
     println("</TD>");
 
     popIndent();
@@ -2156,7 +2137,6 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  
   private String getMultiplicity(TreeNode node) {
     int min = node.getMinCardinality();
     int max = node.getMaxCardinality();
@@ -2167,15 +2147,16 @@ public class ContextHtmlPrinter extends PrintEngine {
       return "1";
     String maxLabel = (max < 0) ? "*" : Integer.toString(max);
     return min + ".." + maxLabel;
-    
+
   }
 
   private void collectFrames() {
     frameList = new ArrayList<Frame>();
     datatypeList = new ArrayList<Datatype>();
 
-    if (context == null) return;
-    
+    if (context == null)
+      return;
+
     Set<String> reachable = getReachableTypes();
 
     List<TermInfo> termList = context.getTerms();
@@ -2196,10 +2177,9 @@ public class ContextHtmlPrinter extends PrintEngine {
             if (reachable.contains(uri)) {
               datatypeList.add(type);
             }
-            
+
             continue;
           }
-            
 
           throw new FrameNotFoundException(uri);
         }
@@ -2208,22 +2188,21 @@ public class ContextHtmlPrinter extends PrintEngine {
         frameList.add(frame);
       }
     }
-    
+
     addMissingTypes(reachable);
-    
+
     Collections.sort(frameList);
     Collections.sort(datatypeList, new Comparator<Datatype>() {
 
       @Override
       public int compare(Datatype a, Datatype b) {
-        
+
         TermInfo aTerm = context.getTermInfoByURI(a.getUri());
         TermInfo bTerm = context.getTermInfoByURI(b.getUri());
-        
+
         String aName = aTerm == null ? a.getLocalName() : aTerm.getTermName();
         String bName = bTerm == null ? b.getLocalName() : bTerm.getTermName();
-        
-        
+
         return aName.compareTo(bName);
       }
     });
@@ -2232,15 +2211,16 @@ public class ContextHtmlPrinter extends PrintEngine {
   private void addMissingTypes(Set<String> reachable) {
     for (String uri : reachable) {
       TermInfo term = context.getTermInfoByURI(uri);
-      if (term != null) continue;
-      
+      if (term != null)
+        continue;
+
       Datatype type = typeManager.getDatatypeByUri(uri);
       if (type != null) {
         datatypeList.add(type);
       }
-      
+
     }
-    
+
   }
 
   private Set<String> getReachableTypes() {
@@ -2253,6 +2233,7 @@ public class ContextHtmlPrinter extends PrintEngine {
       }
     } else if (root != null) {
       addReachableTypes(set, root);
+      addSubtypes(set, root);
     }
     return set;
   }
@@ -2273,53 +2254,45 @@ public class ContextHtmlPrinter extends PrintEngine {
       if (type.canAsListType()) {
         type = type.asListType().getElementType();
       }
-      
-      if (
-          info != null &&
-          type.canAsDatatype()
-      ) {
+
+      if (info != null && type.canAsDatatype()) {
         set.add(type.getUri());
         continue;
       }
-      
-      if (
-          info != null && 
-          info.hasObjectValue() &&
-          "@id".equals(info.getObjectValue().getType()) &&
-          type != null &&
-          type.canAsFrame() &&
-          type.asFrame().getCategory() != RestCategory.ENUMERABLE
-          
+
+      if (info != null && info.hasObjectValue()
+          && "@id".equals(info.getObjectValue().getType()) && type != null
+          && type.canAsFrame()
+          && type.asFrame().getCategory() != RestCategory.ENUMERABLE
+
       ) {
         continue;
       }
-      
 
-      if (type==null || !type.canAsFrame()) {
+      if (type == null || !type.canAsFrame()) {
         continue;
       }
-      
-//      Frame fieldFrame = type.asFrame();
-//      
-//      if (isShortCircuit(fieldFrame)) {
-//        frame = fieldFrame.listAllSubtypes().get(0);
-//      }
-        
+
+      // Frame fieldFrame = type.asFrame();
+      //
+      // if (isShortCircuit(fieldFrame)) {
+      // frame = fieldFrame.listAllSubtypes().get(0);
+      // }
+
       addReachableTypes(set, type.asFrame());
       addSubtypes(set, type.asFrame());
       addSubdatatypes(set, type.asFrame());
-     
+
     }
 
   }
-  
 
   private void addSubdatatypes(Set<String> set, Frame frame) {
     List<Datatype> list = frame.getSubdatatypeList();
     for (Datatype type : list) {
       set.add(type.getUri());
     }
-    
+
   }
 
   private void addSubtypes(Set<String> set, Frame baseFrame) {
@@ -2327,31 +2300,27 @@ public class ContextHtmlPrinter extends PrintEngine {
     for (Frame frame : list) {
       addReachableTypes(set, frame);
     }
-    
+
   }
 
-
-
-  
-  
   static class CaptionManager {
     Map<String, Caption> uri2FigureCaption = new HashMap<String, Caption>();
-    
+
     public void add(Caption caption) {
-      if (caption.getUri() == null) return;
-      
+      if (caption.getUri() == null)
+        return;
+
       switch (caption.getType()) {
-      case Figure :
+      case Figure:
         uri2FigureCaption.put(caption.getUri(), caption);
         break;
       }
     }
-    
+
     public Caption getFigureCaptionByURI(String uri) {
       return uri2FigureCaption.get(uri);
     }
-    
-  }
 
+  }
 
 }

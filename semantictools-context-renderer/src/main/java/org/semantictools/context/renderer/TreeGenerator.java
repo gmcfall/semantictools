@@ -113,12 +113,32 @@ public class TreeGenerator {
   public TreeNode generateRoot(Frame frame, int depth) {
     memory = new HashSet<String>();
     this.maxDepth = depth;
-    TreeNode root = createBasicFrameNode(frame);
-    addContextNode(root);
-    addTypeNode(root, frame, 1);
+    TreeNode root = null;
     
-    addProperties(root, frame, 0);
+    if (frame.getSubtypeList().isEmpty() || depth==1) {
+      root = createBasicFrameNode(frame);
+      addContextNode(root);
+      addTypeNode(root, frame, 1);
+      
+      addProperties(root, frame, 0);
+    } else {
+      root = generateRootSubtypes(frame, depth);
+    }
     memory = null;
+    return root;
+  }
+  
+  private TreeNode generateRootSubtypes(Frame frame, int depth) {
+    
+    TreeNode root = new TreeNode();
+    root.setKind(Kind.FRAME);
+    root.setDescription("");
+    root.setTypeName("");
+    root.setLocalName("");
+    
+    
+    addSubtypes(root, frame, true, depth);
+    
     return root;
   }
   
@@ -268,10 +288,14 @@ public class TreeGenerator {
       }
     }
     
+    int maxCardinality = field.getMaxCardinality();
+    if (contextProperties.getOptionalProperties().contains(uri)) {
+      maxCardinality = 0;
+    }
     
     node.setKind(Kind.PROPERTY);
     node.setMinCardinality(field.getMinCardinality());
-    node.setMaxCardinality(field.getMaxCardinality());
+    node.setMaxCardinality(maxCardinality);
     setDescription(node, field);
     setType(node, field);
     
@@ -385,7 +409,7 @@ public class TreeGenerator {
         
       } else {
         node.setBranchStyle(BranchStyle.OBLIQUE);
-        addSubtypes(node, frame, depth);
+        addSubtypes(node, frame, false, depth);
       }
      
     }
@@ -397,7 +421,7 @@ public class TreeGenerator {
     return constraints != null && constraints.isExcludesSubtypes(field.getURI());
   }
 
-  private void addSubtypes(TreeNode node, Frame frame, int depth) {
+  private void addSubtypes(TreeNode node, Frame frame, boolean hasContext, int depth) {
     
     List<Frame> list = frame.listAllSubtypes();
     filterSubtypes(list);
@@ -420,7 +444,7 @@ public class TreeGenerator {
       node.setTypeName(typeName);
       node.setTypeURI(subtype.getUri());
       node.setBranchStyle(BranchStyle.RECTILINEAR);
-      addConcreteTypeNode(node, subtype, depth);
+      addConcreteTypeNode(node, subtype, hasContext, depth);
       addProperties(node, subtype, depth);
       
       return;
@@ -447,7 +471,7 @@ public class TreeGenerator {
       String typeName = info.getTermName();
       String href = "#" + typeName;
       child.setTypeHref(href);
-      addConcreteTypeNode(child, sub, depth+1);
+      addConcreteTypeNode(child, sub, hasContext, depth+1);
       addProperties(child, sub, depth+1);
     }
     
@@ -456,9 +480,14 @@ public class TreeGenerator {
     
   }
 
-  private void addConcreteTypeNode(TreeNode node, Frame subtype, int depth) {
+  private void addConcreteTypeNode(TreeNode node, Frame subtype, boolean hasContext, int depth) {
 
     if (maxDepth>=0 && depth >= maxDepth) return;
+    
+    if (hasContext) {
+      addContextNode(node);
+    }
+    
     TreeNode typeNode = new TreeNode();
     node.add(typeNode);
     typeNode.setLocalName("@type");
@@ -504,7 +533,9 @@ public class TreeGenerator {
   private void setType(TreeNode node, Field field) {
     RdfType type = field.getRdfType();
     
-    if (shortCircuitType(node, field)) {
+    String propertyURI = field.getURI();
+   
+    if (!contextProperties.isIdRef(propertyURI) && shortCircuitType(node, field)) {
       return;
     }
     

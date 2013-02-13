@@ -1,8 +1,8 @@
 {
   "@context" : [
-    "http://www.imsglobal.org/imspurl/lti/v2/ctx/ToolConsumerProfile",
+    "http://purl.imsglobal.org/ctx/lti/v2/ToolConsumerProfile",
     {
-      "" : "http://lms.example.com/profile/b6ffa601-ce1d-4549-9ccf-145670a964d4#"
+      "tcp" : "http://lms.example.com/profile/b6ffa601-ce1d-4549-9ccf-145670a964d4#"
     }
   ],
   "@type" : "ToolConsumerProfile",
@@ -73,21 +73,21 @@
   "service_offered" : [
     { 
       "@type" : "RestService",
-      "@id" : ":ToolProxy.collection",
+      "@id" : "tcp:ToolProxy.collection",
       "endpoint" : "http://lms.example.com/resources/ToolProxy",
       "format" : ["application/vnd.ims.lti.v2.ToolProxy+json"],
       "action" : ["POST"]
     },
     { 
       "@type" : "RestService",
-      "@id" : ":ToolProxy.item",
+      "@id" : "tcp:ToolProxy.item",
       "endpoint" : "http://lms.example.com/resources/ToolProxy/{tool_proxy_guid}",
       "format" : ["application/vnd.ims.lti.v2.ToolProxy+json"],
       "action" : ["GET", "PUT"]
     },
     { 
       "@type" : "RestService",
-      "@id" : ":Result.item",
+      "@id" : "tcp:Result.item",
       "endpoint" : "http://lms.example.com/resources/Result/{sourcedId}",
       "format" : ["application/vnd.ims.lis.v2.Result+json"],
       "action" : ["GET", "PUT"]

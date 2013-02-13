@@ -1,6 +1,6 @@
 {
   "@context" : [
-      "http://www.imsglobal.org/imspurl/lti/v2/ctx/ToolProxy",
+      "http://purl.imsglobal.org/ctx/lti/v2/ToolProxy",
       "http://purl.org/blackboard/ctx/v1/iconStyle"
   ],
   "@type" : "ToolProxy",

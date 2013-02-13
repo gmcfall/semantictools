@@ -20,6 +20,8 @@ public class TermValue {
   private String type;
   private Container container = Container.NONE;
   
+  private Integer minCardinality;
+  
   public String getId() {
     return id;
   }
@@ -37,6 +39,22 @@ public class TermValue {
   }
   public void setContainer(Container container) {
     this.container = container;
+  }
+  
+  /**
+   * Returns an override for the minimumCardinality of the associated property
+   * within the local JSON-LD context.  This is an extension of the JSON-LD specification.
+   */
+  public Integer getMinCardinality() {
+    return minCardinality;
+  }
+  
+  /**
+   * Sets an over-ride for the minimumCardinality of the associated property
+   * within the local JSON-LD context.  This is an extension of the JSON-LD specification.
+   */
+  public void setMinCardinality(Integer value) {
+    minCardinality = value;
   }
   
   

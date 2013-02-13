@@ -182,8 +182,21 @@ public class ContextBuilder {
 
   private void addSubtypes(ContextProperties properties, JsonContext context, Frame frame) {
     
+    FrameConstraints c = properties.getFrameConstraints(frame.getLocalName());
+    
     List<Frame> list = frame.listAllSubtypes();
     for (Frame sub : list) {
+      if (c != null) {
+        // If the supertype has constraints, then they must bubble down to 
+        // subtypes.  This means that the constraints cannot be null on the subtypes...
+        FrameConstraints cc = properties.getFrameConstraints(sub.getLocalName());
+        if (cc == null) {
+          cc = new FrameConstraints(sub.getLocalName());
+          properties.addFrameConstraints(cc);
+        }
+        cc.copyAll(c);
+      } 
+      
       addType(properties, context, sub, false);
     }
     
@@ -219,7 +232,6 @@ public class ContextBuilder {
     }
     boolean uriRef = properties.isIdRef(property.getURI());
     
-    
     boolean enumerable = 
         rdfType != null && 
         rdfType.canAsFrame() && 
@@ -238,6 +250,12 @@ public class ContextBuilder {
       stubbed = true;
       
     } 
+    if (properties.getOptionalProperties().contains(property.getURI())) {
+      if (value == null) {
+        value = new TermValue();
+      }
+      value.setMinCardinality(0);
+    }
     
     if (enumerable) {
       addIndividuals(context, rdfType.asFrame());
@@ -273,7 +291,9 @@ public class ContextBuilder {
         String propertyTypeURI = rdfType.getUri();
         
         String typeIRI = iriRef(context, rdfType.getNamespace(), rdfType.getLocalName(), propertyTypeURI);
-        value = new TermValue();
+        if (value == null) {
+          value = new TermValue();
+        }
         value.setId(iriValue);
         value.setType(typeIRI);
         info.setObjectValue(value);

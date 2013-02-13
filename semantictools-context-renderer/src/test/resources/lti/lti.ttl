@@ -1,12 +1,12 @@
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix lti-type: <http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#> .
+@prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/lti#> a owl:Ontology  ;
   rdfs:label "LTI Core" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "lti" .
@@ -455,8 +455,8 @@ lti:ProductInstance rdf:type owl:Class;
   ] ; 
   rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
 
-lti:ToolProxy rdf:type owl:Class ;
-  rdfs:subClassOf lti:ToolSettingsContainer ,
+lti:ToolProxy rdf:type owl:Class;
+  rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
     owl:allValuesFrom  xsd:token;
@@ -484,51 +484,6 @@ lti:ToolProxy rdf:type owl:Class ;
     rdfs:comment "The profile of the Tool Consumer that is participating in the integration governed by this ToolProxy."
   ] ; 
   rdfs:comment "This entity defines the integration contract between a ToolConsumer and a Tool.   It is called a \"ToolProxy\" because its primary purpose is to provide the ToolConsumer with all of the information needed to embed a given Tool within the ToolConsumer system." .
-
-lti:ToolProxyBinding rdf:type owl:Class ;
-  rdfs:subClassOf lti:ToolSettingsContainer ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:tool_proxy;
-    owl:minCardinality  1
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:context;
-    owl:minCardinality  1;
-    rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>."
-  ] ; 
-  rdfs:comment "A <code>ToolProxyBinding</code> associates a ToolProxy with a learning Context (such as a Course Section).   This association must be established before the corresponding Tool can be used within the Context.  The <code>ToolProxyBinding</code> also serves as a container that holds tool settings associated with the learning Context." .
-
-lti:PropertySet rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      lti:settings_owner;
-    owl:minCardinality  1
-  ] ; 
-  rdfs:comment "An object that holds custom properties attached to some resource within the Tool Consumer.  These  properties, known as \u201ctool settings,\u201d  do not need to be defined in an ontology (or a JSON-LD context), but they may be so defined.  " .
-
-lti:LtiLink rdf:type owl:Class ;
-  rdfs:subClassOf lti:ToolSettingsContainer ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:resource_link_id;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for this LTI link."
-  ] ; 
-  rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
-
-lti:Context rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      lti:id;
-    owl:minCardinality  1
-  ] .
-
-lti:ToolSettingsContainer rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      lti:custom;
-    rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource."
-  ] ; 
-  rdfs:comment "<code>ToolSettingsContainer</code> is the base class for all resources that encapsulate tool settings." .
 
 lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
@@ -934,37 +889,4 @@ lti:tool_consumer_profile rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxy ;
   rdfs:range lti:ToolConsumerProfile ;
   rdfs:comment "The profile of the Tool Consumer that is participating in the integration governed by this ToolProxy." .
-
-lti:tool_proxy rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:ToolProxyBinding ;
-  rdfs:range lti:ToolProxy .
-
-lti:context rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:ToolProxyBinding ;
-  rdfs:range lti:Context ;
-  rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>." .
-
-lti:settings_owner rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:PropertySet ;
-  rdfs:range lti:ToolSettingsContainer ;
-  owl:inverseOf lti:custom .
-
-lti:resource_link_id rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:LtiLink ;
-  rdfs:range lti-type:GUID.Type ;
-  rdfs:comment "A globally unique identifier for this LTI link." .
-
-lti:id rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:Context ;
-  rdfs:range xsd:normalizedString .
-
-lti:sourcedId rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:Context ;
-  rdfs:range xsd:normalizedString .
-
-lti:custom rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:ToolSettingsContainer ;
-  rdfs:range lti:PropertySet ;
-  owl:inverseOf lti:settings_owner ;
-  rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource." .
 

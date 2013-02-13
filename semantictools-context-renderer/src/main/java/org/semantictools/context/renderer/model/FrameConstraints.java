@@ -28,6 +28,11 @@ public class FrameConstraints {
     this.classURI = classURI;
   }
   
+  public void copyAll(FrameConstraints copy) {
+    includedProperties.addAll(copy.includedProperties);
+    excludedProperties.addAll(copy.excludedProperties);
+  }
+  
   /**
    * Returns the URI for the RDF class to which this set of constraints applies.
    */
