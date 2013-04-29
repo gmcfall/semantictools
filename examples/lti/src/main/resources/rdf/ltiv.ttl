@@ -1,12 +1,12 @@
-@prefix ltiv: <http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix ltiv: <http://purl.imsglobal.org/vocab/lti/v2/variable#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/variable#> a owl:Ontology  ;
   rdfs:label "LTI Variables" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "ltiv" .
@@ -22,7 +22,7 @@ ltiv:User.image rdf:type ltiv:Variable ;
 
 ltiv:Person.sourcedId rdf:type ltiv:Variable ;
   rdfs:comment """The LIS identifier for the user.  
-<p>In the LIS Database, this value corresponds to <code>personRecord/sourceId</code></p>""" .
+<p>In the LIS Database, this value corresponds to <code>personRecord/sourcedId</code></p>""" .
 
 ltiv:Person.name.full rdf:type ltiv:Variable ;
   rdfs:comment """The full name of the user.
@@ -162,7 +162,7 @@ ltiv:Person.sms rdf:type ltiv:Variable ;
 <pre>personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"SMS\"]  /contactinfoValue/text
 </pre></p>""" .
 
-ltiv:CourseTemplate.sourceId rdf:type ltiv:Variable ;
+ltiv:CourseTemplate.sourcedId rdf:type ltiv:Variable ;
   rdfs:comment """The LIS identifier for the Course Template.
 <p>In the LIS Database, this value corresponds to 
 <pre>courseTemplateRecord/sourcedId
@@ -491,16 +491,6 @@ ltiv:Result.createdTimestamp rdf:type ltiv:Variable ;
 <p>In the LIS Database, this value corresponds to 
 <pre>
 </pre></p>""" .
-
-ltiv:Result.status rdf:type ltiv:Variable ;
-  rdfs:comment """A URI for the status of the Result.    As a best practice, the URI <em>should</em> resolve to a JSON-LD description of the status value or a term in a VDEX file.   The vocabulary for Result status values is extensible.  The set of standard values includes:
-<UL>
-  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Unmoderated
-  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Tobemoderated
-  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Pending
-  <LI> http://www.imsglobal.org/lis/omsv1p0/statusofresultvocabularyv1p0#Completed
-</UL>
-""" .
 
 ltiv:Result.resultScore rdf:type ltiv:Variable ;
   rdfs:comment """The score that the learner earned on the assignment or activity to which this Result pertains.

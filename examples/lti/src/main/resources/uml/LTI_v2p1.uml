@@ -1276,7 +1276,7 @@ include:ProductProfile,ProductInfo,ProductFamily,Vendor,Contact
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[6]" type="UMLPackage" guid="HJXJyBpMJkSpc4fxBPztdwAA">
 <XPD:ATTR name="Name" type="string">LTI Core</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/lti#
 prefix=lti
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>
@@ -8745,10 +8745,10 @@ prefix=lti
 <XPD:ATTR name="#Connections" type="integer">2</XPD:ATTR>
 <XPD:OBJ name="Connections[0]" type="UMLAssociationEnd" guid="Qutaur01+0qcsGzFzA7TawAA">
 <XPD:ATTR name="Name" type="string">custom</XPD:ATTR>
-<XPD:ATTR name="Documentation" type="string">A custom property that is stored in this container as a “tool setting.”</XPD:ATTR>
-<XPD:ATTR name="Multiplicity" type="string">*</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer.  </XPD:ATTR>
+<XPD:ATTR name="Multiplicity" type="string">0..1</XPD:ATTR>
 <XPD:REF name="Association">p4+S+TnMc0yljccAQsLRTwAA</XPD:REF>
-<XPD:REF name="Participant">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
+<XPD:REF name="Participant">8YVbRIWxZEm8ZZiq4gIo8QAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">lQb03VbMikyYAca26DEtxgAA</XPD:REF>
 <XPD:REF name="Views[1]">noODs2sdH0GELVKAEqzuwQAA</XPD:REF>
@@ -9948,48 +9948,15 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">VK3A/YH3CU2u3/7RM0xXJgAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[1]" type="UMLClassView" guid="tK6GpCGIuU6gsCCHJinNlQAA">
-<XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
-<XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Left" type="integer">600</XPD:ATTR>
-<XPD:ATTR name="Top" type="integer">88</XPD:ATTR>
-<XPD:ATTR name="Width" type="integer">92</XPD:ATTR>
-<XPD:ATTR name="Height" type="integer">59</XPD:ATTR>
-<XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
-<XPD:REF name="Model">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-<XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="/1i3f4wgxk6PWiUSas0y2wAA">
-<XPD:OBJ name="NameLabel" type="LabelView" guid="hyMrQem9zEKvN5AIJCaWGQAA">
-<XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">Property</XPD:ATTR>
-</XPD:OBJ>
-<XPD:OBJ name="StereotypeLabel" type="LabelView" guid="WJqHW+js/kmsYCotS9M5jAAA">
-<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
-</XPD:OBJ>
-<XPD:OBJ name="PropertyLabel" type="LabelView" guid="qKK8/vRyL0KQunE2F+H4jwAA">
-<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
-</XPD:OBJ>
-</XPD:OBJ>
-<XPD:OBJ name="AttributeCompartment" type="UMLAttributeCompartmentView" guid="I3U9yJUqJEGckQJUV1GBEQAA">
-<XPD:REF name="Model">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-</XPD:OBJ>
-<XPD:OBJ name="OperationCompartment" type="UMLOperationCompartmentView" guid="Yox3EyEFOkaSIMxEJ2rzggAA">
-<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
-<XPD:REF name="Model">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-</XPD:OBJ>
-<XPD:OBJ name="TemplateParameterCompartment" type="UMLTemplateParameterCompartmentView" guid="eW78K4ddV0WqpU6c2r0B4QAA">
-<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
-<XPD:REF name="Model">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-</XPD:OBJ>
-</XPD:OBJ>
-<XPD:OBJ name="OwnedViews[2]" type="UMLAssociationView" guid="zR/KNFt720GdDt2zEmbyRgAA">
+<XPD:OBJ name="OwnedViews[1]" type="UMLAssociationView" guid="zR/KNFt720GdDt2zEmbyRgAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">600,100;423,100</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">548,121;428,121</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">p4+S+TnMc0yljccAQsLRTwAA</XPD:REF>
 <XPD:REF name="Head">rIME4hTUmEindk5J0GFXYQAA</XPD:REF>
-<XPD:REF name="Tail">tK6GpCGIuU6gsCCHJinNlQAA</XPD:REF>
+<XPD:REF name="Tail">w7L4KVjgT0Gu3H23OJlOXQAA</XPD:REF>
 <XPD:OBJ name="NameLabel" type="EdgeLabelView" guid="4Q9Acfyub0S531OktKihywAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
 <XPD:ATTR name="Alpha" type="real">1.5707963267949</XPD:ATTR>
@@ -10033,7 +10000,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:ATTR name="Alpha" type="real">-0.426627664359817</XPD:ATTR>
 <XPD:ATTR name="Distance" type="real">24.1660919471891</XPD:ATTR>
 <XPD:ATTR name="EdgePosition" type="EdgePositionKind">epTail</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">*</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">0..1</XPD:ATTR>
 <XPD:REF name="Model">Qutaur01+0qcsGzFzA7TawAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="HeadPropertyLabel" type="EdgeLabelView" guid="G4lmdDHF7kOj2s0gLm0J7QAA">
@@ -10067,7 +10034,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">Qutaur01+0qcsGzFzA7TawAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[3]" type="UMLClassView" guid="+eB266gDbE+19y1Jeo39jgAA">
+<XPD:OBJ name="OwnedViews[2]" type="UMLClassView" guid="+eB266gDbE+19y1Jeo39jgAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">32</XPD:ATTR>
@@ -10100,10 +10067,10 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">aSRl9MWl2UKcEeFswoUZBwAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[4]" type="UMLClassView" guid="igraPzX94Ee1Lb75VvN7+gAA">
+<XPD:OBJ name="OwnedViews[3]" type="UMLClassView" guid="igraPzX94Ee1Lb75VvN7+gAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Left" type="integer">300</XPD:ATTR>
+<XPD:ATTR name="Left" type="integer">296</XPD:ATTR>
 <XPD:ATTR name="Top" type="integer">368</XPD:ATTR>
 <XPD:ATTR name="Width" type="integer">181</XPD:ATTR>
 <XPD:ATTR name="Height" type="integer">59</XPD:ATTR>
@@ -10133,7 +10100,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">d+KtKVSNQUGgNnNpvIxdLAAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[5]" type="UMLClassView" guid="ENwzz2wfUESAIBBADf1WQwAA">
+<XPD:OBJ name="OwnedViews[4]" type="UMLClassView" guid="ENwzz2wfUESAIBBADf1WQwAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">20</XPD:ATTR>
@@ -10166,13 +10133,13 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">P/yYIUyQCku+OhwZck3SxgAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[6]" type="UMLClassView" guid="rIME4hTUmEindk5J0GFXYQAA">
+<XPD:OBJ name="OwnedViews[5]" type="UMLClassView" guid="rIME4hTUmEindk5J0GFXYQAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">288</XPD:ATTR>
 <XPD:ATTR name="Top" type="integer">92</XPD:ATTR>
-<XPD:ATTR name="Width" type="integer">136</XPD:ATTR>
-<XPD:ATTR name="Height" type="integer">33</XPD:ATTR>
+<XPD:ATTR name="Width" type="integer">141</XPD:ATTR>
+<XPD:ATTR name="Height" type="integer">46</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="whZMAzK6jkyJUqLnOzhxUgAA">
@@ -10199,11 +10166,11 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[7]" type="UMLGeneralizationView" guid="VdTNmqo+GUSAFHju5ZRnVgAA">
+<XPD:OBJ name="OwnedViews[6]" type="UMLGeneralizationView" guid="VdTNmqo+GUSAFHju5ZRnVgAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">139,298;320,298;320,124</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">139,298;320,298;320,137</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">FZWmpz5xZES9bEPk4HVpMAAA</XPD:REF>
 <XPD:REF name="Head">rIME4hTUmEindk5J0GFXYQAA</XPD:REF>
@@ -10227,7 +10194,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">FZWmpz5xZES9bEPk4HVpMAAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[8]" type="UMLGeneralizationView" guid="4g9UFDPy8kiizEVZ2IE6gQAA">
+<XPD:OBJ name="OwnedViews[7]" type="UMLGeneralizationView" guid="4g9UFDPy8kiizEVZ2IE6gQAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
@@ -10255,11 +10222,11 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">RDQ8Bknffkyt21LW1CoHVwAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[9]" type="UMLGeneralizationView" guid="iq3FtAhRckiBy1/BaRFTTAAA">
+<XPD:OBJ name="OwnedViews[8]" type="UMLGeneralizationView" guid="iq3FtAhRckiBy1/BaRFTTAAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">376,368;376,124</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">376,368;376,137</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">YZNysMQR4UyEmeBGs7HrZQAA</XPD:REF>
 <XPD:REF name="Head">rIME4hTUmEindk5J0GFXYQAA</XPD:REF>
@@ -10283,7 +10250,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">YZNysMQR4UyEmeBGs7HrZQAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[10]" type="UMLAssociationView" guid="yHuiARpuHkG+vpXZHu7R1gAA">
+<XPD:OBJ name="OwnedViews[9]" type="UMLAssociationView" guid="yHuiARpuHkG+vpXZHu7R1gAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
@@ -10369,7 +10336,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">SppSOnyttkqtJcXPsrHOoQAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedViews[11]" type="UMLAssociationView" guid="yBlISZD7CEGZ9jy0jo1rLwAA">
+<XPD:OBJ name="OwnedViews[10]" type="UMLAssociationView" guid="yBlISZD7CEGZ9jy0jo1rLwAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
@@ -10455,6 +10422,38 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Model">q+o2qLPo/k6wMfGhLyCrXQAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
+<XPD:OBJ name="OwnedViews[11]" type="UMLClassView" guid="w7L4KVjgT0Gu3H23OJlOXQAA">
+<XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
+<XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
+<XPD:ATTR name="Left" type="integer">548</XPD:ATTR>
+<XPD:ATTR name="Top" type="integer">100</XPD:ATTR>
+<XPD:ATTR name="Width" type="integer">101</XPD:ATTR>
+<XPD:ATTR name="Height" type="integer">43</XPD:ATTR>
+<XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
+<XPD:REF name="Model">8YVbRIWxZEm8ZZiq4gIo8QAA</XPD:REF>
+<XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="gSh720DD0ECkrzCN2BxECgAA">
+<XPD:OBJ name="NameLabel" type="LabelView" guid="vi4k1vB/h0qSSMk356EYRwAA">
+<XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">PropertyMap</XPD:ATTR>
+</XPD:OBJ>
+<XPD:OBJ name="StereotypeLabel" type="LabelView" guid="LMpGn6vgJ0CIwEG6Yh5oPwAA">
+<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
+</XPD:OBJ>
+<XPD:OBJ name="PropertyLabel" type="LabelView" guid="2RML89Hri0eLkgMvSo+1qQAA">
+<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
+</XPD:OBJ>
+</XPD:OBJ>
+<XPD:OBJ name="AttributeCompartment" type="UMLAttributeCompartmentView" guid="cZYHofsPFU+AO9sC+6auMgAA">
+<XPD:REF name="Model">8YVbRIWxZEm8ZZiq4gIo8QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="OperationCompartment" type="UMLOperationCompartmentView" guid="vzUtC004K0a8MxbE1TxnkgAA">
+<XPD:REF name="Model">8YVbRIWxZEm8ZZiq4gIo8QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="TemplateParameterCompartment" type="UMLTemplateParameterCompartmentView" guid="W/ROxGpFbE+n2Rnwy4tD/QAA">
+<XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
+<XPD:REF name="Model">8YVbRIWxZEm8ZZiq4gIo8QAA</XPD:REF>
+</XPD:OBJ>
+</XPD:OBJ>
 </XPD:OBJ>
 </XPD:OBJ>
 <XPD:ATTR name="#OwnedElements" type="integer">10</XPD:ATTR>
@@ -10474,36 +10473,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Associations[0]">8iFN1vignUu5y5ar/hYjRQAA</XPD:REF>
 <XPD:REF name="Associations[1]">eUpXJrBH8UOlp10wxP/HPgAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[1]" type="UMLClass" guid="5Wx2MATv90iIREjQt4wM2QAA">
-<XPD:ATTR name="Name" type="string">Property</XPD:ATTR>
-<XPD:ATTR name="Documentation" type="string">A property that a Tool has attached to some resource within the Tool Consumer.  These  properties are known as “tool settings.”</XPD:ATTR>
-<XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
-<XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
-<XPD:REF name="Views[0]">tK6GpCGIuU6gsCCHJinNlQAA</XPD:REF>
-<XPD:REF name="Views[1]">I3U9yJUqJEGckQJUV1GBEQAA</XPD:REF>
-<XPD:REF name="Views[2]">Yox3EyEFOkaSIMxEJ2rzggAA</XPD:REF>
-<XPD:REF name="Views[3]">eW78K4ddV0WqpU6c2r0B4QAA</XPD:REF>
-<XPD:ATTR name="#Associations" type="integer">1</XPD:ATTR>
-<XPD:REF name="Associations[0]">Qutaur01+0qcsGzFzA7TawAA</XPD:REF>
-<XPD:ATTR name="#Attributes" type="integer">2</XPD:ATTR>
-<XPD:OBJ name="Attributes[0]" type="UMLAttribute" guid="wmpW+CN5LkSyV9nAcb8SEQAA">
-<XPD:ATTR name="Name" type="string">name</XPD:ATTR>
-<XPD:ATTR name="Documentation" type="string">This name of this Property.</XPD:ATTR>
-<XPD:ATTR name="Multiplicity" type="string">1</XPD:ATTR>
-<XPD:ATTR name="TypeExpression" type="string">Name</XPD:ATTR>
-<XPD:REF name="Type_">eMaeMNguJEq8x1W2EDlYSAAA</XPD:REF>
-<XPD:REF name="Owner">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-</XPD:OBJ>
-<XPD:OBJ name="Attributes[1]" type="UMLAttribute" guid="PSL5lU5Jt0iatNpxanHCiQAA">
-<XPD:ATTR name="Name" type="string">value</XPD:ATTR>
-<XPD:ATTR name="Documentation" type="string">The value of this Property.</XPD:ATTR>
-<XPD:ATTR name="Multiplicity" type="string">1</XPD:ATTR>
-<XPD:ATTR name="TypeExpression" type="string">string</XPD:ATTR>
-<XPD:REF name="Type_">gSN+H7M0NUyTCvPBX7mC+QAA</XPD:REF>
-<XPD:REF name="Owner">5Wx2MATv90iIREjQt4wM2QAA</XPD:REF>
-</XPD:OBJ>
-</XPD:OBJ>
-<XPD:OBJ name="OwnedElements[2]" type="UMLClass" guid="d+KtKVSNQUGgNnNpvIxdLAAA">
+<XPD:OBJ name="OwnedElements[1]" type="UMLClass" guid="d+KtKVSNQUGgNnNpvIxdLAAA">
 <XPD:ATTR name="Name" type="string">LtiLink</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">An &lt;code&gt;LtiLink&lt;/code&gt; represents a link within the Tool Consumer system pointing to a resource within the Tool Provider.</XPD:ATTR>
 <XPD:ATTR name="StereotypeName" type="string">addressable</XPD:ATTR>
@@ -10525,8 +10495,9 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Owner">d+KtKVSNQUGgNnNpvIxdLAAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[3]" type="UMLClass" guid="P/yYIUyQCku+OhwZck3SxgAA">
+<XPD:OBJ name="OwnedElements[2]" type="UMLClass" guid="P/yYIUyQCku+OhwZck3SxgAA">
 <XPD:ATTR name="Name" type="string">Context</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">A learning context, such as a Course Section.</XPD:ATTR>
 <XPD:ATTR name="StereotypeName" type="string">addressable</XPD:ATTR>
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
@@ -10552,7 +10523,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Owner">P/yYIUyQCku+OhwZck3SxgAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[4]" type="UMLClass" guid="jmYO6HpT6Eav+qOinDdkPAAA">
+<XPD:OBJ name="OwnedElements[3]" type="UMLClass" guid="jmYO6HpT6Eav+qOinDdkPAAA">
 <XPD:ATTR name="Name" type="string">ToolSettingsContainer</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">&lt;code&gt;ToolSettingsContainer&lt;/code&gt; is the base class for all resources that encapsulate tool settings.</XPD:ATTR>
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
@@ -10567,8 +10538,16 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Specializations[2]">YZNysMQR4UyEmeBGs7HrZQAA</XPD:REF>
 <XPD:ATTR name="#Associations" type="integer">1</XPD:ATTR>
 <XPD:REF name="Associations[0]">uWJLqmvJkUaPIhpgzZbQ5wAA</XPD:REF>
+<XPD:ATTR name="#Attributes" type="integer">1</XPD:ATTR>
+<XPD:OBJ name="Attributes[0]" type="UMLAttribute" guid="Q7pAAi+NoUeXBcIO3OCOTAAA">
+<XPD:ATTR name="Name" type="string">custom_uri</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer.</XPD:ATTR>
+<XPD:ATTR name="Multiplicity" type="string">0..1</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">anyURI</XPD:ATTR>
+<XPD:REF name="Owner">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[5]" type="UMLGeneralization" guid="FZWmpz5xZES9bEPk4HVpMAAA">
+</XPD:OBJ>
+<XPD:OBJ name="OwnedElements[4]" type="UMLGeneralization" guid="FZWmpz5xZES9bEPk4HVpMAAA">
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:REF name="Child">aSRl9MWl2UKcEeFswoUZBwAA</XPD:REF>
 <XPD:REF name="Parent">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
@@ -10578,7 +10557,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Views[2]">DgeUWdQ9NEmQ7D18p24tCwAA</XPD:REF>
 <XPD:REF name="Views[3]">lUeYn6ZeKE2isoHsiGK3HQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[6]" type="UMLGeneralization" guid="RDQ8Bknffkyt21LW1CoHVwAA">
+<XPD:OBJ name="OwnedElements[5]" type="UMLGeneralization" guid="RDQ8Bknffkyt21LW1CoHVwAA">
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:REF name="Child">VK3A/YH3CU2u3/7RM0xXJgAA</XPD:REF>
 <XPD:REF name="Parent">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
@@ -10588,7 +10567,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Views[2]">ukVnPD7b6UW9ExCSol8YowAA</XPD:REF>
 <XPD:REF name="Views[3]">II/Ke5fzKUunj2QFDHQVEQAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[7]" type="UMLGeneralization" guid="YZNysMQR4UyEmeBGs7HrZQAA">
+<XPD:OBJ name="OwnedElements[6]" type="UMLGeneralization" guid="YZNysMQR4UyEmeBGs7HrZQAA">
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:REF name="Child">d+KtKVSNQUGgNnNpvIxdLAAA</XPD:REF>
 <XPD:REF name="Parent">jmYO6HpT6Eav+qOinDdkPAAA</XPD:REF>
@@ -10598,7 +10577,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Views[2]">Ny+SJSNnzkimwKE1SttI2QAA</XPD:REF>
 <XPD:REF name="Views[3]">dXz61Ei65EyKOBGa22Ua6AAA</XPD:REF>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[8]" type="UMLAssociation" guid="URp8PnyEW0ei9XC8tAHFYAAA">
+<XPD:OBJ name="OwnedElements[7]" type="UMLAssociation" guid="URp8PnyEW0ei9XC8tAHFYAAA">
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">yHuiARpuHkG+vpXZHu7R1gAA</XPD:REF>
@@ -10608,6 +10587,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:ATTR name="#Connections" type="integer">2</XPD:ATTR>
 <XPD:OBJ name="Connections[0]" type="UMLAssociationEnd" guid="SppSOnyttkqtJcXPsrHOoQAA">
 <XPD:ATTR name="Name" type="string">tool_proxy</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">The ToolProxy associated with this ToolProxyBinding.</XPD:ATTR>
 <XPD:ATTR name="Multiplicity" type="string">1</XPD:ATTR>
 <XPD:REF name="Association">URp8PnyEW0ei9XC8tAHFYAAA</XPD:REF>
 <XPD:REF name="Participant">VK3A/YH3CU2u3/7RM0xXJgAA</XPD:REF>
@@ -10628,7 +10608,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Views[3]">qGJ6KI3fFEC23VsfUJAF2wAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
-<XPD:OBJ name="OwnedElements[9]" type="UMLAssociation" guid="+Aw8dzOUu0eLMI/lZ28lxgAA">
+<XPD:OBJ name="OwnedElements[8]" type="UMLAssociation" guid="+Aw8dzOUu0eLMI/lZ28lxgAA">
 <XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">yBlISZD7CEGZ9jy0jo1rLwAA</XPD:REF>
@@ -10658,6 +10638,18 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 <XPD:REF name="Views[2]">mzfe+3fdZEOWOSX0HH6kVgAA</XPD:REF>
 <XPD:REF name="Views[3]">Bbg8gVwW8ECEpvLwmILjBAAA</XPD:REF>
 </XPD:OBJ>
+</XPD:OBJ>
+<XPD:OBJ name="OwnedElements[9]" type="UMLClass" guid="8YVbRIWxZEm8ZZiq4gIo8QAA">
+<XPD:ATTR name="Name" type="string">PropertyMap</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">An abstract class whose properties are defined by the Tool Provider and stored in the Tool Consumer.   When represented in JSON-LD, the PropertyMap object typically appears as a plain-old JSON object (though it may have a custom JSON-LD context that defines the semantics for the custom properties).  It is a best practice for the values in a PropertyMap to be strings.  This best practice may be revised if the development community expresses a desire to support other data types in a PropertyMap.</XPD:ATTR>
+<XPD:REF name="Namespace">fq0Fpu98n0KK3jAYHQ9pOgAA</XPD:REF>
+<XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
+<XPD:REF name="Views[0]">w7L4KVjgT0Gu3H23OJlOXQAA</XPD:REF>
+<XPD:REF name="Views[1]">cZYHofsPFU+AO9sC+6auMgAA</XPD:REF>
+<XPD:REF name="Views[2]">vzUtC004K0a8MxbE1TxnkgAA</XPD:REF>
+<XPD:REF name="Views[3]">W/ROxGpFbE+n2Rnwy4tD/QAA</XPD:REF>
+<XPD:ATTR name="#Associations" type="integer">1</XPD:ATTR>
+<XPD:REF name="Associations[0]">Qutaur01+0qcsGzFzA7TawAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
 </XPD:OBJ>
@@ -11573,7 +11565,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[14]" type="UMLPackage" guid="viI8VX+0gEmdfU91Gdan9QAA">
 <XPD:ATTR name="Name" type="string">LTI Simple Types</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/xsd/lti/v2/ltid#
 prefix=lti-type
 </XPD:ATTR>
 <XPD:ATTR name="StereotypeName" type="string">datatypes</XPD:ATTR>
@@ -12508,12 +12500,11 @@ prefix=lti-type
 <XPD:REF name="Views[3]">QSkX7/iFzEiGpOtAP6tOxgAA</XPD:REF>
 <XPD:ATTR name="#Generalizations" type="integer">1</XPD:ATTR>
 <XPD:REF name="Generalizations[0]">vC7lwQkwAE+9SjxNELQJbQAA</XPD:REF>
-<XPD:ATTR name="#TypedFeatures" type="integer">5</XPD:ATTR>
+<XPD:ATTR name="#TypedFeatures" type="integer">4</XPD:ATTR>
 <XPD:REF name="TypedFeatures[0]">eRt7qg1LAUyrcuwMJ/TIKAAA</XPD:REF>
 <XPD:REF name="TypedFeatures[1]">QEHrzGOmTE6vdHv7rBguBQAA</XPD:REF>
 <XPD:REF name="TypedFeatures[2]">jqKzqf72UEOKJHfCA4FwfwAA</XPD:REF>
 <XPD:REF name="TypedFeatures[3]">Uip0foGHFk24UHws4U1xwwAA</XPD:REF>
-<XPD:REF name="TypedFeatures[4]">wmpW+CN5LkSyV9nAcb8SEQAA</XPD:REF>
 <XPD:ATTR name="#Attributes" type="integer">2</XPD:ATTR>
 <XPD:OBJ name="Attributes[0]" type="UMLAttribute" guid="ao0b14ePw0ydP7SuztKQ1AAA">
 <XPD:ATTR name="Name" type="string">maxLength</XPD:ATTR>
@@ -12735,8 +12726,6 @@ prefix=lti-type
 <XPD:ATTR name="#Specializations" type="integer">2</XPD:ATTR>
 <XPD:REF name="Specializations[0]">Tk3lQIXbgkiw48/NIqEPmQAA</XPD:REF>
 <XPD:REF name="Specializations[1]">R/tXk69hg0CONiasyzkTPwAA</XPD:REF>
-<XPD:ATTR name="#TypedFeatures" type="integer">1</XPD:ATTR>
-<XPD:REF name="TypedFeatures[0]">PSL5lU5Jt0iatNpxanHCiQAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[3]" type="UMLClass" guid="fngQchTkrkefetdRtqlorgAA">
 <XPD:ATTR name="Name" type="string">token</XPD:ATTR>
@@ -12771,7 +12760,7 @@ prefix=lti-type
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[17]" type="UMLPackage" guid="vGfqmtt2tkaWHYsh3X0u1QAA">
 <XPD:ATTR name="Name" type="string">LTI Variables</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/variable#
 prefix=ltiv
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>
@@ -13564,7 +13553,7 @@ prefix=ltiv
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="N0NNggnJAEuS36dMMRWjNwAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="lHfpRU/EfkyAh0PS3zRKrgAA">
 <XPD:ATTR name="FontStyle" type="integer">4</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">CourseTemplate.sourceId : Variable</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">CourseTemplate.sourcedId : Variable</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="veUJYQoRBkyq5DLqzSq8GQAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -15196,7 +15185,7 @@ prefix=ltiv
 <XPD:OBJ name="OwnedElements[5]" type="UMLObject" guid="HDAs0UyRokiaSyhGrTtwIwAA">
 <XPD:ATTR name="Name" type="string">Person.sourcedId</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">The LIS identifier for the user.  
-&lt;p&gt;In the LIS Database, this value corresponds to &lt;code&gt;personRecord/sourceId&lt;/code&gt;&lt;/p&gt;</XPD:ATTR>
+&lt;p&gt;In the LIS Database, this value corresponds to &lt;code&gt;personRecord/sourcedId&lt;/code&gt;&lt;/p&gt;</XPD:ATTR>
 <XPD:REF name="Namespace">vGfqmtt2tkaWHYsh3X0u1QAA</XPD:REF>
 <XPD:REF name="Classifier">Es4P0b6npEKjVk9BCpSacQAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">2</XPD:ATTR>
@@ -15480,7 +15469,7 @@ prefix=ltiv
 <XPD:REF name="Views[1]">LaqPVnplIkyIR3mQ9SKEKwAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[29]" type="UMLObject" guid="Sioa/AY+6UGV1Ec0SaBsowAA">
-<XPD:ATTR name="Name" type="string">CourseTemplate.sourceId</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">CourseTemplate.sourcedId</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">The LIS identifier for the Course Template.
 &lt;p&gt;In the LIS Database, this value corresponds to 
 &lt;pre&gt;courseTemplateRecord/sourcedId
@@ -16175,7 +16164,7 @@ prefix=ltiv
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[18]" type="UMLPackage" guid="emyiuW6PyUC/EPQdNN2PVAAA">
 <XPD:ATTR name="Name" type="string">LTI Capabilities</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/capability#
 prefix=ltic
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>

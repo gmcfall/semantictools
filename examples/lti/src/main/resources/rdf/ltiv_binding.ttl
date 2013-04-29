@@ -1,7 +1,7 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix ltiv: <http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> .
+@prefix ltiv: <http://purl.imsglobal.org/vocab/lti/v2/variable#> .
 
 ltiv:Variable rdf:type bind:Enum .
 

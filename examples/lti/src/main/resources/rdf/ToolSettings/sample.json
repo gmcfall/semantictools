@@ -1,0 +1,28 @@
+{
+  "@context" : "http://purl.imsglobal.org/ctx/lti/v2/ToolSettings",
+  "@graph" : [ 
+    { "@type" : "LtiLink",
+      "@id" : "http://tc.example.com/resources/LtiLink/17001",
+      "custom" : {
+         "@id" : "http://tc.example.com/resources/LtiLink/17001/custom",
+         "chapter" : "3",
+         "section" : "1"
+      }
+    },
+    { "@type" : "ToolProxyBinding",
+      "@id" : "http://tc.example.com/courses/0294823738/bindings/tp.example.com/ebook",
+      "custom" : {
+        "@id" : "http://tc.example.com/courses/0294823738/bindings/tp.example.com/ebook/custom",
+        "isbn" : "978-0321558145",
+        "style" : "jazzy"
+      }
+    },
+    { "@type" : "ToolProxy",
+      "@id" : "http://tc.example.com/resources/ToolProxy/79833",
+      "custom" : {
+        "@id" : "http://tc.example.com/resources/ToolProxy/79833/custom",
+        "customerId" : "394892759526"
+      }
+    }
+  ]
+}

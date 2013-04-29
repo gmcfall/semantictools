@@ -1,7 +1,7 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 
 lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
 lti:BaseUrlChoice rdfs:subClassOf
@@ -193,6 +193,23 @@ lti:ToolProxy rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:enabled_capability ;
     bind:associationType bind:Aggregation
+  ] .
+lti:ToolProxyBinding rdf:type bind:Addressable .
+lti:ToolProxyBinding rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:tool_proxy ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:context ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:LtiLink rdf:type bind:Addressable .
+lti:Context rdf:type bind:Addressable .
+lti:ToolSettingsContainer rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:custom ;
+    bind:associationType bind:Composition
   ] .
 
 lti:HttpMethod rdf:type bind:Enum .

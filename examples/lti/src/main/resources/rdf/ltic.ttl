@@ -1,12 +1,12 @@
-@prefix ltic: <http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix ltic: <http://purl.imsglobal.org/vocab/lti/v2/capability#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/capability#> a owl:Ontology  ;
   rdfs:label "LTI Capabilities" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "ltic" .

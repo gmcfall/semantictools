@@ -16,7 +16,7 @@
         <artifactId>semantictools-maven-plugin</artifactId>
         <version>1.16</version>
         <configuration>
-          <version>2012-10-10</version>
+          <version>2013-04-29</version>
           <publish>false</publish>
           <indexFileName>lti.html</indexFileName>
         </configuration>

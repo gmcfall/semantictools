@@ -1276,7 +1276,7 @@ include:ProductProfile,ProductInfo,ProductFamily,Vendor,Contact
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[6]" type="UMLPackage" guid="HJXJyBpMJkSpc4fxBPztdwAA">
 <XPD:ATTR name="Name" type="string">LTI Core</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/lti#
 prefix=lti
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>
@@ -10780,7 +10780,7 @@ The shared secret may be updated when a tool is re-registered (see the reregiste
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[14]" type="UMLPackage" guid="viI8VX+0gEmdfU91Gdan9QAA">
 <XPD:ATTR name="Name" type="string">LTI Simple Types</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/xsd/lti/v2/ltid#
 prefix=lti-type
 </XPD:ATTR>
 <XPD:ATTR name="StereotypeName" type="string">datatypes</XPD:ATTR>
@@ -11972,7 +11972,7 @@ prefix=lti-type
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[17]" type="UMLPackage" guid="vGfqmtt2tkaWHYsh3X0u1QAA">
 <XPD:ATTR name="Name" type="string">LTI Variables</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/variable#
 prefix=ltiv
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>
@@ -12765,7 +12765,7 @@ prefix=ltiv
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="N0NNggnJAEuS36dMMRWjNwAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="lHfpRU/EfkyAh0PS3zRKrgAA">
 <XPD:ATTR name="FontStyle" type="integer">4</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">CourseTemplate.sourceId : Variable</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">CourseTemplate.sourcedId : Variable</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="veUJYQoRBkyq5DLqzSq8GQAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -14424,7 +14424,7 @@ prefix=ltiv
 <XPD:OBJ name="OwnedElements[5]" type="UMLObject" guid="HDAs0UyRokiaSyhGrTtwIwAA">
 <XPD:ATTR name="Name" type="string">Person.sourcedId</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">The LIS identifier for the user.  
-&lt;p&gt;In the LIS Database, this value corresponds to &lt;code&gt;personRecord/sourceId&lt;/code&gt;&lt;/p&gt;</XPD:ATTR>
+&lt;p&gt;In the LIS Database, this value corresponds to &lt;code&gt;personRecord/sourcedId&lt;/code&gt;&lt;/p&gt;</XPD:ATTR>
 <XPD:REF name="Namespace">vGfqmtt2tkaWHYsh3X0u1QAA</XPD:REF>
 <XPD:REF name="Classifier">Es4P0b6npEKjVk9BCpSacQAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">2</XPD:ATTR>
@@ -14708,7 +14708,7 @@ prefix=ltiv
 <XPD:REF name="Views[1]">LaqPVnplIkyIR3mQ9SKEKwAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[29]" type="UMLObject" guid="Sioa/AY+6UGV1Ec0SaBsowAA">
-<XPD:ATTR name="Name" type="string">CourseTemplate.sourceId</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">CourseTemplate.sourcedId</XPD:ATTR>
 <XPD:ATTR name="Documentation" type="string">The LIS identifier for the Course Template.
 &lt;p&gt;In the LIS Database, this value corresponds to 
 &lt;pre&gt;courseTemplateRecord/sourcedId
@@ -15419,7 +15419,7 @@ prefix=ltiv
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[18]" type="UMLPackage" guid="emyiuW6PyUC/EPQdNN2PVAAA">
 <XPD:ATTR name="Name" type="string">LTI Capabilities</XPD:ATTR>
-<XPD:ATTR name="Attachments" type="string">uri=http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#
+<XPD:ATTR name="Attachments" type="string">uri=http://purl.imsglobal.org/vocab/lti/v2/capability#
 prefix=ltic
 </XPD:ATTR>
 <XPD:REF name="Namespace">q0pUVwkZn0y8AS+IuhxsvwAA</XPD:REF>

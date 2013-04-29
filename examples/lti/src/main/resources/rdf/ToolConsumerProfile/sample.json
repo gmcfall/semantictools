@@ -1,6 +1,6 @@
 {
   "@context" : [
-    "http://www.imsglobal.org/imspurl/lti/v2/ctx/ToolConsumerProfile",
+    "http://purl.imsglobal.org/ctx/lti/v2/ToolConsumerProfile",
     {
       "tcp" : "http://lms.example.com/profile/b6ffa601-ce1d-4549-9ccf-145670a964d4#"
     }
