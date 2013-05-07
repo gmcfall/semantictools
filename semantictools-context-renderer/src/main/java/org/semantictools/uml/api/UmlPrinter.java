@@ -674,7 +674,9 @@ public class UmlPrinter extends HtmlPrinter {
 
       @Override
       public int compare(NamedIndividual a, NamedIndividual b) {
-        return a.getLocalName().compareTo(b.getLocalName());
+        return
+            (a.getLocalName() != null && b.getLocalName()!=null) ? a.getLocalName().compareTo(b.getLocalName()) :
+            0;
       }
     });
     

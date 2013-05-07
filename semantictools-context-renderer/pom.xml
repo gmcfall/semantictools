@@ -10,7 +10,7 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-context-renderer</artifactId>
 	<packaging>jar</packaging>
-	<version>1.17</version>
+	<version>1.18</version>
 	<name>SemanticTools Context Renderer</name>
   <description>
     A library used to generate documentation for media types associated with a JSON-LD context
@@ -34,7 +34,7 @@
       <email>gregory.mcfall@gmail.com</email>
     </developer>
   </developers>
-  <!-- 
+ 
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-snapshots</id>
@@ -42,7 +42,7 @@
       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
   </distributionManagement>
- -->
+
 	
 	<properties>
 		<build.finalName>semantictools-context-renderer</build.finalName>
@@ -153,7 +153,7 @@
 		<resources>
 		</resources>
 		<plugins>
-<!--     
+
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -167,7 +167,20 @@
           </execution>
         </executions>
       </plugin>
--->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>
@@ -198,20 +211,6 @@
           </execution>
         </executions>
       </plugin>
-<!-- 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
- -->
 		</plugins>
 	</build>
 	
