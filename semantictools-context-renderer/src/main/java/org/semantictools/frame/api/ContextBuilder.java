@@ -26,7 +26,9 @@ import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.context.renderer.model.TermInfo;
 import org.semantictools.context.renderer.model.TermInfo.TermCategory;
 import org.semantictools.context.renderer.model.TermValue;
+import org.semantictools.frame.model.BindVocabulary;
 import org.semantictools.frame.model.Datatype;
+import org.semantictools.frame.model.DublinCoreTerms;
 import org.semantictools.frame.model.Enumeration;
 import org.semantictools.frame.model.Field;
 import org.semantictools.frame.model.Frame;
@@ -34,12 +36,21 @@ import org.semantictools.frame.model.NamedIndividual;
 import org.semantictools.frame.model.OntologyInfo;
 import org.semantictools.frame.model.RdfType;
 import org.semantictools.frame.model.RestCategory;
+import org.semantictools.frame.model.VannVocabulary;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.Ontology;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class ContextBuilder {
@@ -47,6 +58,7 @@ public class ContextBuilder {
   private TypeManager typeManager;
   
   private OntProperty suggestedPrefix;
+  
   private Set<String> history;
 
   public ContextBuilder(TypeManager typeManager) {
@@ -329,7 +341,7 @@ public class ContextBuilder {
     TermInfo term = context.getTermInfoByURI(namespace);
     if (term != null) return;
     
-    OntologyInfo info = typeManager.getOntologyByUri(namespace);
+    OntologyInfo info = typeManager.getOntologyByNamespaceUri(namespace);
    
     
     String prefix = info==null ?
@@ -420,7 +432,78 @@ public class ContextBuilder {
     return prefix + ":" + localName;
   }
 
-
+  private OntologyInfo createOntologyInfo(String namespaceURI) {
+    Model tmp = ModelFactory.createDefaultModel();
+    Resource namespaceResource = tmp.createResource(namespaceURI);
+    String ontologyURI = null;
+    String prefix = null;
+    String label = null;
+    
+    // Check to see if the namespaceURI is listed as the subject in any statements
+    StmtIterator sequence = model.listStatements(namespaceResource, null, (RDFNode) null);
+    while (sequence.hasNext()) {
+      Statement s = sequence.next();
+      if (s.getPredicate().equals(RDF.type) && s.getObject().equals(OWL.Ontology)) {
+        ontologyURI = namespaceURI;
+      }
+      if (s.getPredicate().equals(RDFS.label) ||
+          s.getPredicate().equals(DublinCoreTerms.title)) {
+        label = s.getObject().asLiteral().getString();
+      }
+      if (s.getPredicate().equals(BindVocabulary.suggestedPrefix) || 
+          s.getPredicate().equals(VannVocabulary.preferredNamespacePrefix)) {
+        prefix = s.getObject().asLiteral().getString();
+      }
+      if ((ontologyURI != null) && (prefix!=null) ) {
+        break;
+      }
+    }
+    
+    if (ontologyURI == null) {
+      // Check to see if the namespaceURI is referenced via the preferredNamespacePrefix
+      Literal object = tmp.createLiteral(namespaceURI);
+      sequence = model.listStatements(null, null, object);
+      if (sequence.hasNext()) {
+        Statement s = sequence.next();
+        Resource subject = s.getSubject();
+        ontologyURI = subject.getURI();
+       
+        s = subject.getProperty(VannVocabulary.preferredNamespacePrefix);
+        if (s != null) {
+          prefix = s.getObject().asLiteral().getString();
+        } else {
+          s = subject.getProperty(BindVocabulary.suggestedPrefix);
+          if (s != null) {
+            prefix =  s.getObject().asLiteral().getString();
+          }
+        }
+        
+        if (prefix != null) {
+          s = subject.getProperty(DublinCoreTerms.title);
+          if (s == null) {
+            s = subject.getProperty(RDFS.label);
+          }
+          if (s == null) {
+            s = subject.getProperty(DublinCoreElements.title);
+          }
+          if (s != null) {
+            label = s.getObject().asLiteral().getString();
+          }
+          
+        }
+        
+      }
+    }
+    
+   OntologyInfo info = new OntologyInfo();
+   
+   info.setNamespaceUri(namespaceURI);
+   info.setOntologyURI(ontologyURI);
+   info.setPrefix(prefix);
+   info.setLabel(label);
+    
+    return info;
+  }
 
   private String getPrefix(JsonContext context, String namespaceURI) {
 
@@ -428,26 +511,15 @@ public class ContextBuilder {
     
     // Special handling for OWL namespace.
     if (OWL2.NS.equals(namespaceURI)) {
-      OntologyInfo info = typeManager.getOntologyByUri(namespaceURI);
+      OntologyInfo info = typeManager.getOntologyByNamespaceUri(namespaceURI);
       prefix = info.getPrefix();
                 
     } else {
       
-      OntologyInfo info = typeManager.getOntologyByUri(namespaceURI);
+      OntologyInfo info = typeManager.getOntologyByNamespaceUri(namespaceURI);
       if (info == null) {
       
-        Ontology ontology = model.getOntology(namespaceURI);
-        
-        
-        Statement statement = (ontology==null) ? null : ontology.getProperty(suggestedPrefix);
-        if (statement == null) {
-          return null;
-        }
-        
-        prefix = statement.getString();
-        info = new OntologyInfo();
-        info.setPrefix(prefix);
-        info.setUri(namespaceURI);
+        info = createOntologyInfo(namespaceURI);
         typeManager.add(info);
       } else {
         prefix = info.getPrefix();

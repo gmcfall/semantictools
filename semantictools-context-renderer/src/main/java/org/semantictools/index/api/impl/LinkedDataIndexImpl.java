@@ -84,14 +84,14 @@ public class LinkedDataIndexImpl implements LinkedDataIndex {
     List<SchemaReference> result = new ArrayList<SchemaReference>();
     Iterator<OntologyInfo> sequence = typeManager.listOntologies().iterator();
     while (sequence.hasNext()) {
-      String ontURI = sequence.next().getUri();
+      String ontURI = sequence.next().getNamespaceUri();
       if (typeManager.isStandard(ontURI)) continue;
-      OntologyInfo info = typeManager.getOntologyByUri(ontURI);
+      OntologyInfo info = typeManager.getOntologyByNamespaceUri(ontURI);
       if (info == null || (type==OntologyType.RDF && !info.hasClasses())) continue;
       if (info.getType() == type) {
-        umlFileManager.setOntology(info.getUri());
+        umlFileManager.setOntology(info.getNamespaceUri());
         
-        String label = info.getLabel()==null ? info.getUri() : info.getLabel();
+        String label = info.getLabel()==null ? info.getNamespaceUri() : info.getLabel();
         File docFile = umlFileManager.getOntologyAllFile();
         
         result.add(new SchemaReference(label, docFile));

@@ -254,7 +254,7 @@ public class SampleWriter {
       }
     });
     for (OntologyInfo info : list) {
-      node.put(info.getPrefix(), info.getUri());
+      node.put(info.getPrefix(), info.getNamespaceUri());
     }
     return node;
   }
@@ -438,7 +438,7 @@ public class SampleWriter {
   private OntologyInfo getOntologyInfo(String namespace) {
    OntologyInfo info = uri2OntologyInfo.get(namespace);
    if (info == null) {
-     info = typeManager.getOntologyByUri(namespace);
+     info = typeManager.getOntologyByNamespaceUri(namespace);
      if (info != null) {
        uri2OntologyInfo.put(namespace, info);
      }

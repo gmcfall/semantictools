@@ -97,7 +97,8 @@ public class DatatypeReader {
       if ("schema".equals(localName)) {
         targetNamespace = toRdfNamespace(attributes.getValue("targetNamespace"));
         ontInfo = new OntologyInfo();
-        ontInfo.setUri(targetNamespace);
+        ontInfo.setOntologyURI(targetNamespace);
+        ontInfo.setNamespaceUri(targetNamespace);
         ontInfo.setType(OntologyType.XSD);
         
         parseNamespaces(attributes);

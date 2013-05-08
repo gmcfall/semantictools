@@ -16,25 +16,44 @@
 package org.semantictools.frame.model;
 
 public class OntologyInfo {
-  private String uri;
+  private String ontologyURI;
+  private String namespaceURI;
   private String prefix;
   private String label;
   private OntologyType type = OntologyType.RDF;
   private boolean hasClasses;
   
-  public OntologyInfo() {}
+  public OntologyInfo() {
+    
+  }
   
-  
-  public OntologyInfo(String prefix, String uri, OntologyType type) {
-    this.uri = uri;
+  public OntologyInfo(String ontologyURI, String prefix, String uri, OntologyType type) {
+    this.ontologyURI = ontologyURI;
+    this.namespaceURI = uri;
     this.prefix = prefix;
     this.type = type;
   }
-  public String getUri() {
-    return uri;
+  
+  public String getOntologyURI() {
+    return ontologyURI;
   }
-  public void setUri(String uri) {
-    this.uri = uri;
+  
+  public void setOntologyURI(String uri) {
+    ontologyURI = uri;
+  }
+  
+  /**
+   * Returns the namespace used by this ontology, which
+   * should end in a slash or a hash.  By convention,
+   * classes and properties defined by the ontology use
+   * this namespace.
+   * @return
+   */
+  public String getNamespaceUri() {
+    return namespaceURI;
+  }
+  public void setNamespaceUri(String uri) {
+    this.namespaceURI = uri;
   }
   public String getPrefix() {
     return prefix;

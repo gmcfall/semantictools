@@ -33,11 +33,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.semantictools.frame.model.BindVocabulary;
 import org.semantictools.frame.model.Datatype;
+import org.semantictools.frame.model.DublinCoreTerms;
 import org.semantictools.frame.model.Frame;
 import org.semantictools.frame.model.ListType;
 import org.semantictools.frame.model.OntologyInfo;
 import org.semantictools.frame.model.OntologyType;
 import org.semantictools.frame.model.RdfType;
+import org.semantictools.frame.model.VannVocabulary;
 import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.datatypes.xsd.impl.XMLLiteralType;
@@ -47,17 +49,18 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class TypeManager {
   
-  private static OntologyInfo XSD_INFO = new OntologyInfo("xs", "http://www.w3.org/2001/XMLSchema#", XSD);
-  private static OntologyInfo OWL_INFO = new OntologyInfo("owl", "http://www.w3.org/2002/07/owl#", RDF);
-  private static OntologyInfo RDFS_INFO = new OntologyInfo("rdfs", "http://www.w3.org/2000/01/rdf-schema#", RDF);
-  private static OntologyInfo XDT_INFO = new OntologyInfo("xdt", "http://www.w3.org/2004/10/xpath-datatypes#", XSD);
-  private static OntologyInfo BIND = new OntologyInfo("bind", "http://purl.org/semantictools/v1/vocab/bind#", RDF);
+  private static OntologyInfo XSD_INFO = new OntologyInfo("http://www.w3.org/2001/XMLSchema#", "xs", "http://www.w3.org/2001/XMLSchema#", XSD);
+  private static OntologyInfo OWL_INFO = new OntologyInfo("http://www.w3.org/2002/07/owl", "owl", "http://www.w3.org/2002/07/owl#", RDF);
+  private static OntologyInfo RDFS_INFO = new OntologyInfo("http://www.w3.org/2000/01/rdf-schema#", "rdfs", "http://www.w3.org/2000/01/rdf-schema#", RDF);
+  private static OntologyInfo XDT_INFO = new OntologyInfo("http://www.w3.org/2004/10/xpath-datatypes#", "xdt", "http://www.w3.org/2004/10/xpath-datatypes#", XSD);
+  private static OntologyInfo BIND = new OntologyInfo("http://purl.org/semantictools/v1/vocab/bind#", "bind", "http://purl.org/semantictools/v1/vocab/bind#", RDF);
   
   private Map<String, Frame> uri2Frame = new HashMap<String, Frame>();
   private Map<String, Datatype> uri2Datatype = new HashMap<String, Datatype>();
@@ -98,7 +101,7 @@ public class TypeManager {
     Datatype duration = getDatatypeByUri(com.hp.hpl.jena.vocabulary.XSD.duration.getURI());
     Datatype dayTimeDuration = new Datatype();
     dayTimeDuration.setLocalName("dayTimeDuration");
-    dayTimeDuration.setUri(XDT_INFO.getUri() + "dayTimeDuration");
+    dayTimeDuration.setUri(XDT_INFO.getNamespaceUri() + "dayTimeDuration");
     dayTimeDuration.setBase(duration);
     add(dayTimeDuration);
   }
@@ -107,7 +110,7 @@ public class TypeManager {
     List<OntClass> classList = ontModel.listClasses().toList();
     for (OntClass type : classList) {
       String namespace = type.getNameSpace();
-      OntologyInfo info = getOntologyByUri(namespace);
+      OntologyInfo info = getOntologyByNamespaceUri(namespace);
       if (info != null) {
         info.setHasClasses(true);
       }
@@ -140,9 +143,9 @@ public class TypeManager {
   private void addStandard(OntologyInfo info) {
     add(info);
     if (info.getType() == OntologyType.XSD) {
-      standardDatatype.add(info.getUri());
+      standardDatatype.add(info.getNamespaceUri());
     }
-    standard.add(info.getUri());
+    standard.add(info.getNamespaceUri());
   }
   
   private void addResource() {
@@ -176,16 +179,44 @@ public class TypeManager {
     List<Ontology> list = ontModel.listOntologies().toList();
     for (Ontology ontology : list) {
 
-      Statement statement = ontology.getProperty(BindVocabulary.suggestedPrefix);
-      if (statement == null) {
+      String prefix = null;
+      
+      RDFNode prefixNode = ontology.getPropertyValue(VannVocabulary.preferredNamespacePrefix);
+      
+      if (prefixNode != null) {
+        prefix = prefixNode.asLiteral().getString();
+      } else {
+        prefixNode = ontology.getPropertyValue(BindVocabulary.suggestedPrefix);
+        prefix = (prefixNode==null) ? null : prefixNode.asLiteral().getString();
+      }
+      
+      /**
+       * We only manage ontologies that have an explicitly declared prefix.
+       */
+      if (prefix == null) {
         continue;
       }
       
+      RDFNode namespaceNode = ontology.getPropertyValue(VannVocabulary.preferredNamespaceUri);
+      String namespaceURI = (namespaceNode == null) ? ontology.getURI() : namespaceNode.asLiteral().getString();
       String label = ontology.getLabel(null);
-      String prefix = statement.getString();
+      String ontologyURI = ontology.getURI();
+      
+      if (label == null) {
+        RDFNode labelNode = ontology.getPropertyValue(DublinCoreTerms.title);
+        if (labelNode == null) {
+          labelNode = ontology.getPropertyValue(DublinCoreElements.title);
+        }
+        if (labelNode != null) {
+          label = labelNode.asLiteral().getString();
+        }
+      }
+      
+      
       OntologyInfo info = new OntologyInfo();
+      info.setOntologyURI(ontologyURI);
       info.setPrefix(prefix);
-      info.setUri(ontology.getURI());
+      info.setNamespaceUri(namespaceURI);
       info.setLabel(label);
       add(info);
     }
@@ -197,7 +228,7 @@ public class TypeManager {
     int slash = uri.lastIndexOf('/');
     int delim = Math.max(hash, slash);
     String namespaceURI = uri.substring(0, delim+1);
-    OntologyInfo info = getOntologyByUri(namespaceURI);
+    OntologyInfo info = getOntologyByNamespaceUri(namespaceURI);
     if (info == null) return null;
     
     String localName = uri.substring(delim+1);
@@ -266,7 +297,7 @@ public class TypeManager {
   
   public void add(OntologyInfo info) {
     // XSD Ontology Type takes precedence 
-    OntologyInfo oldInfo = uri2Ontology.get(info.getUri());
+    OntologyInfo oldInfo = uri2Ontology.get(info.getNamespaceUri());
     if (oldInfo != null) {
       OntologyType type = 
           (oldInfo.getType() == OntologyType.XSD || info.getType()==OntologyType.XSD) ? OntologyType.XSD :
@@ -276,11 +307,11 @@ public class TypeManager {
       oldInfo.setType(type);
       
     } else {
-      uri2Ontology.put(info.getUri(), info);
+      uri2Ontology.put(info.getNamespaceUri(), info);
     }
   }
   
-  public OntologyInfo getOntologyByUri(String uri) {
+  public OntologyInfo getOntologyByNamespaceUri(String uri) {
     return uri2Ontology.get(uri);
   }
   
@@ -301,7 +332,7 @@ public class TypeManager {
     Datatype type = uri2Datatype.get(uri);
     if (type == null) {
       String namespace = getNamespace(uri);
-      if (type == null && (  isStandardDatatype(namespace) || uri.startsWith(RDFS_INFO.getUri())  )) {
+      if (type == null && (  isStandardDatatype(namespace) || uri.startsWith(RDFS_INFO.getNamespaceUri())  )) {
         type = new Datatype();
         type.setUri(uri);
         type.setLocalName(getLocalName(uri));

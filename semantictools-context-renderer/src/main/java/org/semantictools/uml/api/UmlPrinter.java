@@ -109,10 +109,10 @@ public class UmlPrinter extends HtmlPrinter {
   public void printAll() throws IOException {
     Iterator<OntologyInfo> sequence = umlManager.getTypeManager().listOntologies().iterator();
     while (sequence.hasNext()) {
-      String ontURI = sequence.next().getUri();
+      String ontURI = sequence.next().getNamespaceUri();
       if (global.isIgnoredOntology(ontURI)) continue;
       if (umlManager.getTypeManager().isStandard(ontURI)) continue;
-      OntologyInfo info = umlManager.getTypeManager().getOntologyByUri(ontURI);
+      OntologyInfo info = umlManager.getTypeManager().getOntologyByNamespaceUri(ontURI);
       if (info == null) continue;
       init(info);
       switch (info.getType()) {
@@ -131,7 +131,7 @@ public class UmlPrinter extends HtmlPrinter {
   private void init(OntologyInfo info) {
 
     this.init();
-    this.ontologyURI = info.getUri();
+    this.ontologyURI = info.getNamespaceUri();
     linkManager.setOntology(ontologyURI);
     
   }
@@ -162,7 +162,7 @@ public class UmlPrinter extends HtmlPrinter {
 
   private void printDatatypes(OntologyInfo info) {
 
-    List<Datatype> types = listDataTypes(info.getUri());
+    List<Datatype> types = listDataTypes(info.getNamespaceUri());
     for (Datatype type : types) {
       printDatatype(type);
     }
@@ -339,7 +339,7 @@ public class UmlPrinter extends HtmlPrinter {
   }
 
   private void setTitle() {
-    OntologyInfo info = umlManager.getTypeManager().getOntologyByUri(ontologyURI);
+    OntologyInfo info = umlManager.getTypeManager().getOntologyByNamespaceUri(ontologyURI);
     ontologyTitle =  ontologyURI;
     if (info != null && info.getLabel()!=null) {
       ontologyTitle = info.getLabel();
