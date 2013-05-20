@@ -44,7 +44,6 @@ import org.semantictools.index.api.LinkedDataIndexPrinter;
 import org.semantictools.index.api.impl.LinkedDataIndexImpl;
 import org.semantictools.jsonld.LdAsset;
 import org.semantictools.jsonld.LdProcessor;
-import org.semantictools.jsonld.LdPublishException;
 import org.semantictools.jsonld.LdValidationMessage;
 import org.semantictools.jsonld.LdValidationReport;
 import org.semantictools.jsonld.LdValidationResult;
@@ -179,6 +178,9 @@ public class DocumentationGenerator {
     
     TypeManager typeManager = new TypeManager();
     typeManager.loadDir(rdfDir);
+
+//    typeManager.getOntModel().writeAll(System.out, "TURTLE", "");
+    
     typeManager.processOntologies();
     umlManager = new UmlManager(typeManager);
     

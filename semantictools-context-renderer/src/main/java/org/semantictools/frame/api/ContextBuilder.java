@@ -145,8 +145,9 @@ public class ContextBuilder {
     if (properties.getExcludedTypes().contains(typeURI)) {
       return;
     }
-    if (rdfType.canAsListType()) {
-      rdfType = rdfType.asListType().getElementType();
+    if (rdfType.canAsListType() && embedListMembers(properties)) {
+//      rdfType = rdfType.asListType().getElementType();
+      addType(properties, context, rdfType.asListType().getElementType(), stubbed);
     }
     
         
@@ -188,6 +189,15 @@ public class ContextBuilder {
     
     addSubtypes(properties, context, frame);
     
+  }
+
+
+  /**
+   * Returns true if rdf:member is not represented as an idref.
+   */
+  private boolean embedListMembers(ContextProperties properties) {
+    properties.isIdRef("http://www.w3.org/2000/01/rdf-schema#member");
+    return false;
   }
 
 
@@ -239,9 +249,9 @@ public class ContextBuilder {
       value.setContainer(Container.LIST);
       
     } 
-    if (rdfType.canAsListType()) {
-      rdfType = rdfType.asListType().getElementType();
-    }
+//    if (rdfType.canAsListType()) {
+//      rdfType = rdfType.asListType().getElementType();
+//    }
     boolean uriRef = properties.isIdRef(property.getURI());
     
     boolean enumerable = 
@@ -524,6 +534,9 @@ public class ContextBuilder {
       } else {
         prefix = info.getPrefix();
       }
+    }
+    if (prefix == null && namespaceURI.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#")) {
+      prefix = "rdf";
     }
 
     if (prefix !=null && !context.containsTerm(prefix)) {

@@ -29,6 +29,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.semantictools.context.renderer.model.ContextProperties;
+import org.semantictools.context.renderer.model.FrameConstraints;
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.context.renderer.model.TermInfo;
 import org.semantictools.frame.api.FrameNotFoundException;
@@ -116,12 +117,24 @@ public class JsonSampleGenerator {
     List<Field> fieldList = branch.getFrame().listAllFields();
     
     for (Field field : fieldList) {
+      if (!isIncluded(field, contextProperties, branch.getFrame())) continue;
       addField(branch, field, null);
     }
     
     
   }
 
+  private boolean isIncluded(Field field, ContextProperties properties, Frame declaringFrame) {
+    
+    String fieldType = field.getRdfType().getUri();
+    if (properties.getExcludedTypes().contains(fieldType)) return false;
+    
+    FrameConstraints constraints = properties.getFrameConstraints(declaringFrame.getLocalName());
+   
+    return (constraints == null) || constraints.isIncludedProperty(field.getURI());
+  }
+
+  
   private void addField(Branch branch, Field field, String fieldName) {
     
     RdfType type = field.getRdfType();

@@ -34,7 +34,7 @@
       <email>gregory.mcfall@gmail.com</email>
     </developer>
   </developers>
- 
+
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-snapshots</id>
@@ -154,6 +154,7 @@
 		</resources>
 		<plugins>
 
+
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -167,7 +168,7 @@
           </execution>
         </executions>
       </plugin>
-
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>

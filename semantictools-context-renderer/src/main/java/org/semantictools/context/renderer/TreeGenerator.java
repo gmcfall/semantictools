@@ -260,6 +260,9 @@ public class TreeGenerator {
     TreeNode node = new TreeNode();
     TreeNode setContainer = null;
     int max = field.getMaxCardinality();
+    if (max > 0) {
+      node.setMaxCardinality(max);
+    }
     boolean isList = field.getRdfType().canAsListType();
     if (max < 0  && !isList && contextProperties.isSetProperty(field.getURI())) {
       node.setLocalName("@set");

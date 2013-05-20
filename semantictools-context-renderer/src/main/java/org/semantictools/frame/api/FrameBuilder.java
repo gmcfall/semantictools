@@ -45,11 +45,13 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.impl.OntResourceImpl;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -57,6 +59,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class FrameBuilder {
   private static Logger logger = LoggerFactory.getLogger(FrameBuilder.class);
+  
+  private static final OntModel owlModel = ModelFactory.createOntologyModel();
+  private static final OntClass THING = owlModel.createClass("http://www.w3.org/2002/07/owl#Thing");
   private static final String[] STANDARD_URI = {
     "http://www.w3.org/2001/XMLSchema#",
     "http://www.w3.org/2002/07/owl#",
@@ -193,10 +198,10 @@ public class FrameBuilder {
       
       String comment = restriction.getComment(null);
       if (priorField != null) {
-        // TODO: need to better understand where the priorField is coming from.
-        // Why don't we apply other aspects of the restriction besides the comment?
-        //
+        
         priorField.setComment(comment);
+        priorField.setMinCardinality(minCardinality);
+        priorField.setMaxCardinality(maxCardinality);
         return;
       }
      Field field = new Field(frame, property, range, minCardinality, maxCardinality);
@@ -228,6 +233,7 @@ public class FrameBuilder {
   private void addFields(OntProperty p) {
     OntResource domainResource = p.getDomain();
     if (domainResource == null) {
+      handleNullDomain(p);
       return;
     }
     
@@ -242,6 +248,42 @@ public class FrameBuilder {
     }
   }
   
+  private void handleNullDomain(OntProperty p) {
+ 
+    List<RDFNode> list = p.listPropertyValues(RDFS.subClassOf).toList();
+    for (RDFNode node : list) {
+      if (!node.canAs(Resource.class)) continue;
+      Resource resource = node.asResource();
+      Resource onPropertyValue = resource.getPropertyResourceValue(OWL.onProperty);
+      if (!RDFS.domain.equals(onPropertyValue)) continue;
+      Resource someValuesFrom = resource.getPropertyResourceValue(OWL.someValuesFrom);
+      if (someValuesFrom == null) continue;
+      String uri = someValuesFrom.getURI();
+      if (uri != null) {
+        OntResource type = someValuesFrom.as(OntResource.class);
+        addField(type, p);
+      } else {
+        Resource unionList = someValuesFrom.getPropertyResourceValue(OWL.unionOf);
+        while (unionList != null) {
+          Resource first = unionList.getPropertyResourceValue(RDF.first);
+          if (first != null) {
+            String typeURI = first.getURI();
+            if (typeURI == null) {
+              logger.warn("Cannot handle union that contains an anonymous class in the domain of " + p.getURI());
+            } else {
+              OntResource type = first.as(OntResource.class);
+              addField(type, p);
+            }
+          } 
+          unionList = unionList.getPropertyResourceValue(RDF.rest);
+          if (RDF.nil.equals(unionList)) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
   private void addField(OntResource type, OntProperty p) {
     int minCardinality = 0;
     int maxCardinality = -1;
@@ -267,8 +309,9 @@ public class FrameBuilder {
     OntClass restriction = frame.getRestriction(p.getURI());
     range = p.getRange();
     if (range == null) {
-      logger.warn("Ignoring property " + p.getLocalName() + " on class " + type.getLocalName() + ": range not defined");
-      return;
+//      logger.warn("Ignoring property " + p.getLocalName() + " on class " + type.getLocalName() + ": range not defined");
+//      return;
+      range = THING;
     }
     if (restriction != null) {
       Resource onClass = restriction.getPropertyResourceValue(OWL2.allValuesFrom);
@@ -307,7 +350,8 @@ public class FrameBuilder {
       field = new Field(frame, p, range, minCardinality, maxCardinality);
       
       if (field.getRdfType() == null) {
-        logger.warn("Faild to create RdfType for field " + field.getLocalName());
+        logger.warn("Failed to create RdfType for field " + field.getLocalName() + " of type " + field.getType().getURI());
+       
       }
       
     }
@@ -349,7 +393,7 @@ public class FrameBuilder {
                  
                  ListType listType = manager.getListTypeByElementUri(elementTypeURI);
                  if (listType == null) {
-                   listType = new ListType(intersectionMember, elementType);
+                   listType = new ListType(manager, intersectionMember, elementType);
                    manager.add(listType);
                  }
                  
@@ -451,6 +495,9 @@ public class FrameBuilder {
       String subURI = type.getURI();
       if (subURI == null) continue;
       Frame subFrame = manager.getFrameByUri(subURI);
+      if (subFrame == null) {
+        subFrame = manager.getListTypeByListUri(subURI);
+      }
       if (subFrame != null) {
         frame.getSubtypeList().add(subFrame);
       } else {
@@ -460,6 +507,7 @@ public class FrameBuilder {
           frame.addSubdatatype(datatype);
           continue;
         }
+        
         
         
         if (isStandard(subURI)) continue;
@@ -492,6 +540,9 @@ public class FrameBuilder {
     List<OntClass> list = listNamedClasses();
     
     for (OntClass type : list) {
+      if (isProperty(type)) {
+        continue;
+      }
       Frame frame = createFrame(type);
       if (frame == null) continue;
       setRestCategory(frame);
@@ -502,17 +553,32 @@ public class FrameBuilder {
     
   }
   
+  private boolean isProperty(OntClass type) {
+    return type.canAs(OntProperty.class);
+  }
+
   private List<OntClass> listNamedClasses() {
     List<OntClass> result = new ArrayList<OntClass>();
     
-    Iterator<OntClass> sequence = model.listNamedClasses();
-    
-    while (sequence.hasNext()) {
-      OntClass type = sequence.next();
-      if (!isStandard(type.getURI())) {
-        result.add(type);
+    StmtIterator classes = model.listStatements(null, RDF.type, OWL.Class);
+    while (classes.hasNext()) {
+      Resource type = classes.next().getSubject();
+      String uri = type.getURI();
+      if (uri == null) continue;
+      if (!isStandard(uri)) {
+        result.add(type.as(OntClass.class));
       }
     }
+    classes = model.listStatements(null, RDF.type, RDFS.Class);
+    while (classes.hasNext()) {
+      Resource type = classes.next().getSubject();
+      String uri = type.getURI();
+      if (uri == null) continue;
+      if (!isStandard(uri)) {
+        result.add(type.as(OntClass.class));
+      }
+    }
+    
     
 
     List<Resource> rdfsClassList = model.listResourcesWithProperty(RDF.type, RDFS.Class).toList();
@@ -553,7 +619,10 @@ public class FrameBuilder {
       ListType listType = manager.getListTypeByElementUri(elemURI);
       if (listType == null) {
         RdfType elemRdfType = manager.getTypeByURI(elemURI);
-        listType = new ListType(type, elemRdfType);
+        if (elemRdfType == null) {
+          elemRdfType = createFrame(elemType);
+        }
+        listType = new ListType(manager, type, elemRdfType);
         manager.add(listType);
       }
       return null;

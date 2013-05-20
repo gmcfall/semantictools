@@ -331,6 +331,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     documentPrinter.endSection();
     // TODO: move the endHeading call to the same scope where the heading
     // begins.
+    if (!contextProperties.isMediaTypeSection()) return;
     if (context == null) {
       return;
     }
@@ -552,7 +553,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printHowToRead() throws IOException {
-    if (context == null) {
+    if (context == null || !contextProperties.isHowToReadThisDocument()) {
       return;
     }
 
@@ -571,6 +572,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printContextDiscussion() {
+    if (!contextProperties.isJsonldIntroduction()) return;
+    
     Heading heading = documentPrinter.createHeading("The JSON-LD Context");
     documentPrinter.print(heading);
 
@@ -724,6 +727,8 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printReservedTerms() {
+    if (!contextProperties.isReservedTermsSection()) return;
+    
     Heading heading = documentPrinter.createHeading("Reserved Terms");
     documentPrinter.print(heading);
     printParagraph("The JSON-LD standard reserves a handful of property names and tokens "
@@ -1464,7 +1469,7 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   public boolean isIncludeOverviewDiagram() {
-    return includeOverviewDiagram && (context != null);
+    return includeOverviewDiagram && (context != null) && contextProperties.isOverviewDiagram();
   }
 
   public void setIncludeOverviewDiagram(boolean includeOverviewDiagram) {
@@ -2247,6 +2252,8 @@ public class ContextHtmlPrinter extends PrintEngine {
     set.add(uri);
     List<Field> fieldList = frame.listAllFields();
     for (Field field : fieldList) {
+      if (contextProperties.isIdRef(field.getURI())) continue;
+      if (!isIncluded(frame, field)) continue;
       OntProperty p = field.getProperty();
       String propertyURI = p.getURI();
       TermInfo info = context.getTermInfoByURI(propertyURI);
@@ -2255,6 +2262,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         type = type.asListType().getElementType();
       }
 
+      
       if (info != null && type.canAsDatatype()) {
         set.add(type.getUri());
         continue;

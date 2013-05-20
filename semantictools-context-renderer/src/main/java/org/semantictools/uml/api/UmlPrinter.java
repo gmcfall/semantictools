@@ -584,7 +584,7 @@ public class UmlPrinter extends HtmlPrinter {
 
   private void printInheritedProperties(UmlClass umlClass) {
     
-    List<UmlClass> list = umlClass.getSupertypeList();
+    List<UmlClass> list = umlClass.listAllSupertypes();
     if (list.isEmpty()) return;
     
     list = new ArrayList<UmlClass>(list);
@@ -741,9 +741,9 @@ public class UmlPrinter extends HtmlPrinter {
       
       RdfType fieldType = field.getRdfType();
       
-      if (fieldType.canAsListType()) {
-        fieldType = fieldType.asListType().getElementType();
-      }
+//      if (fieldType.canAsListType()) {
+//        fieldType = fieldType.asListType().getElementType();
+//      }
       
       String link = typeManager.isStandard(fieldType.getNamespace()) ? fieldType.getLocalName() :
         linkManager.getTypeLink(fieldType);

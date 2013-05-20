@@ -25,6 +25,7 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 public class Field {
   private Frame frame;
@@ -180,7 +181,7 @@ public class Field {
   
   public String getComment() {
     if (comment == null) {
-      comment = property.getComment(null);
+      comment = FrameUtil.getPropertyDescription(property);
       if (comment == null) {
         comment = "";
       }
@@ -211,6 +212,13 @@ public class Field {
       if (rdfType == null) {
         rdfType = manager.getListTypeByListUri(type.getURI());
       }
+      
+      if (type.getURI().startsWith(RDF.getURI())) {
+        
+        Frame f = new Frame(frame.getTypeManager(), type.as(OntClass.class));
+        frame.getTypeManager().add(f);
+        rdfType = f;
+      }
      
     }
     return rdfType;
@@ -224,6 +232,14 @@ public class Field {
   }
   public int getMaxCardinality() {
     return maxCardinality;
+  }
+  
+  public void setMinCardinality(int value) {
+    minCardinality = value;
+  }
+  
+  public void setMaxCardinality(int value) {
+    maxCardinality = value;
   }
   
   public String getMultiplicity() {

@@ -17,9 +17,11 @@ package org.semantictools.frame.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.semantictools.frame.api.TypeManager;
 
@@ -35,7 +37,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
 public class Frame implements Comparable<Frame>, RdfType {
   
   private TypeManager typeManager;
-  private OntClass type;
+  protected OntClass type;
   private RestCategory category = RestCategory.UNKNOWN;
   private List<Frame> supertypeList = new ArrayList<Frame>();
   private List<Frame> subtypeList = new ArrayList<Frame>();
@@ -79,7 +81,7 @@ public class Frame implements Comparable<Frame>, RdfType {
   }
 
   public String getComment() {
-    String result = type.getComment(null);
+    String result = FrameUtil.getClassDescription(type);
     if (result == null) {
       result = "";
     }
@@ -134,6 +136,22 @@ public class Frame implements Comparable<Frame>, RdfType {
         list.add(sub);
         addSubtypes(list, sub);
       }
+    }
+    
+  }
+  
+  public List<Frame> listAllSupertypes() {
+    Set<Frame> set = new HashSet<Frame>();
+    addSupertypes(this, set);
+    List<Frame> list = new ArrayList<Frame>(set);
+    return list;
+  }
+
+  private void addSupertypes(Frame frame, Set<Frame> set) {
+    for (Frame type : frame.getSupertypeList()) {
+      if (set.contains(type)) continue;
+      set.add(type);
+      addSupertypes(type, set);
     }
     
   }

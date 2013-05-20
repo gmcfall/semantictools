@@ -71,6 +71,12 @@ public class ContextManager {
   private static final String CAPTION_SUFFIX = ".caption";
   private static final String TEMPLATE = "template";
   private static final String VALIDATE_JSON_SAMPLES = "validateJsonSamples";
+  private static final String HOW_TO_READ = "includeHowToReadSection";
+  private static final String JSON_LD_SECTION = "includeJsonldSection";
+  private static final String RESERVED_WORDS = "includeReservedWordsSection";
+  private static final String MEDIA_TYPE_SECTION = "includeMediaTypeConformance";
+  private static final String OVERVIEW_DIAGRAM = "includeOverviewDiagram";
+  
   
   private MediaTypeFileManager fileManager;
   private Map<String, ContextProperties> contextMap = new HashMap<String, ContextProperties>();
@@ -238,6 +244,16 @@ public class ContextManager {
         sink.setTemplateName(value);
       } else if (VALIDATE_JSON_SAMPLES.equals(key)) {
         sink.setValidateJsonSamples("true".equalsIgnoreCase(value));
+      } else if (HOW_TO_READ.equals(key)) {
+        sink.setHowToReadThisDocument(toBoolean(value));
+      } else if (RESERVED_WORDS.equals(key)) {
+        sink.setReservedTermsSection(toBoolean(value));
+      } else if (JSON_LD_SECTION.equals(key)) {
+        sink.setReservedTermsSection(toBoolean(value));
+      } else if (MEDIA_TYPE_SECTION.equals(key)) {
+        sink.setMediaTypeSection(toBoolean(value));
+      } else if (OVERVIEW_DIAGRAM.equals(key)) {
+        sink.setOverviewDiagram(toBoolean(value));
       }
     }
     validate(sink);
@@ -245,6 +261,9 @@ public class ContextManager {
     
   }
 
+  boolean toBoolean(String text) {
+    return "true".equalsIgnoreCase(text);
+  }
 
 
   private void addOptionalProperties(ContextProperties sink, String value) {

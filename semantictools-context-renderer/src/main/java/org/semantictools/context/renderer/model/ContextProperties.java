@@ -61,6 +61,11 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
   private Map<String, FrameConstraints> uri2FrameConstraints = new HashMap<String, FrameConstraints>();
   private Properties rawProperties;
   private Set<String> usePrefix = new HashSet<String>();
+  private boolean howToReadThisDocument=true;
+  private boolean reservedTermsSection=true;
+  private boolean jsonldIntroduction=true;
+  private boolean mediaTypeSection = true;
+  private boolean overviewDiagram = true;
   
   
   public ContextProperties(DocumentMetadata parent, Properties rawProperties) {
@@ -418,6 +423,46 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
    */
   public void setContextFile(File contextFile) {
     this.contextFile = contextFile;
+  }
+
+  public boolean isHowToReadThisDocument() {
+    return howToReadThisDocument;
+  }
+
+  public void setHowToReadThisDocument(boolean howToReadThisDocument) {
+    this.howToReadThisDocument = howToReadThisDocument;
+  }
+
+  public boolean isReservedTermsSection() {
+    return reservedTermsSection;
+  }
+
+  public void setReservedTermsSection(boolean reservedTermsSection) {
+    this.reservedTermsSection = reservedTermsSection;
+  }
+
+  public boolean isJsonldIntroduction() {
+    return jsonldIntroduction;
+  }
+
+  public void setJsonldIntroduction(boolean jsonldIntroduction) {
+    this.jsonldIntroduction = jsonldIntroduction;
+  }
+
+  public boolean isMediaTypeSection() {
+    return mediaTypeSection;
+  }
+
+  public void setMediaTypeSection(boolean mediaTypeSection) {
+    this.mediaTypeSection = mediaTypeSection;
+  }
+
+  public boolean isOverviewDiagram() {
+    return overviewDiagram;
+  }
+
+  public void setOverviewDiagram(boolean overviewDiagram) {
+    this.overviewDiagram = overviewDiagram;
   }
 
 

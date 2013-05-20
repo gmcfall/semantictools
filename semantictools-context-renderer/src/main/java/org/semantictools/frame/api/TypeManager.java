@@ -50,7 +50,7 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -86,6 +86,7 @@ public class TypeManager {
     addStandardLiteralTypes();
   }
   
+  
   private void addStandardLiteralTypes() {
     standardLiteralType.add(RDFS.Literal.getURI());
     standardLiteralType.add(RDFS.Datatype.getURI());
@@ -107,13 +108,29 @@ public class TypeManager {
   }
   
   public void analyzeOntologies() {
-    List<OntClass> classList = ontModel.listClasses().toList();
-    for (OntClass type : classList) {
-      String namespace = type.getNameSpace();
-      OntologyInfo info = getOntologyByNamespaceUri(namespace);
-      if (info != null) {
-        info.setHasClasses(true);
+    markOntologiesWithClasses(ontModel.listStatements(null, com.hp.hpl.jena.vocabulary.RDF.type,  com.hp.hpl.jena.vocabulary.RDFS.Class));
+    markOntologiesWithClasses(ontModel.listStatements(null, com.hp.hpl.jena.vocabulary.RDF.type,  com.hp.hpl.jena.vocabulary.OWL.Class));
+    
+//    List<OntClass> classList = ontModel.listClasses().toList();
+//    for (OntClass type : classList) {
+//      String namespace = type.getNameSpace();
+//      OntologyInfo info = getOntologyByNamespaceUri(namespace);
+//      if (info != null) {
+//        info.setHasClasses(true);
+//      }
+//    }
+  }
+  
+  private void markOntologiesWithClasses(StmtIterator sequence) {
+    while (sequence.hasNext()) {
+      String uri = sequence.next().getSubject().getNameSpace();
+      if (uri != null) {
+        OntologyInfo info = getOntologyByNamespaceUri(uri);
+        if (info != null) {
+          info.setHasClasses(true);
+        }
       }
+      
     }
   }
 
@@ -283,6 +300,7 @@ public class TypeManager {
   
 
   public void add(ListType listType) {
+    add((Frame) listType);
     listURI2ListType.put(listType.getUri(), listType);
     elemURI2ListType.put(listType.getElementType().getUri(), listType);
   }
@@ -381,6 +399,10 @@ public class TypeManager {
   
   public Collection<Frame> listFrames() {
     return uri2Frame.values();
+  }
+  
+  public Collection<ListType> listListTypes() {
+    return listURI2ListType.values();
   }
   
   public List<Frame> listFramesInOntology(String ontologyURI) {

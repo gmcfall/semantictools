@@ -91,6 +91,25 @@ public class UmlClass {
     return fieldList;
   }
 
+  public List<UmlClass> listAllSupertypes() {
+    List<UmlClass> list = new ArrayList<UmlClass>();
+    if (type.canAsFrame()) {
+      List<Frame> frameList = type.asFrame().listAllSupertypes();
+      for (Frame frame : frameList) {
+        String uri = frame.getUri();
+        if (uri.startsWith(RDF.getURI())) continue;
+        if (uri.startsWith(RDFS.getURI())) continue;
+        
+        UmlClass superClass = manager.getUmlClassByURI(frame.getUri());
+        if (superClass == null) {
+          superClass = new UmlClass(frame, manager);
+        }
+        list.add(superClass);
+      }
+    }
+    
+    return list;
+  }
 
   public List<UmlClass> getSupertypeList() {
     if (supertypeList == null) {
@@ -229,4 +248,7 @@ public class UmlClass {
     return p;
   }
   
+  public String toString() {
+    return type.getLocalName();
+  }
 }

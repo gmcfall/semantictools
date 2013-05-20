@@ -83,6 +83,10 @@ public class UmlManager {
     for (Frame frame : typeManager.listFrames() ) {
       buildClass(frame);
     }
+    for (Frame frame : typeManager.listListTypes()) {
+      buildClass(frame);
+    }
+    
     
   }
 
@@ -96,6 +100,7 @@ public class UmlManager {
     for (Field field : frame.getDeclaredFields()) {
       
       RdfType fieldType = field.getRdfType();
+     
       
       if (fieldType.canAsDatatype()) {
         umlClass.add(field);
