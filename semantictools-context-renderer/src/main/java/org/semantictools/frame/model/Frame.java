@@ -163,6 +163,13 @@ public class Frame implements Comparable<Frame>, RdfType {
     return declaredFields;
   }
   
+  public Field getDeclaredFieldByPropertyURI(String uri) {
+    for (Field field : declaredFields) {
+      if (uri.equals(field.getURI())) return field;
+    }
+    return null;
+  }
+  
   /**
    * Returns the list of all fields defined on this type, including
    * fields declared on supertypes.

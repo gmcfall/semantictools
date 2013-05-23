@@ -25,6 +25,7 @@ public class BindVocabulary {
   private static final OntModel model = ModelFactory.createOntologyModel();
 
   public static final OntClass AbstractClass = model.createClass("http://purl.org/semantictools/v1/vocab/bind#AbstractClass");
+  public static final OntClass AbstractProperty = model.createClass("http://purl.org/semantictools/v1/vocab/bind#AbstractProperty");
   public static final OntClass Addressable = model.createClass("http://purl.org/semantictools/v1/vocab/bind#Addressable");
   public static final OntClass EmbeddableClass = model.createClass("http://purl.org/semantictools/v1/vocab/bind#EmbeddableClass");
   public static final OntClass Enum = model.createClass("http://purl.org/semantictools/v1/vocab/bind#Enum");

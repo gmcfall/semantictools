@@ -11,6 +11,6 @@ public class VannVocabulary {
       model.createOntProperty("http://purl.org/vocab/vann/preferredNamespacePrefix");
   
   public static final OntProperty preferredNamespaceUri =
-      model.createOntProperty("http://purl.org/vocab/vann/preferredNamespaceUri");
+      model.createOntProperty("http://purl.org/vocab/vann/preferredNamespaceURI");
   
 }

@@ -223,17 +223,17 @@ public class FrameBuilder {
     List<OntProperty> list = listProperties();
     for (OntProperty p : list) {
       if (isStandard(p.getURI())) continue;
-      addFields(p);
+      addFields(p, p);
     }
     
   }
 
 
 
-  private void addFields(OntProperty p) {
-    OntResource domainResource = p.getDomain();
+  private void addFields(OntProperty p, OntProperty ancestor) {
+    OntResource domainResource = ancestor.getDomain();
     if (domainResource == null) {
-      handleNullDomain(p);
+      handleNullDomain(p, ancestor);
       return;
     }
     
@@ -244,11 +244,31 @@ public class FrameBuilder {
     }
     
     for (OntResource type : domainList) {
-      addField(type, p);
+      addField(type, p, ancestor);
     }
   }
+
+  private void handleNullDomain(OntProperty p, OntProperty ancestor) {
+    handlePropertySubclassOf(p);
+    handleSubpropertyOf(p, ancestor);
+  }
   
-  private void handleNullDomain(OntProperty p) {
+  private void handleSubpropertyOf(OntProperty p, OntProperty ancestor) {
+    
+    List<RDFNode> list = ancestor.listPropertyValues(RDFS.subPropertyOf).toList();
+    for (RDFNode node : list) {
+      if (!node.canAs(OntProperty.class)) continue;
+      
+      OntProperty superProperty = node.as(OntProperty.class);
+      if (superProperty.equals(ancestor)) continue;
+      addFields(p, superProperty);
+      handleSubpropertyOf(p, superProperty);
+      
+      
+    }
+  }
+
+  private void handlePropertySubclassOf(OntProperty p) {
  
     List<RDFNode> list = p.listPropertyValues(RDFS.subClassOf).toList();
     for (RDFNode node : list) {
@@ -261,7 +281,7 @@ public class FrameBuilder {
       String uri = someValuesFrom.getURI();
       if (uri != null) {
         OntResource type = someValuesFrom.as(OntResource.class);
-        addField(type, p);
+        addField(type, p, null);
       } else {
         Resource unionList = someValuesFrom.getPropertyResourceValue(OWL.unionOf);
         while (unionList != null) {
@@ -272,7 +292,7 @@ public class FrameBuilder {
               logger.warn("Cannot handle union that contains an anonymous class in the domain of " + p.getURI());
             } else {
               OntResource type = first.as(OntResource.class);
-              addField(type, p);
+              addField(type, p, null);
             }
           } 
           unionList = unionList.getPropertyResourceValue(RDF.rest);
@@ -284,7 +304,7 @@ public class FrameBuilder {
     }
   }
 
-  private void addField(OntResource type, OntProperty p) {
+  private void addField(OntResource type, OntProperty p, OntProperty ancestor) {
     int minCardinality = 0;
     int maxCardinality = -1;
     OntResource range = null;
@@ -295,12 +315,17 @@ public class FrameBuilder {
       return;
     }
     
+    // Do not add abstract properties.
+    if (isAbstract(p)) return;
+    
     Frame frame = manager.getFrameByUri(typeURI);
     if (frame == null) {
       if (isStandard(typeURI)) return;
       logger.warn("Ignoring property " + p.getLocalName() + " on class " + type.getLocalName() + ": frame not found");
       return;
     }
+    
+    if (frame.getDeclaredFieldByPropertyURI(p.getURI()) != null) return;
 
     if (p.hasRDFType(OWL.FunctionalProperty)) {
       maxCardinality = 1;
@@ -308,6 +333,9 @@ public class FrameBuilder {
     
     OntClass restriction = frame.getRestriction(p.getURI());
     range = p.getRange();
+    if (range == null && ancestor!=null) {
+      range = ancestor.getRange();
+    }
     if (range == null) {
 //      logger.warn("Ignoring property " + p.getLocalName() + " on class " + type.getLocalName() + ": range not defined");
 //      return;
@@ -364,6 +392,17 @@ public class FrameBuilder {
     
   }
   
+
+  private boolean isAbstract(OntProperty p) {
+    List<RDFNode> list = p.listPropertyValues(RDF.type).toList();
+    for (RDFNode node : list) {
+      if (node.canAs(Resource.class)) {
+        Resource r = node.asResource();
+        if (BindVocabulary.AbstractProperty.getURI().equals(r.getURI())) return true;
+      }
+    }
+    return false;
+  }
 
   private Field createListField(Frame frame, OntProperty p, OntResource range) {
     

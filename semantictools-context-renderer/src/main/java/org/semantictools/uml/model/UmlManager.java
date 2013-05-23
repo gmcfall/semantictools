@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.semantictools.uml.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -130,6 +131,8 @@ public class UmlManager {
 
   private void addChildren(UmlClass umlClass, Frame frame) {
    
+    List<UmlAssociation> parentList = new ArrayList<UmlAssociation>();
+    
     for (Field field : frame.getDeclaredFields()) {
       RdfType fieldType = field.getRdfType();
 
@@ -167,7 +170,7 @@ public class UmlManager {
           UmlAssociation assoc = new UmlAssociation(end0, end1);
           
           otherClass.addChild(assoc);
-          umlClass.addParent(assoc);
+          parentList.add(assoc);
           
           
         } else {
@@ -181,7 +184,7 @@ public class UmlManager {
           UmlAssociation assoc = new UmlAssociation(end0, end1);
           
           umlClass.addChild(assoc);
-          otherClass.addParent(assoc);
+          parentList.add(assoc);
         }
         
       } else {
@@ -190,10 +193,30 @@ public class UmlManager {
         
       }
       
+      
     }
+    
+    addParentList(umlClass, parentList);
     
   }
   
+  private void addParentList(UmlClass umlClass, List<UmlAssociation> parentList) {
+    for (UmlAssociation assoc : parentList) {
+      addParentAssociation(umlClass, assoc);
+    }
+    
+  }
+
+  private void addParentAssociation(UmlClass umlClass, UmlAssociation assoc) {
+    
+    List<UmlAssociation> childList = umlClass.getChildren();
+    for (UmlAssociation child : childList) {
+      if (child.equals(assoc)) return;
+    }
+    umlClass.addParent(assoc);
+    
+  }
+
   private void defineEnd(UmlAssociationEnd end, Field field, Encapsulation encapsulation) {
 
     end.setEncapsulation(encapsulation);
