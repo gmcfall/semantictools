@@ -71,6 +71,11 @@ public class Frame implements Comparable<Frame>, RdfType {
     this.category = category;
   }
   
+  public boolean hasInstances() {
+    Iterator<? extends OntResource> sequence = type.listInstances(false);
+    return sequence.hasNext();
+  }
+  
   public List<NamedIndividual> listInstances(boolean direct) {
     List<NamedIndividual> list = new ArrayList<NamedIndividual>();
     Iterator<? extends OntResource> sequence = type.listInstances(direct);
@@ -154,6 +159,15 @@ public class Frame implements Comparable<Frame>, RdfType {
       addSupertypes(type, set);
     }
     
+  }
+  
+  public boolean isSubclassOf(String uri) {
+    if (getUri().equals(uri)) return true;
+    for (Frame supertype : supertypeList) {
+      if (supertype.isSubclassOf(uri)) return true;
+    }
+    
+    return false;
   }
 
   public List<Frame> getSupertypeList() {

@@ -63,6 +63,7 @@ public class ContextManager {
   private static final String SAMPLE_TEXT = "sampleText";
   private static final String EXCLUDE_TYPE = "excludeType";
   private static final String INTRODUCTION = "introduction";
+  private static final String SIMPLE_NAMES = "simpleNames";
   private static final String INCLUDES_SUFFIX = ".includes";
   private static final String EXCLUDES_SUFFIX = ".excludes";
   private static final String EXCLUDE_SUBTYPES_SUFFIX = ".excludeSubtypes";
@@ -224,6 +225,8 @@ public class ContextManager {
         sink.setIntroduction(value);
       } else if (TITLE.equals(key)) {
         sink.setTitle(value);
+      } else if (SIMPLE_NAMES.equals(key)) {
+        setSimpleNames(sink, value);
       } else if (SAMPLE_TEXT.equals(key)) {
         sink.setSampleText(value);
       } else if (EXCLUDE_TYPE.equals(key)) {
@@ -258,6 +261,14 @@ public class ContextManager {
     }
     validate(sink);
     setDefaults(sink);
+    
+  }
+
+  private void setSimpleNames(ContextProperties sink, String value) {
+    StringTokenizer tokenizer = new StringTokenizer(value, " \t\r\n");
+    while (tokenizer.hasMoreElements()) {
+      sink.addSimpleName(tokenizer.nextToken());
+    }    
     
   }
 

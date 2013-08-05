@@ -146,6 +146,10 @@ public class FrameBuilder {
       String uri = resource.getURI();
       Field priorField = fieldMap.get(uri);
       
+      if (priorField != null) {
+        maxCardinality = priorField.getMaxCardinality();
+      }
+      
       
       OntProperty property = null;
       
@@ -197,8 +201,9 @@ public class FrameBuilder {
       }
       
       String comment = restriction.getComment(null);
-      if (priorField != null) {
+      if (priorField != null && priorField.getDeclaringFrame()==frame) {
         
+       
         priorField.setComment(comment);
         priorField.setMinCardinality(minCardinality);
         priorField.setMaxCardinality(maxCardinality);

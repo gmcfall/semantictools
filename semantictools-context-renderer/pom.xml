@@ -35,7 +35,7 @@
     </developer>
   </developers>
 
-<!-- 
+
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-snapshots</id>
@@ -43,7 +43,7 @@
       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
   </distributionManagement>
- -->
+
 	
 	<properties>
 		<build.finalName>semantictools-context-renderer</build.finalName>
@@ -155,7 +155,7 @@
 		</resources>
 		<plugins>
 
-<!-- 
+
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -182,7 +182,7 @@
           </execution>
         </executions>
       </plugin>
- -->
+
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>

@@ -47,6 +47,7 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
   private String sampleText;
   private String purlDomain;
   private File mediaTypeDocFile;
+  private Set<String> simpleNames = new HashSet<String>();
   private List<String> idRefList = new ArrayList<String>();
   private List<String> optional = new ArrayList<String>();
   private Set<String> mixedSet = new HashSet<String>();
@@ -78,6 +79,19 @@ public class ContextProperties extends BaseDocumentMetadata implements Comparabl
    */
   public void addSetProperty(String propertyURI) {
     setProperty.add(propertyURI);
+  }
+  
+  /**
+   * Register a property whose value should be represented as a
+   * simple name.
+   * @param propertyURI
+   */
+  public void addSimpleName(String propertyURI) {
+    simpleNames.add(propertyURI);
+  }
+  
+  public boolean isSimpleName(String propertyURI) {
+    return simpleNames.contains(propertyURI);
   }
   
   /**

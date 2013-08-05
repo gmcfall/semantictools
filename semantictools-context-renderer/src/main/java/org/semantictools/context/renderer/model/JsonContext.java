@@ -20,7 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JsonContext {
+  private static final Logger logger = LoggerFactory.getLogger(JsonContext.class);
   private String contextURI;
   private String mediaType;
   private String rootType;
@@ -72,6 +76,11 @@ public class JsonContext {
     return info;
   }
   public void add(TermInfo rule) {
+    
+    TermInfo other = termName2TermInfo.get(rule.getTermName());
+    if (other != null) {
+      logger.warn("Replacing term: " + rule.getTermName());
+    }
     termName2TermInfo.put(rule.getTermName(), rule);
     addRewriteRule(rule);
   }

@@ -29,6 +29,10 @@ public class NamedIndividual {
     return ontResource.getLocalName();
   }
   
+  public String getNamespaceURI() {
+    return ontResource.getNameSpace();
+  }
+  
   public String getUri() {
     return ontResource.getURI();
   }
@@ -39,6 +43,10 @@ public class NamedIndividual {
       comment = "";
     }
     return comment;
+  }
+  
+  public String toString() {
+    return getLocalName();
   }
 
 }

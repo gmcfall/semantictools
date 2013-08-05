@@ -46,6 +46,10 @@ import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JsonSampleGenerator {
+
+  private static final String CONTAINER = "http://www.w3.org/ns/ldp#Container";
+  private static final String PAGE = "http://www.w3.org/ns/ldp#Page";
+  private static final String pageOf = "http://www.w3.org/ns/ldp#pageOf";
   
   private TypeManager typeManager;
   private JsonContext context;
@@ -77,6 +81,9 @@ public class JsonSampleGenerator {
     List<String> graphTypes = properties.getGraphTypes();
     if (graphTypes.isEmpty()) {
       Frame frame = typeManager.getFrameByUri(context.getRootType());
+      if (frame.isSubclassOf(CONTAINER)) {
+        frame = typeManager.getFrameByUri(PAGE);
+      }
       Branch branch = new Branch(null, null, node, frame);
       
       addTypeProperty(node, frame);
@@ -138,6 +145,11 @@ public class JsonSampleGenerator {
   private void addField(Branch branch, Field field, String fieldName) {
     
     RdfType type = field.getRdfType();
+    
+    if (field.getURI().equals(pageOf)) {
+      // Special handling for LDP pageOf
+      type = typeManager.getFrameByUri(contextProperties.getRdfTypeURI());
+    }
     
     if (fieldName == null && contextProperties.isSetProperty(field.getURI())) {
       addSetProperty(branch, field, type);
@@ -237,7 +249,7 @@ public class JsonSampleGenerator {
 
     boolean iriReference = term!=null && term.isCoercedAsIriRef();
     
-    if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE) {
+    if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE || frame.hasInstances()) {
       createEnumReference(branch, frame, callback);
       
     } else if (iriReference) {

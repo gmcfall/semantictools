@@ -75,6 +75,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class ContextHtmlPrinter extends PrintEngine {
 
+  private static final String CONTAINER = "http://www.w3.org/ns/ldp#Container";
+  private static final String PAGE = "http://www.w3.org/ns/ldp#Page";
   private static Logger logger = LoggerFactory
       .getLogger(ContextHtmlPrinter.class);
 
@@ -1547,8 +1549,23 @@ public class ContextHtmlPrinter extends PrintEngine {
       String rdfProperty = contextProperties.getRdfProperty();
 
       List<Frame> graphTypes = getGraphTypes();
-      TreeNode node = (graphTypes == null) ? treeGenerator.generateRoot(root,
-          rdfProperty, -1) : treeGenerator.generateGraph(graphTypes, -1);
+      TreeNode node = null;
+      if (graphTypes == null) {
+        if (root.isSubclassOf(CONTAINER)) {
+          
+          Frame page = typeManager.getFrameByUri(PAGE);
+          if (page == null) {
+            throw new FrameNotFoundException(PAGE);
+          }
+          node = treeGenerator.generateRoot(page, null, -1);
+          
+        } else {
+          node = treeGenerator.generateRoot(root, rdfProperty, -1);
+        }
+      } else {
+        node = treeGenerator.generateGraph(graphTypes, -1);
+      }
+      
 
       sortAll(node);
 
@@ -1871,8 +1888,16 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void printIndividuals(Frame frame) {
+    
+    String frameURI = frame.getUri();
+    if (
+        frameURI.startsWith("http://www.w3.org/1999/02/22-rdf-syntax-ns#") ||
+        frameURI.startsWith("http://www.w3.org/2000/01/rdf-schema#")
+    ){
+      return;
+    }
 
-    if (frame.getCategory() != RestCategory.ENUMERABLE)
+    if (frame.getCategory() != RestCategory.ENUMERABLE && !frame.hasInstances())
       return;
 
     List<NamedIndividual> list = frame.listInstances(false);
@@ -1884,7 +1909,10 @@ public class ContextHtmlPrinter extends PrintEngine {
 
       @Override
       public int compare(NamedIndividual a, NamedIndividual b) {
-        return a.getLocalName().compareTo(b.getLocalName());
+        String aName = a.getLocalName();
+        String bName = b.getLocalName();
+        
+        return (aName==null || bName==null) ? 0 : aName.compareTo(bName);
       }
     });
 
@@ -1915,8 +1943,14 @@ public class ContextHtmlPrinter extends PrintEngine {
     indent().println("</TR>");
     for (NamedIndividual n : list) {
 
-      String localName = n.getLocalName();
       String uri = n.getUri();
+      TermInfo term = context.getTermInfoByURI(uri);
+      
+      if (term == null) {
+        continue;
+      }
+
+      String localName = term.getTermName();
       String comment = n.getComment();
       if (comment != null) {
         comment = comment.trim();

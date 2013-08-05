@@ -29,6 +29,7 @@ import org.semantictools.context.renderer.model.ObjectPresentation;
 import org.semantictools.context.renderer.model.TermInfo;
 import org.semantictools.context.renderer.model.TreeNode;
 import org.semantictools.context.renderer.model.TreeNode.Kind;
+import org.semantictools.frame.api.FrameNotFoundException;
 import org.semantictools.frame.api.TypeManager;
 import org.semantictools.frame.model.Datatype;
 import org.semantictools.frame.model.Field;
@@ -40,6 +41,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
 
 public class TreeGenerator {
   private static final String XMLSCHEMA_URI = "http://www.w3.org/2001/XMLSchema#";
+  private static final String pageOf = "http://www.w3.org/ns/ldp#pageOf";
   private JsonContext context;
   private ContextProperties contextProperties;
   private int maxDepth;
@@ -111,6 +113,7 @@ public class TreeGenerator {
   }
 
   public TreeNode generateRoot(Frame frame, int depth) {
+    
     memory = new HashSet<String>();
     this.maxDepth = depth;
     TreeNode root = null;
@@ -330,6 +333,12 @@ public class TreeGenerator {
       
     } 
     
+    if (contextProperties.isSimpleName(uri) ||
+        (frame!=null && frame.hasInstances())
+    ) {
+      node.setObjectPresentation(ObjectPresentation.SIMPLE_NAME);
+    }
+    
     checkExpandedValue(node, field, term);
     
     return setContainer == null ? node : setContainer;
@@ -393,6 +402,7 @@ public class TreeGenerator {
       return;
     }
 
+    
     parent.add(node);
     if (contextProperties.isSetProperty(field.getURI())) {
       node = node.getChildren().get(1);
@@ -402,6 +412,20 @@ public class TreeGenerator {
     
     Frame frame = getFieldTypeAsFrame(field);
     if (frame == null || isCyclic(node)) return;
+
+    if (field.getURI().equals(pageOf)) {
+      // Special handling for LDP pageOf property
+      
+      String containerType = contextProperties.getRdfTypeURI();
+      frame = typeManager.getFrameByUri(containerType);
+      if (frame == null) {
+        throw new FrameNotFoundException(containerType);
+      }
+      
+      node.setTypeURI(containerType);
+      node.setTypeName(frame.getLocalName());
+     
+    }
     
     if (node.getObjectPresentation()==ObjectPresentation.NONE ) {
       

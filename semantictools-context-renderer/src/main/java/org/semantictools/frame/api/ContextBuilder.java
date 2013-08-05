@@ -38,8 +38,10 @@ import org.semantictools.frame.model.RdfType;
 import org.semantictools.frame.model.RestCategory;
 import org.semantictools.frame.model.VannVocabulary;
 
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -54,6 +56,10 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class ContextBuilder {
+  private static final String CONTAINER = "http://www.w3.org/ns/ldp#Container";
+  private static final String PAGE = "http://www.w3.org/ns/ldp#Page";
+  private static final String nextPage = "http://www.w3.org/ns/ldp#nextPage";
+  private static final String NIL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
   private OntModel model;
   private TypeManager typeManager;
   
@@ -88,6 +94,18 @@ public class ContextBuilder {
       throw new FrameNotFoundException(typeURI);
     }
     addType(properties, context, frame, false);
+    if (frame.isSubclassOf(CONTAINER)) {
+      Frame page = typeManager.getFrameByUri(PAGE);
+      addType(properties, context, page, false);
+
+      TermInfo term = new TermInfo("nil");
+      term.setIriValue(NIL);
+      context.add(term);
+      
+      properties.getIdRefList().add(nextPage);
+      
+      
+    }
     context.expand();
     context.invertRewriteRules();
     
@@ -257,7 +275,7 @@ public class ContextBuilder {
     boolean enumerable = 
         rdfType != null && 
         rdfType.canAsFrame() && 
-        rdfType.asFrame().getCategory() == RestCategory.ENUMERABLE;
+        (rdfType.asFrame().getCategory() == RestCategory.ENUMERABLE);
     
     boolean stubbed = false;
     // stubbed=true means that the object is stubbed out because it is coerced as an IRI reference only,
@@ -279,9 +297,14 @@ public class ContextBuilder {
       value.setMinCardinality(0);
     }
     
-    if (enumerable) {
+    if (
+        enumerable 
+        || (rdfType!=null && rdfType.canAsFrame() && rdfType.asFrame().hasInstances())
+    ) {
       addIndividuals(context, rdfType.asFrame());
     }
+    
+    
     
     if (value != null) {
       value.setId(iriValue);
@@ -344,12 +367,31 @@ public class ContextBuilder {
   }
 
 
+  private TermInfo addNamespace(JsonContext context, NamedIndividual individual) {
 
-  private void addNamespace(JsonContext context, RdfType rdfType) {
+    String namespace = individual.getNamespaceURI();
+    TermInfo term = context.getTermInfoByURI(namespace);
+    if (term != null) return term;
+    
+    String prefix = getPrefix(context, namespace);
+    
+    OntologyInfo info = typeManager.getOntologyByNamespaceUri(namespace);
+   
+    
+    
+    term = new TermInfo(prefix);
+    term.setIriValue(namespace);
+    term.setCategory(TermCategory.NAMESPACE);
+    context.add(term);
+    
+    return term;
+  }
+
+  private TermInfo addNamespace(JsonContext context, RdfType rdfType) {
     
     String namespace = rdfType.getNamespace();
     TermInfo term = context.getTermInfoByURI(namespace);
-    if (term != null) return;
+    if (term != null) return term;
     
     OntologyInfo info = typeManager.getOntologyByNamespaceUri(namespace);
    
@@ -363,7 +405,7 @@ public class ContextBuilder {
     term.setCategory(TermCategory.NAMESPACE);
     context.add(term);
     
-    
+    return term;
     
   }
 
@@ -383,6 +425,11 @@ public class ContextBuilder {
 
   private void addIndividuals(JsonContext context, Frame frame) {
     
+    if (frame.getUri().startsWith("http://www.w3.org/1999/02/22-rdf-syntax-ns#") ||
+        frame.getUri().startsWith("http://www.w3.org/2000/01/rdf-schema#") ||
+        frame.getUri().startsWith("http://www.w3.org/2002/07/owl#")
+    ) return;
+    
     if (frame.canAsEnumeration()) {
       addIndividuals(context, frame.asEnumeration());
       
@@ -391,8 +438,35 @@ public class ContextBuilder {
       for (NamedIndividual n : list) {
         String name = n.getLocalName();
         String uri = n.getUri();
-        TermInfo term = context.getTermInfoByURI(uri);
+        TermInfo term = context.getTermInfoByShortName(name);
+        
+        if (term != null) {
+          String termURI = term.getIri();
+          if (!uri.equals(termURI)) {
+            // There is another entity with the same short name.
+            // Check to see if this entity is registered by another name.
+            
+            term = context.getTermInfoByURI(uri);
+            if (term == null) {
+              // Not registered.  So create a new term using a CURIE.
+              
+              TermInfo nsTerm = addNamespace(context, n);
+              String prefix = nsTerm.getTermName();
+              name = prefix + ":" + name;
+              
+              term = new TermInfo(name);
+              term.setIriValue(name);
+              context.add(term);
+            }
+            
+            
+          }
+        }
+        
         if (term == null) {
+          
+          TermInfo nsTerm = addNamespace(context, n);
+          uri = nsTerm.getTermName() + ":" + name;
           term = new TermInfo(name);
           term.setIriValue(uri);
           context.add(term);
@@ -531,6 +605,7 @@ public class ContextBuilder {
       
         info = createOntologyInfo(namespaceURI);
         typeManager.add(info);
+        prefix = info.getPrefix();
       } else {
         prefix = info.getPrefix();
       }
