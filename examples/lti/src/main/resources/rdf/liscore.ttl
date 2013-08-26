@@ -1,0 +1,49 @@
+@prefix liscore: <http://purl.imsglobal.org/vocab/lis/v2/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.imsglobal.org/vocab/lis/v2/core#> a owl:Ontology  ;
+  rdfs:label "LIS Membership" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "liscore" .
+
+liscore:Person rdf:type owl:Class .
+
+liscore:Membership rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      liscore:memberRole;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liscore:member;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liscore:memberGroup;
+    owl:minCardinality  1
+  ] .
+
+liscore:Group rdf:type owl:Class .
+
+liscore:Role rdf:type owl:Class .
+
+liscore:memberRole rdf:type owl:FunctionalProperty ;
+  rdfs:domain liscore:Membership ;
+  rdfs:range liscore:Role .
+
+liscore:member rdf:type owl:FunctionalProperty ;
+  rdfs:domain liscore:Membership ;
+  rdfs:range liscore:Person .
+
+liscore:memberGroup rdf:type owl:FunctionalProperty ;
+  rdfs:domain liscore:Membership ;
+  rdfs:range liscore:Group .
+
+liscore:Instructor rdf:type liscore:Role .
+
+liscore:Learner rdf:type liscore:Role .
+

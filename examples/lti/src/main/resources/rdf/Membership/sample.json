@@ -1,0 +1,13 @@
+{
+  "@context" : "http://purl.imsglobal.org/ctx/lis/v2/Membership",
+  "@type" : "Membership",
+  "@id" : "http://tc.example.com/resources/Membership/92783",
+  "memberGroup" : {
+    "@id" : "http://tc.example.com/resources/Group/84344"
+  },
+  "memberRole" : "Instructor",
+  "member" : {
+    "@id" : "http://tc.example.com/resources/Person/14575"
+  }
+}
+

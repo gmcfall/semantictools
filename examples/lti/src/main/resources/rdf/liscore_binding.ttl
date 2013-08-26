@@ -1,0 +1,23 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix liscore: <http://purl.imsglobal.org/vocab/lis/v2/core#> .
+
+liscore:Person rdf:type bind:Addressable .
+liscore:Membership rdf:type bind:Addressable .
+liscore:Membership rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscore:memberRole ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscore:member ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscore:memberGroup ;
+    bind:associationType bind:Aggregation
+  ] .
+liscore:Group rdf:type bind:Addressable .
+liscore:Role rdf:type bind:Enum .
+
