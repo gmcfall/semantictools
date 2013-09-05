@@ -17,6 +17,10 @@ package org.semantictools.context.renderer.model;
 
 public class ResponseInfo {
   public final static ResponseInfo OK = new ResponseInfo(200, "OK", "The request was successful.");
+  
+  public final static ResponseInfo CREATED = new ResponseInfo(201, "Created", 
+      "The request has succeeded; the supplied resource was created.");
+  
   public final static ResponseInfo ACCEPTED = new ResponseInfo(202, "Accepted", 
       "The request has been accepted for processing, but the processing has not been completed. " +
       "The request might or might not eventually be acted upon, as it might be disallowed when " +

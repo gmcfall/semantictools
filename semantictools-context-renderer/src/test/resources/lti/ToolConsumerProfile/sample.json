@@ -68,13 +68,13 @@
   "capability_offered" : [
      "basic-lti-launch-request",
      "Result.autocreate",
-     "Result.sourcedGUID"
+     "Result.sourcedId"
   ],
   "service_offered" : [
     { 
       "@type" : "RestService",
       "@id" : "tcp:ToolProxy.collection",
-      "endpoint" : "http://lms.example.com/resources/ToolProxy",
+      "endpoint" : "http://lms.example.com/resources/ToolProxy/",
       "format" : ["application/vnd.ims.lti.v2.ToolProxy+json"],
       "action" : ["POST"]
     },

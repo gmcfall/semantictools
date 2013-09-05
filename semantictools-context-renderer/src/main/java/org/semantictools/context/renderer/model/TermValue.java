@@ -22,6 +22,23 @@ public class TermValue {
   
   private Integer minCardinality;
   
+  public boolean equals(Object obj) {
+    if (obj instanceof TermValue) {
+      TermValue v = (TermValue) obj;
+      return 
+          equals(id, v.id) &&
+          equals(type, v.type)&&
+          equals(container, v.container) &&
+          equals(minCardinality, v.minCardinality);
+    }
+    return false;
+  }
+
+  
+  private boolean equals(Object a, Object b) {
+    return (a!=null && a.equals(b) || (a==null && b==null));
+  }
+  
   public String getId() {
     return id;
   }

@@ -1,13 +1,13 @@
 
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix lti-type: <http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#> .
+@prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/lti#> a owl:Ontology  ;
   rdfs:label "LTI Core" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "lti" .
@@ -59,11 +59,6 @@ In the case of a MessageHandler, the path may be an absolute path if the associa
 
 lti:ServiceProvider rdf:type owl:Class;
   rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      lti:guid;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  "
-  ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
     owl:minCardinality  1;
@@ -449,12 +444,30 @@ lti:ProductInstance rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      lti:profile;
     rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners."
+  ] ; 
+  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+
+lti:ServiceOwner rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:timestamp;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this record was last modified."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:owner_name;
+    owl:minCardinality  1;
+    rdfs:comment "The name of the service owner, suitable for display in a user interface."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:description;
+    rdfs:comment "A description of the service owner."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:support;
     rdfs:comment "Contact information for support on this deployed instance of the product (Tool or ToolConsumer)."
   ] ; 
-  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+  rdfs:comment "The entity that owns the services provided by this product instance." .
 
 lti:ToolProxy rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
@@ -490,7 +503,8 @@ lti:ToolProxyBinding rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
   [ a owl:Restriction ;
     owl:onProperty      lti:tool_proxy;
-    owl:minCardinality  1
+    owl:minCardinality  1;
+    rdfs:comment "The ToolProxy associated with this ToolProxyBinding."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:context;
@@ -498,14 +512,6 @@ lti:ToolProxyBinding rdf:type owl:Class ;
     rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>."
   ] ; 
   rdfs:comment "A <code>ToolProxyBinding</code> associates a ToolProxy with a learning Context (such as a Course Section).   This association must be established before the corresponding Tool can be used within the Context.  The <code>ToolProxyBinding</code> also serves as a container that holds tool settings associated with the learning Context." .
-
-lti:PropertySet rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      lti:settings_owner;
-    owl:minCardinality  1
-  ] ; 
-  rdfs:comment "An object that holds custom properties attached to some resource within the Tool Consumer.  These  properties, known as \u201ctool settings,\u201d  do not need to be defined in an ontology (or a JSON-LD context), but they may be so defined.  " .
 
 lti:LtiLink rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
@@ -521,15 +527,23 @@ lti:Context rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      lti:id;
     owl:minCardinality  1
-  ] .
+  ] ; 
+  rdfs:comment "A learning context, such as a Course Section." .
 
 lti:ToolSettingsContainer rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
+    owl:onProperty      lti:custom_uri;
+    rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      lti:custom;
-    rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource."
+    rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer.  "
   ] ; 
   rdfs:comment "<code>ToolSettingsContainer</code> is the base class for all resources that encapsulate tool settings." .
+
+lti:PropertyMap rdf:type owl:Class ; 
+  rdfs:comment "An abstract class whose properties are defined by the Tool Provider and stored in the Tool Consumer.   When represented in JSON-LD, the PropertyMap object typically appears as a plain-old JSON object (though it may have a custom JSON-LD context that defines the semantics for the custom properties).  It is a best practice for the values in a PropertyMap to be strings.  This best practice may be revised if the development community expresses a desire to support other data types in a PropertyMap." .
 
 lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
@@ -573,24 +587,13 @@ lti:path rdf:type owl:FunctionalProperty ;
   rdfs:comment """This attribute specifies the path for an endpoint such as a MessageHandler or an Icon. Typically, this path is relative to one of the base URL values defined in a BaseUrlChoice.  
 In the case of a MessageHandler, the path may be an absolute path if the associated message type explicitly declares that an absolute path is allowed.  """ .
 
-lti:guid rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      lti:ServiceProvider
-      lti:ToolConsumerProfile
-      lti:ProductInstance
-    )
-  ] ;
-  rdfs:range lti-type:GUID.Type ;
-  rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  " .
-
 lti:timestamp rdf:type owl:FunctionalProperty ;
   rdfs:domain  [
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range xsd:dateTime ;
@@ -609,6 +612,7 @@ lti:description rdf:type owl:FunctionalProperty ;
       lti:ProductInfo
       lti:ResourceHandler
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:LocalizedText ;
@@ -619,7 +623,7 @@ lti:support rdf:type owl:FunctionalProperty ;
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
-      lti:ProductInstance
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;
@@ -754,6 +758,16 @@ lti:product_instance rdf:type owl:FunctionalProperty ;
   rdfs:range lti:ProductInstance ;
   owl:inverseOf lti:profile ;
   rdfs:comment "An inverse attribute which references the ProductInstance within which this ProductProfile is defined." .
+
+lti:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      lti:ToolConsumerProfile
+      lti:ProductInstance
+    )
+  ] ;
+  rdfs:range lti-type:GUID.Type .
 
 lti:capability_offered rdf:type rdf:Property ;
   rdfs:domain lti:ToolConsumerProfile ;
@@ -916,6 +930,15 @@ lti:profile rdf:type rdf:Property ;
   owl:inverseOf lti:product_instance ;
   rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners." .
 
+lti:service_owner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ProductInstance ;
+  rdfs:range lti:ServiceOwner .
+
+lti:owner_name rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ServiceOwner ;
+  rdfs:range lti:LocalizedName ;
+  rdfs:comment "The name of the service owner, suitable for display in a user interface." .
+
 lti:tool_proxy_guid rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxy ;
   rdfs:range lti-type:GUID.Type ;
@@ -938,17 +961,13 @@ lti:tool_consumer_profile rdf:type owl:FunctionalProperty ;
 
 lti:tool_proxy rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxyBinding ;
-  rdfs:range lti:ToolProxy .
+  rdfs:range lti:ToolProxy ;
+  rdfs:comment "The ToolProxy associated with this ToolProxyBinding." .
 
 lti:context rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxyBinding ;
   rdfs:range lti:Context ;
   rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>." .
-
-lti:settings_owner rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:PropertySet ;
-  rdfs:range lti:ToolSettingsContainer ;
-  owl:inverseOf lti:custom .
 
 lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:LtiLink ;
@@ -963,15 +982,19 @@ lti:sourcedId rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
 
+lti:custom_uri rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ToolSettingsContainer ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer." .
+
 lti:custom rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
-  rdfs:range lti:PropertySet ;
-  owl:inverseOf lti:settings_owner ;
-  rdfs:comment "An object that holds the custom \u201ctool settings\u201d attached to this resource." .
+  rdfs:range lti:PropertyMap ;
+  rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer.  " .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 
 lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
 lti:BaseUrlChoice rdfs:subClassOf
@@ -1143,6 +1166,11 @@ lti:ProductInstance rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:service_owner ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:ServiceOwner rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:support ;
     bind:associationType bind:Composition
   ] .
@@ -1174,10 +1202,8 @@ lti:ToolProxyBinding rdfs:subClassOf
     bind:onProperty lti:context ;
     bind:associationType bind:Aggregation
   ] .
-lti:PropertySet rdf:type bind:Addressable .
 lti:LtiLink rdf:type bind:Addressable .
 lti:Context rdf:type bind:Addressable .
-lti:ToolSettingsContainer rdf:type bind:AbstractClass .
 lti:ToolSettingsContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:custom ;
@@ -1185,15 +1211,15 @@ lti:ToolSettingsContainer rdfs:subClassOf
   ] .
 
 lti:HttpMethod rdf:type bind:Enum .
-@prefix ltiv: <http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix ltiv: <http://purl.imsglobal.org/vocab/lti/v2/variable#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/variable#> a owl:Ontology  ;
   rdfs:label "LTI Variables" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "ltiv" .
@@ -1209,7 +1235,7 @@ ltiv:User.image rdf:type ltiv:Variable ;
 
 ltiv:Person.sourcedId rdf:type ltiv:Variable ;
   rdfs:comment """The LIS identifier for the user.  
-<p>In the LIS Database, this value corresponds to <code>personRecord/sourceId</code></p>""" .
+<p>In the LIS Database, this value corresponds to <code>personRecord/sourcedId</code></p>""" .
 
 ltiv:Person.name.full rdf:type ltiv:Variable ;
   rdfs:comment """The full name of the user.
@@ -1349,7 +1375,7 @@ ltiv:Person.sms rdf:type ltiv:Variable ;
 <pre>personRecord/person/contactinfo[contactinfoType/instanceValue/text=\"SMS\"]  /contactinfoValue/text
 </pre></p>""" .
 
-ltiv:CourseTemplate.sourceId rdf:type ltiv:Variable ;
+ltiv:CourseTemplate.sourcedId rdf:type ltiv:Variable ;
   rdfs:comment """The LIS identifier for the Course Template.
 <p>In the LIS Database, this value corresponds to 
 <pre>courseTemplateRecord/sourcedId
@@ -1693,21 +1719,23 @@ ltiv:Result.dataSource rdf:type ltiv:Variable ;
 
 ltiv:Result.uri rdf:type ltiv:Variable ;
   rdfs:comment "The URI of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URI." .
+
+ltiv:User.username rdf:type ltiv:Variable .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix ltiv: <http://www.imsglobal.org/imspurl/lti/v2/vocab/variable#> .
+@prefix ltiv: <http://purl.imsglobal.org/vocab/lti/v2/variable#> .
 
 ltiv:Variable rdf:type bind:Enum .
-@prefix ltic: <http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#> .
-@prefix lti: <http://www.imsglobal.org/imspurl/lti/v2/vocab/lti#> .
+@prefix ltic: <http://purl.imsglobal.org/vocab/lti/v2/capability#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#> a owl:Ontology  ;
+<http://purl.imsglobal.org/vocab/lti/v2/capability#> a owl:Ontology  ;
   rdfs:label "LTI Capabilities" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "ltic" .
@@ -1719,12 +1747,12 @@ ltic:Result.autocreate rdf:type ltic:OutcomesCapability .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix ltic: <http://www.imsglobal.org/imspurl/lti/v2/vocab/capability#> .
+@prefix ltic: <http://purl.imsglobal.org/vocab/lti/v2/capability#> .
 
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.imsglobal.org/imspurl/lti/v2/xsd/ltid#> a owl:Ontology ;
+<http://purl.imsglobal.org/xsd/lti/v2/ltid#> a owl:Ontology ;
   bind:suggestedPrefix "lti-type" .
 
 

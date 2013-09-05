@@ -93,7 +93,7 @@
           ],
           "parameter" : [
             { "name" : "result_uri",
-              "variable" : "$Result.uri"
+              "variable" : "Result.uri"
             },
             { "name" : "discipline",
               "fixed" : "chemistry"
@@ -122,6 +122,9 @@
          ]
       }
     ]
+  },
+  "custom" : {
+    "customerId" : "394892759526"
   },
   "security_contract" : {
     "shared_secret" : "ThisIsASecret!",

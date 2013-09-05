@@ -14,15 +14,15 @@ liso:Result rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      liso:resultScore;
-    rdfs:comment "The score received by the person associated with this Result."
+    rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment."
   ] ; 
-  rdfs:comment "A container for the results of some person's interaction with a learning activity." .
+  rdfs:comment "A container that holds the result of some scorable activity or assignment." .
 
 liso:Score rdf:type owl:Class ; 
-  rdfs:comment "An abstract class that represents a person's score that resulted from some interaction with a learning activity." .
+  rdfs:comment "The score that a learner has received for engaging in some activity or submitting an assignment." .
 
 liso:resultScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
   rdfs:range liso:Score ;
-  rdfs:comment "The score received by the person associated with this Result." .
+  rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment." .
 

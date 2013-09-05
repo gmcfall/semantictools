@@ -13,8 +13,8 @@ public class DocumentationTest {
   public void test() throws Exception {
 
     boolean publish = false;
-    File rdfDir = new File("src/test/resources/example");
-    File pubDir = new File("target/example");
+    File rdfDir = new File("src/test/resources/lti");
+    File pubDir = new File("target/lti");
     File repoDir = new File("target/repo");
     String endpointURL = "http://127.0.0.1:8888/admin/upload.do";
 //    String endpointURL = "http://semantic-tools.appspot.com/admin/upload.do";

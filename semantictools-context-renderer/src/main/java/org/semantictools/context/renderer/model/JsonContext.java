@@ -78,7 +78,8 @@ public class JsonContext {
   public void add(TermInfo rule) {
     
     TermInfo other = termName2TermInfo.get(rule.getTermName());
-    if (other != null) {
+    if (other != null  && !other.equals(rule)) {
+      
       logger.warn("Replacing term: " + rule.getTermName());
     }
     termName2TermInfo.put(rule.getTermName(), rule);

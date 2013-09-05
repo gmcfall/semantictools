@@ -59,11 +59,6 @@ In the case of a MessageHandler, the path may be an absolute path if the associa
 lti:ServiceProvider rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      lti:guid;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  "
-  ] ,
-  [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
     owl:minCardinality  1;
     rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current."
@@ -448,15 +443,33 @@ lti:ProductInstance rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      lti:profile;
     rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners."
+  ] ; 
+  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+
+lti:ServiceOwner rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:timestamp;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this record was last modified."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:owner_name;
+    owl:minCardinality  1;
+    rdfs:comment "The name of the service owner, suitable for display in a user interface."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:description;
+    rdfs:comment "A description of the service owner."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:support;
     rdfs:comment "Contact information for support on this deployed instance of the product (Tool or ToolConsumer)."
   ] ; 
-  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+  rdfs:comment "The entity that owns the services provided by this product instance." .
 
-lti:ToolProxy rdf:type owl:Class;
-  rdfs:subClassOf 
+lti:ToolProxy rdf:type owl:Class ;
+  rdfs:subClassOf lti:ToolSettingsContainer ,
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
     owl:allValuesFrom  xsd:token;
@@ -484,6 +497,52 @@ lti:ToolProxy rdf:type owl:Class;
     rdfs:comment "The profile of the Tool Consumer that is participating in the integration governed by this ToolProxy."
   ] ; 
   rdfs:comment "This entity defines the integration contract between a ToolConsumer and a Tool.   It is called a \"ToolProxy\" because its primary purpose is to provide the ToolConsumer with all of the information needed to embed a given Tool within the ToolConsumer system." .
+
+lti:ToolProxyBinding rdf:type owl:Class ;
+  rdfs:subClassOf lti:ToolSettingsContainer ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:tool_proxy;
+    owl:minCardinality  1;
+    rdfs:comment "The ToolProxy associated with this ToolProxyBinding."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:context;
+    owl:minCardinality  1;
+    rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>."
+  ] ; 
+  rdfs:comment "A <code>ToolProxyBinding</code> associates a ToolProxy with a learning Context (such as a Course Section).   This association must be established before the corresponding Tool can be used within the Context.  The <code>ToolProxyBinding</code> also serves as a container that holds tool settings associated with the learning Context." .
+
+lti:LtiLink rdf:type owl:Class ;
+  rdfs:subClassOf lti:ToolSettingsContainer ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:resource_link_id;
+    owl:minCardinality  1;
+    rdfs:comment "A globally unique identifier for this LTI link."
+  ] ; 
+  rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
+
+lti:Context rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:id;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "A learning context, such as a Course Section." .
+
+lti:ToolSettingsContainer rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:custom_uri;
+    rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:custom;
+    rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer.  "
+  ] ; 
+  rdfs:comment "<code>ToolSettingsContainer</code> is the base class for all resources that encapsulate tool settings." .
+
+lti:PropertyMap rdf:type owl:Class ; 
+  rdfs:comment "An abstract class whose properties are defined by the Tool Provider and stored in the Tool Consumer.   When represented in JSON-LD, the PropertyMap object typically appears as a plain-old JSON object (though it may have a custom JSON-LD context that defines the semantics for the custom properties).  It is a best practice for the values in a PropertyMap to be strings.  This best practice may be revised if the development community expresses a desire to support other data types in a PropertyMap." .
 
 lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
@@ -527,24 +586,13 @@ lti:path rdf:type owl:FunctionalProperty ;
   rdfs:comment """This attribute specifies the path for an endpoint such as a MessageHandler or an Icon. Typically, this path is relative to one of the base URL values defined in a BaseUrlChoice.  
 In the case of a MessageHandler, the path may be an absolute path if the associated message type explicitly declares that an absolute path is allowed.  """ .
 
-lti:guid rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      lti:ServiceProvider
-      lti:ToolConsumerProfile
-      lti:ProductInstance
-    )
-  ] ;
-  rdfs:range lti-type:GUID.Type ;
-  rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  " .
-
 lti:timestamp rdf:type owl:FunctionalProperty ;
   rdfs:domain  [
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range xsd:dateTime ;
@@ -563,6 +611,7 @@ lti:description rdf:type owl:FunctionalProperty ;
       lti:ProductInfo
       lti:ResourceHandler
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:LocalizedText ;
@@ -573,7 +622,7 @@ lti:support rdf:type owl:FunctionalProperty ;
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
-      lti:ProductInstance
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;
@@ -708,6 +757,16 @@ lti:product_instance rdf:type owl:FunctionalProperty ;
   rdfs:range lti:ProductInstance ;
   owl:inverseOf lti:profile ;
   rdfs:comment "An inverse attribute which references the ProductInstance within which this ProductProfile is defined." .
+
+lti:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      lti:ToolConsumerProfile
+      lti:ProductInstance
+    )
+  ] ;
+  rdfs:range lti-type:GUID.Type .
 
 lti:capability_offered rdf:type rdf:Property ;
   rdfs:domain lti:ToolConsumerProfile ;
@@ -870,6 +929,15 @@ lti:profile rdf:type rdf:Property ;
   owl:inverseOf lti:product_instance ;
   rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners." .
 
+lti:service_owner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ProductInstance ;
+  rdfs:range lti:ServiceOwner .
+
+lti:owner_name rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ServiceOwner ;
+  rdfs:range lti:LocalizedName ;
+  rdfs:comment "The name of the service owner, suitable for display in a user interface." .
+
 lti:tool_proxy_guid rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxy ;
   rdfs:range lti-type:GUID.Type ;
@@ -889,4 +957,37 @@ lti:tool_consumer_profile rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxy ;
   rdfs:range lti:ToolConsumerProfile ;
   rdfs:comment "The profile of the Tool Consumer that is participating in the integration governed by this ToolProxy." .
+
+lti:tool_proxy rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ToolProxyBinding ;
+  rdfs:range lti:ToolProxy ;
+  rdfs:comment "The ToolProxy associated with this ToolProxyBinding." .
+
+lti:context rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ToolProxyBinding ;
+  rdfs:range lti:Context ;
+  rdfs:comment "The learning Context associated with this <code>ToolProxyBinding</code>." .
+
+lti:resource_link_id rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:LtiLink ;
+  rdfs:range lti-type:GUID.Type ;
+  rdfs:comment "A globally unique identifier for this LTI link." .
+
+lti:id rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Context ;
+  rdfs:range xsd:normalizedString .
+
+lti:sourcedId rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Context ;
+  rdfs:range xsd:normalizedString .
+
+lti:custom_uri rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ToolSettingsContainer ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer." .
+
+lti:custom rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ToolSettingsContainer ;
+  rdfs:range lti:PropertyMap ;
+  rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer.  " .
 

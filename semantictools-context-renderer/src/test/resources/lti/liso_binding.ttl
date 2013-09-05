@@ -3,9 +3,12 @@
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 
+liso:Result rdf:type bind:Addressable .
 liso:Result rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty liso:resultScore ;
     bind:associationType bind:Composition
   ] .
+liso:Score rdf:type bind:EmbeddableClass .
+liso:Score rdf:type bind:AbstractClass .
 

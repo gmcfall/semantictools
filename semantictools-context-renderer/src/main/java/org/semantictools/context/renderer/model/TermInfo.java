@@ -36,6 +36,23 @@ public class TermInfo implements Comparable<TermInfo> {
       throw new RuntimeException("termName must be non-null");
     }
   }
+  
+  public boolean equals(Object obj) {
+    if (obj instanceof TermInfo) {
+      TermInfo t = (TermInfo) obj;
+      return 
+          equals(category, t.category) &&
+          equals(iri, t.iri) &&
+          equals(termName, t.termName)&&
+          equals(value, t.value);
+    }
+    return false;
+  }
+  
+  private boolean equals(Object a, Object b) {
+    return (a!=null && a.equals(b) || (a==null && b==null));
+  }
+
   public TermCategory getCategory() {
     return category;
   }

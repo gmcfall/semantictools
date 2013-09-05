@@ -752,7 +752,7 @@ public class ServiceDocumentationManager {
       }
       
       
-      addResponse(method, ResponseInfo.OK.copy(okDescription));
+      addResponse(method, ResponseInfo.CREATED.copy(okDescription));
       addResponse(method, ResponseInfo.BAD_REQUEST);
       addResponse(method, ResponseInfo.UNAUTHORIZED);
       addResponse(method, ResponseInfo.INTERNAL_SERVER_ERROR);
