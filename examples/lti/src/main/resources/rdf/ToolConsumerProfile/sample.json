@@ -45,8 +45,19 @@
         }
       }
     },
-    "support" : {
-      "email" : "techsupport@university.edu"
+    "service_owner" : {
+      "@id" : "http://state.university.edu/",
+      "timestamp" : "2012-03-28T09:08:16-04:00",
+      "owner_name" : {
+        "default_value" : "State University",
+        "key" : "service_owner.name"
+      },
+      "description" : {
+        "default_value" : "A fictitious university."
+      },
+      "support" : {
+        "email" : "techsupport@university.edu"
+      }
     },
     "service_provider" : {
       "@id" : "http://yasp.example.com/ServiceProvider",
@@ -68,13 +79,13 @@
   "capability_offered" : [
      "basic-lti-launch-request",
      "Result.autocreate",
-     "Result.sourcedGUID"
+     "Result.sourcedId"
   ],
   "service_offered" : [
     { 
       "@type" : "RestService",
       "@id" : "tcp:ToolProxy.collection",
-      "endpoint" : "http://lms.example.com/resources/ToolProxy",
+      "endpoint" : "http://lms.example.com/resources/ToolProxy/",
       "format" : ["application/vnd.ims.lti.v2.ToolProxy+json"],
       "action" : ["POST"]
     },

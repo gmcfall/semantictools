@@ -59,11 +59,6 @@ In the case of a MessageHandler, the path may be an absolute path if the associa
 lti:ServiceProvider rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      lti:guid;
-    owl:minCardinality  1;
-    rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  "
-  ] ,
-  [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
     owl:minCardinality  1;
     rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current."
@@ -448,12 +443,30 @@ lti:ProductInstance rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      lti:profile;
     rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners."
+  ] ; 
+  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+
+lti:ServiceOwner rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      lti:timestamp;
+    owl:minCardinality  1;
+    rdfs:comment "The date and time when this record was last modified."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:owner_name;
+    owl:minCardinality  1;
+    rdfs:comment "The name of the service owner, suitable for display in a user interface."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:description;
+    rdfs:comment "A description of the service owner."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:support;
     rdfs:comment "Contact information for support on this deployed instance of the product (Tool or ToolConsumer)."
   ] ; 
-  rdfs:comment "The resource encapsulates information about one deployed instance of a web-based product (Tool or Tool Consumer)." .
+  rdfs:comment "The entity that owns the services provided by this product instance." .
 
 lti:ToolProxy rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
@@ -573,24 +586,13 @@ lti:path rdf:type owl:FunctionalProperty ;
   rdfs:comment """This attribute specifies the path for an endpoint such as a MessageHandler or an Icon. Typically, this path is relative to one of the base URL values defined in a BaseUrlChoice.  
 In the case of a MessageHandler, the path may be an absolute path if the associated message type explicitly declares that an absolute path is allowed.  """ .
 
-lti:guid rdf:type owl:FunctionalProperty ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      lti:ServiceProvider
-      lti:ToolConsumerProfile
-      lti:ProductInstance
-    )
-  ] ;
-  rdfs:range lti-type:GUID.Type ;
-  rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  " .
-
 lti:timestamp rdf:type owl:FunctionalProperty ;
   rdfs:domain  [
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range xsd:dateTime ;
@@ -609,6 +611,7 @@ lti:description rdf:type owl:FunctionalProperty ;
       lti:ProductInfo
       lti:ResourceHandler
       lti:Vendor
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:LocalizedText ;
@@ -619,7 +622,7 @@ lti:support rdf:type owl:FunctionalProperty ;
     rdf:type owl:Class ;
     owl:unionOf (
       lti:ServiceProvider
-      lti:ProductInstance
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;
@@ -754,6 +757,16 @@ lti:product_instance rdf:type owl:FunctionalProperty ;
   rdfs:range lti:ProductInstance ;
   owl:inverseOf lti:profile ;
   rdfs:comment "An inverse attribute which references the ProductInstance within which this ProductProfile is defined." .
+
+lti:guid rdf:type owl:FunctionalProperty ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      lti:ToolConsumerProfile
+      lti:ProductInstance
+    )
+  ] ;
+  rdfs:range lti-type:GUID.Type .
 
 lti:capability_offered rdf:type rdf:Property ;
   rdfs:domain lti:ToolConsumerProfile ;
@@ -915,6 +928,15 @@ lti:profile rdf:type rdf:Property ;
   rdfs:range lti:ProductProfile ;
   owl:inverseOf lti:product_instance ;
   rdfs:comment "A resource that presents a view of this ProductInstance to one or more integration partners." .
+
+lti:service_owner rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ProductInstance ;
+  rdfs:range lti:ServiceOwner .
+
+lti:owner_name rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:ServiceOwner ;
+  rdfs:range lti:LocalizedName ;
+  rdfs:comment "The name of the service owner, suitable for display in a user interface." .
 
 lti:tool_proxy_guid rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolProxy ;

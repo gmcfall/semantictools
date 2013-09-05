@@ -173,6 +173,11 @@ lti:ProductInstance rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:service_owner ;
+    bind:associationType bind:Aggregation
+  ] .
+lti:ServiceOwner rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:support ;
     bind:associationType bind:Composition
   ] .

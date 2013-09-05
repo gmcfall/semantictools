@@ -507,3 +507,5 @@ ltiv:Result.dataSource rdf:type ltiv:Variable ;
 ltiv:Result.uri rdf:type ltiv:Variable ;
   rdfs:comment "The URI of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URI." .
 
+ltiv:User.username rdf:type ltiv:Variable .
+
