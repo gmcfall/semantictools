@@ -19,9 +19,39 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-jsonld</artifactId>
 	<packaging>jar</packaging>
-	<version>1.17</version>
+	<version>1.22</version>
 	<name>SemanticTools JSON-LD</name>
-
+  <description>
+    A library used for JSON-LD processing
+  </description>
+  <url>https://github.com/gmcfall/semantictools</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:gmcfall/semantictools.git</connection>
+    <url>scm:git:git@github.com:gmcfall/semantictools.git</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>gmcfall</id>
+      <name>Greg McFall</name>
+      <email>gregory.mcfall@gmail.com</email>
+    </developer>
+  </developers>
+<!-- 
+  <distributionManagement>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Nexus Snapshots Repository</name>
+      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+  </distributionManagement>
+ -->  
 	<properties>
 		<build.finalName>semantictools-jsonld</build.finalName>
 		<jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
@@ -114,12 +144,52 @@
 		<resources>
 		</resources>
 		<plugins>
+<!--          
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+-->      
 			<plugin>
 			   <artifactId>maven-compiler-plugin</artifactId>
 			   <version>2.0.2</version>
 			   <configuration>
-			       <source>1.6</source>
-			       <target>1.6</target>
+			       <source>1.7</source>
+			       <target>1.7</target>
 			   </configuration>
 			</plugin>
         <plugin>

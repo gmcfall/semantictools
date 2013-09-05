@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.semantictools.jsonld.impl.AppspotContextPublisher;
 import org.semantictools.jsonld.impl.LdAssetManagerImpl;
@@ -31,6 +33,7 @@ import org.semantictools.jsonld.impl.LdContextManagerImpl;
 import org.semantictools.jsonld.impl.LdParserImpl;
 import org.semantictools.jsonld.impl.LdPublisherPipeline;
 import org.semantictools.jsonld.impl.LdValidationServiceImpl;
+import org.semantictools.jsonld.io.ErrorHandler;
 import org.semantictools.jsonld.io.LdContextReader;
 import org.semantictools.jsonld.io.LdContextWriter;
 import org.semantictools.jsonld.io.LdParseException;
@@ -110,7 +113,7 @@ public class LdProcessor implements LdPublisher {
     }
   }
   
-  private LdContextReader getContextReader() {
+  public LdContextReader getContextReader() {
     if (contextReader == null) {
       LdContextReaderImpl impl = new LdContextReaderImpl(null);
       contextReader = impl;   
@@ -203,10 +206,32 @@ public class LdProcessor implements LdPublisher {
     
     LdParser parser = getLdParser();
     LdValidationService service = getValidationService();
-   
+    ValidationErrorHandler handler = new ValidationErrorHandler();
+    getContextReader().setErrorHandler(handler);
     LdNode node = parser.parse(jsonDocument.openStream());
+    getContextReader().setErrorHandler(null);
     
-    return service.validate(node);
+    LdValidationReport report = service.validate(node);
+    handler.reportErrors(report);
+    
+    return report;
+  }
+  
+  static class ValidationErrorHandler implements ErrorHandler {
+    private List<Throwable> errorList = new ArrayList<>();
+
+    @Override
+    public void handleError(Throwable error) {
+      errorList.add(error);
+    }
+    
+    void reportErrors(LdValidationReport report) {
+      for (Throwable e : errorList) {
+        LdValidationMessage message = new LdValidationMessage(LdValidationResult.WARNING, "", e.getMessage());
+        report.add(message);
+      }
+    }
+    
   }
 
 

@@ -44,6 +44,7 @@ public interface LdContextReader {
    */
   LdContext parseContextField(JsonParser parser) throws LdContextParseException, IOException;
   
-  
+  void setErrorHandler(ErrorHandler handler);
+  ErrorHandler getErrorHandler();
 
 }

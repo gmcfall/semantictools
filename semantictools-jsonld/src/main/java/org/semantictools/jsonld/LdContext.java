@@ -371,6 +371,9 @@ public class LdContext implements Serializable {
   }
   
   public LdDatatype findDatatypeByURI(String datatypeURI) {
+    if (datatypeURI==null) {
+      return null;
+    }
     if (datatypeURI.startsWith(XsdType.URI) || datatypeURI.startsWith(LdDatatypeManager.XPATH_DATATYPES_URI)) {
       return LdDatatypeManager.getXsdTypeByURI(datatypeURI);
     }

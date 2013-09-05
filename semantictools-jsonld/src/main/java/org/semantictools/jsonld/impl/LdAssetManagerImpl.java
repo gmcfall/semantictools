@@ -57,8 +57,7 @@ public class LdAssetManagerImpl implements LdAssetManager {
       
       
     } catch (Throwable oops) {
-      logger.error("Failed to download asset: " + assetURI);
-      logger.error(oops.getMessage());
+      logger.warn("Failed to download asset: " + assetURI);
       return null;
     }
   }

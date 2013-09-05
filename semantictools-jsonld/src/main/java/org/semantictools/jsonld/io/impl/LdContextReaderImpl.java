@@ -38,12 +38,13 @@ import org.semantictools.jsonld.LdQualifiedRestriction;
 import org.semantictools.jsonld.LdRestriction;
 import org.semantictools.jsonld.LdTerm;
 import org.semantictools.jsonld.Whitespace;
+import org.semantictools.jsonld.io.ErrorHandler;
 import org.semantictools.jsonld.io.LdContextReader;
 
 public class LdContextReaderImpl implements LdContextReader {
   
   private LdContextManager manager;
-  
+  private ErrorHandler errorHandler;
   
 
   public LdContextReaderImpl(LdContextManager manager) {
@@ -670,8 +671,23 @@ public class LdContextReaderImpl implements LdContextReader {
       case END_ARRAY: return;
       
       case VALUE_STRING:
-        child = loadExternalContext(jsonParser.getText());
-        context.add(child);
+        try {
+          child = loadExternalContext(jsonParser.getText());
+          context.add(child);
+        } catch (IOException e) {
+          if (errorHandler == null) {
+            throw e;
+          } else {
+            errorHandler.handleError(e);
+          }
+        } catch (LdContextParseException e) {
+          if (errorHandler == null) {
+            throw e;
+          } else {
+            errorHandler.handleError(e);
+          }
+          
+        }
         break;
         
       case START_OBJECT :
@@ -693,6 +709,16 @@ public class LdContextReaderImpl implements LdContextReader {
       throw new LdContextParseException("JSON-LD context not found: " + contextURI);
     }
     return context;
+  }
+
+  @Override
+  public void setErrorHandler(ErrorHandler handler) {
+    errorHandler = handler;
+  }
+
+  @Override
+  public ErrorHandler getErrorHandler() {
+    return errorHandler;
   }
 
 

@@ -80,13 +80,19 @@ public class LdValidationServiceImpl implements LdValidationService {
     }
     RandomAccessObject object = new RandomAccessObject(obj);
     LdContext context = obj.getContext();
+   
     
     // TODO: Do we need to check restrictions on superclasses in the type hierarchy?
 
     if (path.length()>0) {
       path = path + ".";
     }
-    LdClass dr = context.getClass(objectType);
+    LdClass dr = null;
+    if (context == null) {
+      warn(path, "JSON-LD context is undefined");
+    } else {
+      dr = context.getClass(objectType);
+    }
     if (dr != null) {
       validateObject(path, object, dr);
     }
@@ -264,6 +270,11 @@ public class LdValidationServiceImpl implements LdValidationService {
     }
     
     String typeIRI = fieldTerm.getTypeIRI();
+    if (typeIRI == null) {
+      String msg = "Cannot validate this property because the datatype is not known.";
+      warn(path, msg);
+      return;
+    }
     
     LdDatatype datatype = context.findDatatypeByURI(typeIRI);
     
@@ -337,6 +348,15 @@ public class LdValidationServiceImpl implements LdValidationService {
     LdObject owner = field.getOwner();
     LdContext context = owner.getContext();
     String fieldName = field.getLocalName();
+    if ("@graph".equals(fieldName)) {
+      return;
+    }
+    
+    if (context == null) {
+      warn(path, "JSON-LD context is not defined");
+      return;
+    } 
+
     LdTerm term = context.getTerm(fieldName);
     if (term == null) {
       String msg = 
@@ -558,6 +578,7 @@ public class LdValidationServiceImpl implements LdValidationService {
     
     }
   }
+
   
 
 }

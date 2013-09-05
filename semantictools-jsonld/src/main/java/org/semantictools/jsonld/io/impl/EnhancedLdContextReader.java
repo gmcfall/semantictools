@@ -24,6 +24,7 @@ import org.semantictools.jsonld.LdContext;
 import org.semantictools.jsonld.LdContextEnhancer;
 import org.semantictools.jsonld.LdContextParseException;
 import org.semantictools.jsonld.impl.LdContextEnhanceException;
+import org.semantictools.jsonld.io.ErrorHandler;
 import org.semantictools.jsonld.io.LdContextReader;
 
 public class EnhancedLdContextReader implements LdContextReader {
@@ -67,6 +68,17 @@ public class EnhancedLdContextReader implements LdContextReader {
     } catch (LdContextEnhanceException oops) {
       throw new LdContextParseException(oops);
     }
+  }
+
+  @Override
+  public void setErrorHandler(ErrorHandler handler) {
+    reader.setErrorHandler(handler);
+    
+  }
+
+  @Override
+  public ErrorHandler getErrorHandler() {
+    return reader.getErrorHandler();
   }
 
 }
