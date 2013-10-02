@@ -30,10 +30,10 @@ prefix=liso
 <XPD:OBJ name="OwnedViews[0]" type="UMLClassView" guid="EvaZfwtdL0mBfJHP0W3+oAAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Left" type="integer">108</XPD:ATTR>
-<XPD:ATTR name="Top" type="integer">96</XPD:ATTR>
-<XPD:ATTR name="Width" type="integer">100</XPD:ATTR>
-<XPD:ATTR name="Height" type="integer">56</XPD:ATTR>
+<XPD:ATTR name="Left" type="integer">72</XPD:ATTR>
+<XPD:ATTR name="Top" type="integer">88</XPD:ATTR>
+<XPD:ATTR name="Width" type="integer">123</XPD:ATTR>
+<XPD:ATTR name="Height" type="integer">59</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">sMSIv4toP0GYumGC3IE5gQAA</XPD:REF>
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="WjjeXTJ/30G9HzZ4FQncqgAA">
@@ -159,7 +159,7 @@ prefix=liso
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">324,125;207,125</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">324,125;194,125</XPD:ATTR>
 <XPD:ATTR name="ShowProperty" type="boolean">True</XPD:ATTR>
 <XPD:REF name="Model">G6eXSX/Nak+hnnp8Z6C/CQAA</XPD:REF>
 <XPD:REF name="Head">EvaZfwtdL0mBfJHP0W3+oAAA</XPD:REF>
@@ -256,6 +256,14 @@ prefix=liso
 <XPD:REF name="Views[3]">Sm9hXAfyukOySjCJt9t7dQAA</XPD:REF>
 <XPD:ATTR name="#Associations" type="integer">1</XPD:ATTR>
 <XPD:REF name="Associations[0]">pTgeGEpWmkGrD9l9YJopXQAA</XPD:REF>
+<XPD:ATTR name="#Attributes" type="integer">1</XPD:ATTR>
+<XPD:OBJ name="Attributes[0]" type="UMLAttribute" guid="9nKDn5joEk6R0I3rlLYSNgAA">
+<XPD:ATTR name="Name" type="string">comment</XPD:ATTR>
+<XPD:ATTR name="Documentation" type="string">A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader.</XPD:ATTR>
+<XPD:ATTR name="Multiplicity" type="string">0..1</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">string</XPD:ATTR>
+<XPD:REF name="Owner">sMSIv4toP0GYumGC3IE5gQAA</XPD:REF>
+</XPD:OBJ>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[1]" type="UMLClass" guid="oLQRb4dU4Uq1d7HG9OkCNgAA">
 <XPD:ATTR name="Name" type="string">Score</XPD:ATTR>
