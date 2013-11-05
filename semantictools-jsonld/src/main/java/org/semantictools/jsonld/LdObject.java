@@ -19,6 +19,8 @@ import java.util.Iterator;
 
 public interface LdObject extends LdNode {
   
+  void setContext(LdContext context);
+  
   /**
    * Returns the JSON-LD context that governs this object.
    */

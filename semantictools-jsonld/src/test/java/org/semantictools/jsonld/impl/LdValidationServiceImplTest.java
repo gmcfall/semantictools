@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.semantictools.jsonld.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -25,15 +26,9 @@ import java.io.PrintWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.semantictools.jsonld.LdContext;
-import org.semantictools.jsonld.LdContextManager;
 import org.semantictools.jsonld.LdNode;
 import org.semantictools.jsonld.LdValidationMessage;
 import org.semantictools.jsonld.LdValidationReport;
-import org.semantictools.jsonld.impl.InMemoryLdContextManager;
-import org.semantictools.jsonld.impl.InMemoryVocabularyManager;
-import org.semantictools.jsonld.impl.LdContextEnhancerImpl;
-import org.semantictools.jsonld.impl.LdParserImpl;
-import org.semantictools.jsonld.impl.LdValidationServiceImpl;
 import org.semantictools.jsonld.io.LdParser;
 import org.semantictools.jsonld.io.impl.HtmlReportWriter;
 import org.semantictools.jsonld.io.impl.LdContextReaderImpl;
@@ -43,6 +38,7 @@ public class LdValidationServiceImplTest {
   private String contextURI = "http://purl.org/pearson/core/v1/ctx/outcomes/GradebookItemEvent";
   private String contextPath = "gdx/GradebookItemEventContext.json";
   private String gradebookItemEventInvalid = "GradebookItemEventInvalid.json";
+  private String gradebookItemEventContext = "GradebookItemEventContext.json";
   private String noBody = "GradebookItemEventNoBody.json";
   
   private LdValidationServiceImpl validator;
@@ -69,7 +65,7 @@ public class LdValidationServiceImplTest {
     contextManager.add(context);
     
     
-    parser = new LdParserImpl(contextParser);
+    parser = new LdTreeReader(contextParser);
     validator = new LdValidationServiceImpl();
   }
 
@@ -98,6 +94,20 @@ public class LdValidationServiceImplTest {
     
     assertTrue(report != null);
     
+  }
+  
+  /**
+   * Verify that the validator works even if the JSON-LD context
+   * is defined at the end of the JSON document.
+   */
+  @Test
+  public void testContext() throws Exception {
+
+    InputStream documentStream = getClass().getClassLoader().getResourceAsStream(gradebookItemEventContext);
+    LdNode node = parser.parse(documentStream);  
+    LdValidationReport report = validator.validate(node);
+    
+    assertEquals(0, report.listMessages().size());
   }
   
   public static void validateReport(LdValidationReport report) {

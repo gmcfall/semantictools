@@ -168,19 +168,19 @@ public class LdValidationServiceImpl implements LdValidationService {
       Integer minCardinality = restriction.getMinCardinality();
       Integer maxCardinality = restriction.getMaxCardinality();
       
-     
+      LdContext context = object.getNode().getContext();
       
       int cardinality = getCardinality(field);
       
       if (minCardinality != null) {
-        validateMinCardinality(object.getNode(), propertyURI, fieldPath, minCardinality, cardinality);
+        validateMinCardinality(context, object.getNode(), propertyURI, fieldPath, minCardinality, cardinality);
       }
       
       if (maxCardinality != null) {
         validateMaxCardinality(fieldPath, maxCardinality, cardinality);
       }
 
-      validateQualifiedRestrictions(fieldPath, restriction, field, cardinality);
+      validateQualifiedRestrictions(context, fieldPath, restriction, field, cardinality);
       
     }
 
@@ -190,6 +190,7 @@ public class LdValidationServiceImpl implements LdValidationService {
   
 
   private void validateQualifiedRestrictions(
+      LdContext context,
       String fieldPath, LdRestriction restriction, LdField field, int cardinality) {
    
     List<LdQualifiedRestriction> list = restriction.listQualifiedRestrictions();
@@ -199,9 +200,14 @@ public class LdValidationServiceImpl implements LdValidationService {
 
       Integer minCardinality = qr.getMinCardinality();
       Integer maxCardinality = qr.getMaxCardinality();
+      
+      LdObject owner = field==null ? null : field.getOwner();
+      String propertyURI = field==null ? qr.getRestriction().getPropertyURI() : field.getPropertyURI();
+      
+      LdContext c = (owner==null) ? context : owner.getContext();
 
       if (minCardinality != null) {
-        validateMinCardinality(field.getOwner(), field.getPropertyURI(), fieldPath, minCardinality, cardinality);
+        validateMinCardinality(c, owner, propertyURI, fieldPath, minCardinality, cardinality);
       }
       
       if (maxCardinality != null) {
@@ -500,13 +506,13 @@ public class LdValidationServiceImpl implements LdValidationService {
 
 
   private void validateMinCardinality(
+      LdContext context,
       LdObject object, String propertyURI, String fieldPath, int minCardinality, int cardinality) {
     
     /**
      * Check to see if the minimum cardinality has an override in the
      * JSON-LD context.
      */
-    LdContext context = object.getContext();
     LdTerm term = context.getTerm(propertyURI);
     if (term.getMinCardinality() != null) {
       minCardinality = term.getMinCardinality();

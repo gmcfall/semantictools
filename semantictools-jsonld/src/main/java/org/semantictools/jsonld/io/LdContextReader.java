@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.node.ObjectNode;
 import org.semantictools.jsonld.LdContext;
 import org.semantictools.jsonld.LdContextParseException;
 
@@ -43,6 +45,8 @@ public interface LdContextReader {
    * The Jackson parser must be positioned after the &#064;context property within some JSON object.
    */
   LdContext parseContextField(JsonParser parser) throws LdContextParseException, IOException;
+  
+  LdContext parseContext(JsonNode node) throws LdContextParseException, IOException;
   
   void setErrorHandler(ErrorHandler handler);
   ErrorHandler getErrorHandler();

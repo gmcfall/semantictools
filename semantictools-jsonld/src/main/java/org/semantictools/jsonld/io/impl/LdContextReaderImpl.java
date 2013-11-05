@@ -19,13 +19,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
 import org.semantictools.jsonld.LdClass;
 import org.semantictools.jsonld.LdContainerType;
 import org.semantictools.jsonld.LdContext;
@@ -719,6 +724,373 @@ public class LdContextReaderImpl implements LdContextReader {
   @Override
   public ErrorHandler getErrorHandler() {
     return errorHandler;
+  }
+
+  @Override
+  public LdContext parseContext(JsonNode node) throws LdContextParseException, IOException {
+    LdContext context = null;
+    boolean external = false;
+    
+    if (node.isTextual()) {
+      context = loadExternalContext(node.asText());
+      external = true;
+      
+    } else if (node instanceof ObjectNode) {
+      context = new LdContext();
+      parseContextObject((ObjectNode) node, context);
+    } else if (node instanceof ArrayNode) {
+      context = new LdContext();
+      parseContextArray((ArrayNode)node, context);
+    }
+    
+    if (context != null) {
+      context.close();
+      prepareOwlClasses(context);
+      
+      // We don't need to resolve references if the context is external
+      // and obtained from the LdContextManager.
+      //
+      if (!external && context.isEnhanced()) {
+        resolveRefereces(context);
+      }
+    }
+    
+    return context;
+  }
+
+  private void parseContextArray(ArrayNode array, LdContext context) throws LdContextParseException, IOException {
+    
+    for (int i=0; i<array.size(); i++) {
+      JsonNode node = array.get(i);
+      if (node.isTextual()) {
+          LdContext child;
+          try {
+            child = loadExternalContext(node.getTextValue());
+            context.add(child);
+          } catch (LdContextParseException e) {
+            if (errorHandler != null) {
+              errorHandler.handleError(e);
+            } else {
+              throw e;
+            }
+          } catch (IOException e) {
+            if (errorHandler != null) {
+              errorHandler.handleError(e);
+            } else {
+              throw e;
+            }
+          }
+      } else if (node instanceof ObjectNode) {
+        LdContext child = new LdContext();
+        try {
+          parseContextObject((ObjectNode)node, child);
+          context.add(child);
+        } catch (JsonParseException e) {
+          if (errorHandler != null) {
+            errorHandler.handleError(e);
+          } else {
+            throw e;
+          }
+        }
+      }
+    }
+  }
+
+  private void parseContextObject(ObjectNode node, LdContext context) throws JsonParseException, LdContextParseException {
+   
+    Iterator<Entry<String, JsonNode>> sequence = node.getFields();
+    while (sequence.hasNext()) {
+      Entry<String, JsonNode> entry = sequence.next();
+      parseField(context, entry.getKey(), entry.getValue());
+    }
+  }
+
+  private void parseField(LdContext context, String fieldName, JsonNode value) throws JsonParseException, LdContextParseException {
+    LdTerm term = new LdTerm();
+    term.setShortName(fieldName);
+    context.add(term);
+    
+    if (value.isTextual()) {
+      term.setRawIRI(value.getTextValue());
+      
+    } else if (value instanceof ObjectNode) {
+      parseTermFields((ObjectNode)value, term);
+      
+    } else {
+      throw new JsonParseException("Expected IRI value or object definition of term " + fieldName, null);
+    }
+    
+  }
+
+  private void parseTermFields(ObjectNode json, LdTerm term) throws LdContextParseException {
+    JsonToken token = null;
+    
+    Iterator<Entry<String,JsonNode>> sequence = json.getFields();
+    while (sequence.hasNext()) {
+      Entry<String,JsonNode> entry = sequence.next();
+      String fieldName = entry.getKey();
+      JsonNode value = entry.getValue();
+   
+      if ("@id".equals(fieldName)) {
+        term.setRawIRI(value.getTextValue());
+        
+      } else if ("@type".equals(fieldName)) {
+        term.setRawTypeIRI(value.getTextValue());
+        
+      } else if ("@language".equals(fieldName)) {
+        term.setLanguage(value.getTextValue());
+        
+      } else if ("@container".equals(fieldName)) {
+        term.setContainerType(readContainerType(value));
+        
+      }  else if ("@minCardinality".equals(fieldName)) {
+        term.setMinCardinality(value.getIntValue());
+        
+      }  else if ("datatype".equals(fieldName)) {
+        parseDatatype(value, term);
+        
+      } else if ("class".equals(fieldName)) {
+        parseClass(value, term);
+        
+      } else if("property".equals(fieldName)) {
+        parseProperty(value, term);
+        
+      } 
+    }
+    
+    
+  }
+
+
+  private void parseProperty(JsonNode value, LdTerm term) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  private void parseClass(JsonNode value, LdTerm term) throws LdContextParseException {
+    if ( ! (value instanceof ObjectNode)) {
+      throw new LdContextParseException("Expected class definition to be an object in term " + term.getRawIRI());
+    }
+    ObjectNode object = (ObjectNode) value;
+    LdClass rdfClass = new LdClass(null);
+    term.setRdfClass(rdfClass);
+    
+    Iterator<Entry<String,JsonNode>> sequence = object.getFields();
+    
+    while ( sequence.hasNext() ) {
+      Entry<String,JsonNode> entry = sequence.next();
+      String fieldName = entry.getKey();
+      value = entry.getValue();
+      
+      if ("supertype".equals(fieldName))  {
+        parserSupertype(value, rdfClass);
+        
+      } else if ("restriction".equals(fieldName)) {
+        parseRestrictionArray(value, rdfClass);
+        
+      } 
+      
+    }
+    
+  }
+
+  private void parseRestrictionArray(JsonNode value, LdClass rdfClass) throws LdContextParseException {
+
+    if (! (value instanceof ArrayNode)) {
+      throw new LdContextParseException("Expected restriction definition to be an array");
+    }
+    ArrayNode array = (ArrayNode) value;
+    for (int i=0; i<array.size(); i++) {
+      value = array.get(i);
+      parseRestriction(value, rdfClass);
+    }
+    
+    
+  }
+
+  private void parseRestriction(JsonNode value, LdClass rdfClass) throws LdContextParseException {
+
+    if (!(value instanceof ObjectNode)) {
+      throw new LdContextParseException("Expected restriction definition to be an object");
+    }
+    LdRestriction restriction = new LdRestriction();
+    rdfClass.add(restriction);
+    ObjectNode object = (ObjectNode) value;
+    Iterator<Entry<String,JsonNode>> sequence = object.getFields();
+    
+    while (sequence.hasNext()) {
+      Entry<String,JsonNode> entry = sequence.next();
+      
+      String fieldName = entry.getKey();
+      value = entry.getValue();
+      
+      if ("onProperty".equals(fieldName)) {
+        restriction.setPropertyURI(value.getTextValue());
+        
+      } else if ("maxCardinality".equals(fieldName)) {
+        restriction.setMaxCardinality(value.getIntValue());
+        
+      } else if ("minCardinality".equals(fieldName)) {
+        restriction.setMinCardinality(value.getIntValue());
+        
+      } else if ("qualifiedRestriction".equals(fieldName)) {
+        parseQualifiedRestrictionArray(value, restriction);
+        
+      }
+      
+    }
+    
+  }
+
+  private void parseQualifiedRestrictionArray(JsonNode value,
+      LdRestriction restriction) throws LdContextParseException {
+    
+    if (!(value instanceof ArrayNode)) {
+      throw new LdContextParseException("Expected qualified restriction definition to be an array");
+    }
+    ArrayNode array = (ArrayNode) value;
+    
+    for (int i=0; i<array.size(); i++) {
+      parseQualifiedRestriction(value, restriction);
+    }
+    
+  }
+
+  private void parseQualifiedRestriction(JsonNode value, LdRestriction restriction) throws LdContextParseException {
+    
+    if (! (value instanceof ObjectNode)) {
+      throw new LdContextParseException("Expected qualified restriction definition to be an object");
+    }
+    ObjectNode object = (ObjectNode) value;
+    LdQualifiedRestriction qr = new LdQualifiedRestriction();
+    restriction.add(qr);
+    
+    Iterator<Entry<String,JsonNode>> sequence = object.getFields();
+    
+    while (sequence.hasNext()) {
+      Entry<String,JsonNode> entry = sequence.next();
+      value = entry.getValue();
+      String fieldName = entry.getKey();
+      if ("onClass".equals(fieldName)) {
+        qr.setRangeURI(value.getTextValue());
+        
+      } else if ("maxCardinality".equals(fieldName)) {
+        qr.setMaxCardinality(value.getIntValue());
+        
+      } else if ("minCardinality".equals(fieldName)) {
+        qr.setMinCardinality(value.getIntValue());
+        
+      }
+    }
+    
+  }
+
+  private void parserSupertype(JsonNode value, LdClass rdfClass) throws LdContextParseException {
+
+    if (! (value instanceof ArrayNode)) {
+      throw new LdContextParseException("Expected supertype value to be an array");
+    }
+    ArrayNode array = (ArrayNode) value;
+    for (int i=0; i<array.size(); i++) {
+      value = array.get(i);
+      String supertypeURI = value.getTextValue();
+      LdClass superClass = new LdClass(supertypeURI);
+      rdfClass.addSupertype(superClass);
+    }
+    
+  }
+
+  private void parseDatatype(JsonNode value, LdTerm term) throws LdContextParseException {
+    LdDatatype datatype = new LdDatatype();
+    term.setDatatype(datatype);
+    
+    if ( !(value instanceof ObjectNode)) {
+      throw new LdContextParseException("Expected object for datatype description " + term.getRawIRI());
+    }
+    ObjectNode object = (ObjectNode) value;
+
+    Iterator<Entry<String,JsonNode>> sequence = object.getFields();
+    while (sequence.hasNext()) {
+      Entry<String,JsonNode> entry = sequence.next();
+      String fieldName = entry.getKey();
+      value = entry.getValue();
+      
+      if (fieldName.equals("base")) {
+        String baseURI = value.getTextValue();
+        LdDatatype base = new LdDatatype();
+        base.setUri(baseURI);
+        datatype.setBase(base);
+        
+      } else if ("length".equals(fieldName)) {
+        datatype.setLength(value.getIntValue());
+        
+      } else if ("minLength".equals(fieldName)) {
+        datatype.setMinLength(value.getIntValue());
+        
+      } else if ("maxLength".equals(fieldName)) {
+        datatype.setMaxLength(value.getIntValue());
+        
+      } else if ("pattern".equals(fieldName)) {
+        datatype.setPattern(Pattern.compile(value.getTextValue()));
+        
+      } else if ("whitespace".equals(fieldName)) {
+        String name = value.getTextValue();
+        
+        Whitespace ws = 
+            "collapse".equals(name) ? Whitespace.COLLAPSE :
+            "replace".equals(name) ? Whitespace.REPLACE :
+            "preserve".equals(name) ? Whitespace.PRESERVE :
+            null;
+        
+        if (ws == null) {
+          throw new LdContextParseException("Unrecognized whitespace '" + name + "' in term " + term.getIRI());
+        }
+        datatype.setWhitespace(ws);
+        
+      } else if ("maxInclusive".equals(fieldName)) {
+        datatype.setMaxInclusive(readNumber(value));
+        
+      } else if ("minInclusive".equals(fieldName)) {
+        datatype.setMinInclusive(readNumber(value));
+        
+      } else if ("maxExclusive".equals(fieldName)) {
+        datatype.setMaxExclusive(readNumber(value));
+        
+      } else if ("minExclusive".equals(fieldName)) {
+        datatype.setMinExclusive(readNumber(value));
+        
+      } else if ("totalDigits".equals(fieldName)) {
+        datatype.setTotalDigits(value.getIntValue());
+        
+      } else if ("fractionDigits".equals(fieldName)) {
+        datatype.setFractionDigits(value.getIntValue());
+        
+      } 
+      
+    }
+    
+  }
+
+  private Number readNumber(JsonNode value) throws LdContextParseException {
+    if (value.isInt()) {
+      return new Integer(value.getIntValue());
+    }
+    if (value.isLong()) {
+      return new Long(value.getLongValue());
+    }
+    if (value.isDouble()) {
+      return new Double(value.getDoubleValue());
+    }
+    throw new LdContextParseException("Expected a numeric value");
+  }
+
+  private LdContainerType readContainerType(JsonNode value) {
+ String text = value.getTextValue();
+    
+    return 
+      "@set".equals(text) ? LdContainerType.SET :
+      "@list".equals(text) ? LdContainerType.LIST :
+      LdContainerType.UNDEFINED;
   }
 
 

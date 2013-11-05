@@ -19,7 +19,7 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-jsonld</artifactId>
 	<packaging>jar</packaging>
-	<version>1.22</version>
+	<version>1.24</version>
 	<name>SemanticTools JSON-LD</name>
   <description>
     A library used for JSON-LD processing

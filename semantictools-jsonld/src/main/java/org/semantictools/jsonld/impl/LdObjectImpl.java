@@ -84,10 +84,14 @@ public class LdObjectImpl implements LdObject, LdIRI, LdBlankNode {
 
   @Override
   public LdContext getContext() {
+    if (context == null && owner != null && owner.getOwner()!=null) {
+      return owner.getOwner().getContext();
+    }
     return context;
   }
   
-  void setContext(LdContext context) {
+  @Override
+  public void setContext(LdContext context) {
     this.context = context;
   }
 

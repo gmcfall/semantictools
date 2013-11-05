@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.semantictools.jsonld.LdContext;
 import org.semantictools.jsonld.LdContextEnhancer;
@@ -79,6 +80,12 @@ public class EnhancedLdContextReader implements LdContextReader {
   @Override
   public ErrorHandler getErrorHandler() {
     return reader.getErrorHandler();
+  }
+
+  @Override
+  public LdContext parseContext(JsonNode node) throws LdContextParseException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

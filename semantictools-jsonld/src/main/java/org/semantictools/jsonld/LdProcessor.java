@@ -32,6 +32,7 @@ import org.semantictools.jsonld.impl.LdContextEnhancerImpl;
 import org.semantictools.jsonld.impl.LdContextManagerImpl;
 import org.semantictools.jsonld.impl.LdParserImpl;
 import org.semantictools.jsonld.impl.LdPublisherPipeline;
+import org.semantictools.jsonld.impl.LdTreeReader;
 import org.semantictools.jsonld.impl.LdValidationServiceImpl;
 import org.semantictools.jsonld.io.ErrorHandler;
 import org.semantictools.jsonld.io.LdContextReader;
@@ -160,7 +161,7 @@ public class LdProcessor implements LdPublisher {
   private LdParser getLdParser() {
     if (jsonldParser == null) {
       LdContextReader reader = new EnhancedLdContextReader(getContextEnhancer(), getContextReader());
-      jsonldParser = new LdParserImpl(reader);
+      jsonldParser = new LdTreeReader(reader);
     }
     return jsonldParser;
   }
