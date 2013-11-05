@@ -27,7 +27,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-public class Field {
+public class Field implements Comparable<Field> {
   private Frame frame;
   private OntProperty property;
   private OntResource type;
@@ -260,6 +260,11 @@ public class Field {
     builder.append("]");
     
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(Field o) {
+    return getLocalName().compareTo(o.getLocalName());
   }
 
 }

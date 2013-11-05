@@ -72,6 +72,7 @@ public class ServiceDocumentationManager {
   private static final String REPRESENTATIONS_TEXT = "representations.text";
   private static final String PUT_INSTRUCTIONS = "PUT.instructions";
   private static final String PUT_RULES = "PUT.rules";
+  private static final String POST_CREATED_DESCRIPTION = "POST.created.description";
   
   private static final String GET_REQUEST_BODY_DEFAULT = "The request body must be empty.";
   
@@ -131,6 +132,7 @@ public class ServiceDocumentationManager {
 
   private void parseProperties(Properties properties) {
     ServiceDocumentation sink = new ServiceDocumentation(global);
+    ServiceMethodInfo methodInfo = new ServiceMethodInfo();
     
     sink.setDefaultMediaType(properties.getProperty(DEFAULT_MEDIA_TYPE));
     
@@ -197,11 +199,13 @@ public class ServiceDocumentationManager {
         sink.setPutInstructions(value);
       } else if (PUT_RULES.equals(key)) {
         setPutRules(sink, value);
+      } else if (POST_CREATED_DESCRIPTION.equals(key)) {
+        methodInfo.setPostCreatedDescription(value);
       }
     }
 
     validate(sink);
-    addDefaults(sink);
+    addDefaults(sink, methodInfo);
     
     put(sink);
     
@@ -394,7 +398,7 @@ public class ServiceDocumentationManager {
     return localName;
   }
   
-  private void addDefaults(ServiceDocumentation doc) {
+  private void addDefaults(ServiceDocumentation doc, ServiceMethodInfo methodInfo) {
     List<ContextProperties> contextList = doc.listContextProperties();
     if (contextList.isEmpty()) return;
     
@@ -409,7 +413,7 @@ public class ServiceDocumentationManager {
     setIntroduction(doc, typeName);
     setRepresentationHeading(doc, typeName);
     setRepresentationText(doc, typeName);
-    setPostDoc(doc, typeName);
+    setPostDoc(doc, methodInfo, typeName);
     setGetDoc(doc, typeName);
     setPutDoc(doc, typeName);
     setDeleteDoc(doc, typeName);
@@ -705,7 +709,7 @@ public class ServiceDocumentationManager {
     }
   }
 
-  private void setPostDoc(ServiceDocumentation doc, String typeName) {
+  private void setPostDoc(ServiceDocumentation doc, ServiceMethodInfo methodInfo, String typeName) {
     List<HttpMethod> list = doc.getMethodList();
     if (!list.isEmpty() && !list.contains(HttpMethod.POST)) {
       return;
@@ -728,10 +732,11 @@ public class ServiceDocumentationManager {
       
 
       
-      String okDescription = null;
-      String idMediaType = doc.getPostResponseMediaType();
+      String createdDescription = null;
+      
+      String idMediaType = null;
       if (idMediaType == null) {
-        okDescription = "The request has succeeded.\n" +
+        createdDescription = "The request has succeeded.\n" +
         "<p>The reponse will contain an empty body.</p>";
       } else {
         ContextProperties context = contextManager.getContextPropertiesByMediaType(idMediaType);
@@ -742,17 +747,20 @@ public class ServiceDocumentationManager {
         String href = linkManager.relativize(context.getMediaTypeDocFile());
         StringBuilder anchor = new StringBuilder();
         appendAnchor(anchor, href, idMediaType);
-        okDescription = 
-            "The request has succeeded.\n" +
-            "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
-            "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
-            "The <code>Content-Type</code> header of the response will be set to this media type.";
-        okDescription = format(okDescription, typeName, anchor.toString());
+        createdDescription = methodInfo.getPostCreatedDescription();
+        if (createdDescription == null) {
+            createdDescription = 
+              "The request has succeeded.\n" +
+              "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
+              "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
+              "The <code>Content-Type</code> header of the response will be set to this media type.";
+        }
+        createdDescription = format(createdDescription, typeName, anchor.toString());
         
       }
       
       
-      addResponse(method, ResponseInfo.CREATED.copy(okDescription));
+      addResponse(method, ResponseInfo.CREATED.copy(createdDescription));
       addResponse(method, ResponseInfo.BAD_REQUEST);
       addResponse(method, ResponseInfo.UNAUTHORIZED);
       addResponse(method, ResponseInfo.INTERNAL_SERVER_ERROR);
@@ -1022,6 +1030,21 @@ public class ServiceDocumentationManager {
     } finally {
       writer.close();      
     }
+    
+  }
+  
+  static class ServiceMethodInfo {
+    private static String postCreatedDescription;
+
+    public static String getPostCreatedDescription() {
+      return postCreatedDescription;
+    }
+
+    public static void setPostCreatedDescription(String postCreatedDescription) {
+      ServiceMethodInfo.postCreatedDescription = postCreatedDescription;
+    }
+    
+    
     
   }
 

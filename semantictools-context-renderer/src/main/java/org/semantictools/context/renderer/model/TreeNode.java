@@ -16,9 +16,10 @@
 package org.semantictools.context.renderer.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class TreeNode {
+public class TreeNode implements Comparable<TreeNode> {
   
   public static enum Kind {
     FRAME,
@@ -134,9 +135,21 @@ public class TreeNode {
   public void setBranchStyle(BranchStyle branchStyle) {
     this.branchStyle = branchStyle;
   }
+
+  @Override
+  public int compareTo(TreeNode o) {
+    return localName.compareTo(o.localName);
+  }
   
   
-  
+  public void sort() {
+    if (children != null) {
+      for (TreeNode n : children) {
+        n.sort();
+      }
+      Collections.sort(children);
+    }
+  }
   
   
 

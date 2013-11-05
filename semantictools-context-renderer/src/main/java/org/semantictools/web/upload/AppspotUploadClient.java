@@ -16,8 +16,12 @@
 package org.semantictools.web.upload;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -48,18 +52,48 @@ public class AppspotUploadClient {
   private static final String PATH = "path";
   private static final String VERSION = "version";
   private static final String FILE_UPLOAD = "fileUpload";
+  private static final String CHECKSUM_PROPERTIES = "checksum.properties";
   
   private String servletURL = SERVLET_URL;
   private String version;
   
+  private Properties checksumProperties;
+  
     
   public void uploadAll(File baseDir) throws IOException {
     LinkManager linkManager = new LinkManager(baseDir);
+    loadCheckSumProperties(baseDir);
     uploadFiles(linkManager, baseDir);
+    saveCheckSumProperties(baseDir);
     
   }
   
   
+  private void saveCheckSumProperties(File baseDir) throws IOException {
+
+    File file = new File(baseDir, CHECKSUM_PROPERTIES);
+    FileOutputStream out = new FileOutputStream(file);
+    checksumProperties.store(out, null);
+    checksumProperties = null;
+  }
+
+
+  private void loadCheckSumProperties(File baseDir) throws IOException {
+    checksumProperties = new Properties();
+    
+    File file = new File(baseDir, CHECKSUM_PROPERTIES);
+    if (file.exists()) {
+      FileReader reader = new FileReader(file);
+      try {
+        checksumProperties.load(reader);
+      } finally {
+        reader.close();
+      }
+    }
+    
+  }
+
+
   public String getVersion() {
     return version;
   }
@@ -161,11 +195,34 @@ public class AppspotUploadClient {
     
   }
 
-  public String upload(String contentType, String path, File file) throws IOException {
+  public void upload(String contentType, String path, File file) throws IOException {
+    
+    if (file.getName().equals(CHECKSUM_PROPERTIES)) {
+      return;
+    }
    
     if (!path.startsWith("/")) {
       path = "/" + path;
     }
+    
+    // Do not upload if we can confirm that we previously uploaded
+    // the same content.
+
+    String checksumKey = path.concat(".sha1");
+    String checksumValue = null;
+    try {
+      checksumValue = Checksum.sha1(file);
+      String prior = checksumProperties.getProperty(checksumKey);
+      if (checksumValue.equals(prior)) {
+        return;
+      }
+      
+    } catch (NoSuchAlgorithmException e) {
+      // Ignore.
+    }
+    
+
+    logger.debug("uploading... " + path);
     
     HttpClient client = new DefaultHttpClient();
     HttpPost post = new HttpPost(servletURL);
@@ -184,10 +241,13 @@ public class AppspotUploadClient {
     
     post.setEntity(entity);
     
-    logger.debug("uploading... " + path);
     String response = EntityUtils.toString(client.execute(post).getEntity(), "UTF-8");
     
     client.getConnectionManager().shutdown();
-    return response;
+    
+    if (checksumValue != null) {
+      checksumProperties.put(checksumKey, checksumValue);
+    }
+    
   }
 }

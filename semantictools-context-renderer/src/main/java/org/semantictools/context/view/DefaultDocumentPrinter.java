@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -435,6 +436,7 @@ public class DefaultDocumentPrinter extends PrintEngine implements DocumentPrint
     
     List<BibliographicReference> targetList = new ArrayList<BibliographicReference>();
     List<BibliographicReference> list = manager.listReferences();
+    Collections.sort(list);
     for (BibliographicReference ref : list) {
       String htmlLabel = ref.htmlLabel();
       String textLabel = ref.textLabel();

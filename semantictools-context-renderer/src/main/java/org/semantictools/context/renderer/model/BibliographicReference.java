@@ -18,7 +18,7 @@ package org.semantictools.context.renderer.model;
 import java.io.File;
 import java.util.List;
 
-public class BibliographicReference {
+public class BibliographicReference implements Comparable<BibliographicReference> {
   private String label;
   private String author;
   private String title;
@@ -222,6 +222,21 @@ public class BibliographicReference {
 
   public void setLocalFile(File localFile) {
     this.localFile = localFile;
+  }
+
+  @Override
+  public int compareTo(BibliographicReference other) {
+    
+    if (other == null) return -1;
+    return compare(label, other.label);
+  }
+  
+  private int compare(String a, String b) {
+    return 
+        (a==null && b==null) ? 0 : 
+        (a!=null && b!=null) ? a.compareTo(b) :
+        (a!=null && b==null) ? -1 :
+        1;
   }
   
   

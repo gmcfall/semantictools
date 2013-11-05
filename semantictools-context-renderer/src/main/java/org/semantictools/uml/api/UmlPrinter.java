@@ -718,6 +718,7 @@ public class UmlPrinter extends HtmlPrinter {
     List<Field> list = frame.getDeclaredFields();
     
     if (list.isEmpty()) return;
+    Collections.sort(list);
     
     String tableId = umlClass.getLocalName() + ".properties";
     String captionText = format("{0} Properties", umlClass.getLocalName());

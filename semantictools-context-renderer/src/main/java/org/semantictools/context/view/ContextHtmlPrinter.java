@@ -562,15 +562,29 @@ public class ContextHtmlPrinter extends PrintEngine {
     Heading heading = documentPrinter
         .createHeading("How To Read this Document");
     documentPrinter.print(heading);
-
+    
+    List<Field> fieldList = getFieldList();
+    
     printSampleObject();
-    printPropertyRepresentation();
-    printOptionalPropertyFigure();
-    printRepeatedPropertyFigure();
-    printObjectRepresentation();
+    printPropertyRepresentation(fieldList);
+    printOptionalPropertyFigure(fieldList);
+    printRepeatedPropertyFigure(fieldList);
+    printObjectRepresentation(fieldList);
     printReservedTerms();
     printContextDiscussion();
 
+  }
+
+  private void sort(List<Field> fieldList) {
+    Collections.sort(fieldList, new Comparator<Field>() {
+
+      @Override
+      public int compare(Field a, Field b) {
+        
+        return a.getLocalName().compareTo(b.getLocalName());
+      }
+    });
+    
   }
 
   private void printContextDiscussion() {
@@ -783,12 +797,12 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private void printPropertyRepresentation() throws IOException {
+  private void printPropertyRepresentation(List<Field> fieldList) throws IOException {
 
     // Find a field that has a simple type, like a string, number or date.
     // This is our first choice for the node that we'll use as the sample
     // property.
-    Field field = getSimpleTypeField(new HashSet<String>(), root);
+    Field field = getSimpleTypeField(fieldList);
 
     if (field == null) {
       field = getAnyField(root);
@@ -817,10 +831,10 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private void printObjectRepresentation() throws IOException {
+  private void printObjectRepresentation(List<Field> fieldList) throws IOException {
 
-    Field uriRefField = getUriRefField(new HashSet<String>(), root);
-    Field snRefField = getSnRefField(new HashSet<String>(), root);
+    Field uriRefField = getUriRefField(fieldList);
+    Field snRefField = getSnRefField(fieldList);
 
     indent()
         .println(
@@ -959,6 +973,8 @@ public class ContextHtmlPrinter extends PrintEngine {
     List<Frame> graphTypes = getGraphTypes();
     TreeNode node = (graphTypes == null) ? treeGenerator.generateRoot(root, 1)
         : treeGenerator.generateGraph(graphTypes, 1);
+    
+    node.sort();
 
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
     //
@@ -1082,10 +1098,10 @@ public class ContextHtmlPrinter extends PrintEngine {
     return frameList.size() + typeList.size() == 1;
   }
 
-  private void printRepeatedPropertyFigure() throws IOException {
+  private void printRepeatedPropertyFigure(List<Field> fieldList) throws IOException {
 
     String typeText = null;
-    Field field = getRepeatedSimpleType(new HashSet<String>(), root);
+    Field field = getRepeatedSimpleType(fieldList);
 
     if (field != null) {
 
@@ -1154,9 +1170,9 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private void printOptionalPropertyFigure() throws IOException {
+  private void printOptionalPropertyFigure(List<Field> fieldList) throws IOException {
 
-    Field field = getOptionalSimpleType(new HashSet<String>(), root);
+    Field field = getOptionalSimpleType(fieldList);
 
     if (field == null) {
       field = getAnyOptionalField(new HashSet<String>(), root);
@@ -1200,13 +1216,9 @@ public class ContextHtmlPrinter extends PrintEngine {
 
   }
 
-  private Field getUriRefField(Set<String> history, Frame frame) {
+  private Field getUriRefField(List<Field> list) {
 
-    if (history.contains(frame.getUri()))
-      return null;
-    history.add(frame.getUri());
 
-    List<Field> list = frame.listAllFields();
     for (Field field : list) {
 
       String shortName = field.getLocalName();
@@ -1223,24 +1235,13 @@ public class ContextHtmlPrinter extends PrintEngine {
           && type.asFrame().getCategory() != RestCategory.ENUMERABLE) {
         return field;
       }
-
-      if (type != null && type.canAsFrame()) {
-        Field result = getUriRefField(history, type.asFrame());
-        if (result != null)
-          return result;
-      }
     }
 
     return null;
   }
 
-  private Field getSnRefField(Set<String> history, Frame frame) {
+  private Field getSnRefField(List<Field> list) {
 
-    if (history.contains(frame.getUri()))
-      return null;
-    history.add(frame.getUri());
-
-    List<Field> list = frame.listAllFields();
     for (Field field : list) {
 
       String shortName = field.getLocalName();
@@ -1253,24 +1254,16 @@ public class ContextHtmlPrinter extends PrintEngine {
       RdfType type = field.getRdfType();
       if (type != null && type.canAsFrame()) {
         Frame obj = type.asFrame();
-        if (obj.getCategory() == RestCategory.ENUMERABLE)
+        if (obj.getCategory() == RestCategory.ENUMERABLE) {
           return field;
-
-        Field result = getSnRefField(history, obj);
-        if (result != null)
-          return result;
+        }
       }
     }
 
     return null;
   }
 
-  private Field getRepeatedSimpleType(Set<String> history, Frame frame) {
-    if (history.contains(frame.getUri()))
-      return null;
-    history.add(frame.getUri());
-
-    List<Field> list = frame.listAllFields();
+  private Field getRepeatedSimpleType(List<Field> list) {
     for (Field field : list) {
       if (context.getTermInfoByURI(field.getURI()) == null) {
         continue;
@@ -1278,44 +1271,33 @@ public class ContextHtmlPrinter extends PrintEngine {
       if (field.getMaxCardinality() > 0 && field.getMaxCardinality() < 2)
         continue;
       String typeURI = field.getType().getURI();
-      if (typeURI != null
-          && typeManager.isStandardDatatype(field.getType().getNameSpace())) {
+      if (isSimpleType(field)) {
         return field;
-      }
-      RdfType type = field.getRdfType();
-      if (type != null && type.canAsFrame()) {
-        Field result = getRepeatedSimpleType(history, type.asFrame());
-        if (result != null)
-          return result;
       }
     }
 
     return null;
   }
 
-  private Field getOptionalSimpleType(HashSet<String> history, Frame frame) {
-    if (history.contains(frame.getUri()))
-      return null;
-    history.add(frame.getUri());
-
-    List<Field> list = frame.listAllFields();
+  private Field getOptionalSimpleType(List<Field> list) {
+   
     for (Field field : list) {
       if (field.getMinCardinality() == 0 && field.getMaxCardinality() == 1
           && field.getType().getURI() != null
-          && typeManager.isStandardDatatype(field.getType().getNameSpace())
-          && context.getTermInfoByURI(field.getURI()) != null) {
+          && isSimpleType(field)
+      ) {
         return field;
       }
 
-      RdfType type = field.getRdfType();
-      if (type != null && type.canAsFrame()) {
-        Field result = getOptionalSimpleType(history, type.asFrame());
-        if (result != null)
-          return result;
-      }
     }
 
     return null;
+  }
+  
+  private boolean isSimpleType(Field field) {
+    RdfType rdfType = field.getRdfType();
+    return typeManager.isStandard(field.getType().getNameSpace()) ||
+        (rdfType!=null && rdfType.canAsDatatype() );
   }
 
   private Field getAnyOptionalField(HashSet<String> history, Frame frame) {
@@ -1418,31 +1400,65 @@ public class ContextHtmlPrinter extends PrintEngine {
     indent().println("</DIV>");
 
   }
+  
+  private List<Field> getFieldList() {
+    Set<String> visited = new HashSet<String>();
+    List<Field> fieldList = new ArrayList<Field>();
+    
+    addFields(visited, fieldList, root);
+    
+    sort(fieldList);
+    
+    return fieldList;
+   
+  }
 
-  private Field getSimpleTypeField(Set<String> history, Frame frame) {
+  private void addFields(Set<String> visited, List<Field> sink, Frame frame) {
+    
     String frameURI = frame.getUri();
-    if (history.contains(frameURI)) {
-      // avoid infinite regress
-      return null;
+    if (!visited.contains(frameURI)) {
+      visited.add(frameURI);
+      List<Field> declared = frame.getDeclaredFields();
+      filterFields(visited, sink, declared);
+      List<Frame> supertypeList = frame.getSupertypeList();
+      if (supertypeList != null) {
+        for (Frame supertype : supertypeList) {
+          addFields(visited, sink, supertype);
+        }
+      }
     }
-    history.add(frameURI);
-    List<Field> list = frame.listAllFields();
+    
+  }
+
+  private void filterFields(Set<String> visited, List<Field> sink, List<Field> declared) {
+   
+    for (Field field : declared) {
+      String uri = field.getURI();
+     
+      if (!visited.contains(uri)) {
+        visited.add(uri);
+        
+        TermInfo term = context.getTermInfoByURI(uri);
+        if (term != null) {
+          sink.add(field);
+          
+          RdfType type = field.getRdfType();
+          if (type != null && type.canAsFrame()) {
+            addFields(visited, sink, type.asFrame());
+          }
+        }
+      }
+    }
+    
+  }
+
+  private Field getSimpleTypeField(List<Field> list) {
+    
     for (Field field : list) {
 
-      String typeURI = field.getType().getURI();
-      if (typeURI == null)
-        continue;
-      TermInfo term = context.getTermInfoByURI(field.getURI());
-      if (typeManager.isStandardDatatype(field.getType().getNameSpace())
-          && term != null)
-        return field;
-
       RdfType type = field.getRdfType();
-      if (type != null && type.canAsFrame()) {
-        Field result = getSimpleTypeField(history, type.asFrame());
-        if (result != null) {
-          return result;
-        }
+      if (isSimpleType(field)) {
+        return field;
       }
 
     }
