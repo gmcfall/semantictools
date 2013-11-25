@@ -29,7 +29,7 @@
         "code" : "omega",
         "vendor" : {
           "code" : "lms.example.com",
-          "name" : {
+          "vendor_name" : {
             "default_value" : "LMS Corporation",
             "key" : "product.vendor.name"
           },
@@ -48,7 +48,7 @@
     "service_owner" : {
       "@id" : "http://state.university.edu/",
       "timestamp" : "2012-03-28T09:08:16-04:00",
-      "owner_name" : {
+      "service_owner_name" : {
         "default_value" : "State University",
         "key" : "service_owner.name"
       },

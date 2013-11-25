@@ -9,6 +9,4 @@ liso:Result rdfs:subClassOf
     bind:onProperty liso:resultScore ;
     bind:associationType bind:Composition
   ] .
-liso:Score rdf:type bind:EmbeddableClass .
-liso:Score rdf:type bind:AbstractClass .
 

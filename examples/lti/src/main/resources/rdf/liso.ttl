@@ -22,9 +22,6 @@ liso:Result rdf:type owl:Class;
   ] ; 
   rdfs:comment "A container that holds the result of some scorable activity or assignment." .
 
-liso:Score rdf:type owl:Class ; 
-  rdfs:comment "The score that a learner has received for engaging in some activity or submitting an assignment." .
-
 liso:comment rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
   rdfs:range xsd:string ;
@@ -32,6 +29,6 @@ liso:comment rdf:type owl:FunctionalProperty ;
 
 liso:resultScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range liso:Score ;
+  rdfs:range xsd:float ;
   rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment." .
 

@@ -464,6 +464,10 @@ lti:ServiceOwner rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:service_owner_name
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:support;
+    rdfs:comment "Contact information for support from the service owner."
   ] ; 
   rdfs:comment "The entity that owns the services provided by a product instance." .
 
@@ -629,6 +633,7 @@ lti:support rdf:type owl:FunctionalProperty ;
     owl:unionOf (
       lti:ServiceProvider
       lti:ProductInstance
+      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;

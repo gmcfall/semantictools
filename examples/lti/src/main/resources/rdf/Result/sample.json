@@ -4,5 +4,6 @@
   "resultScore" : {
     "@type" : "decimal",
     "@value" : 0.83
-  }
+  },
+  "comment" : "Nice Work!"
 }

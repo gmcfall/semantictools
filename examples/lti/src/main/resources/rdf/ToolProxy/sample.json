@@ -1,7 +1,7 @@
 {
   "@context" : [
-      "http://purl.imsglobal.org/ctx/lti/v2/ToolProxy",
-      "http://purl.org/blackboard/ctx/v1/iconStyle"
+     "http://purl.imsglobal.org/ctx/lti/v2/ToolProxy",
+     "http://purl.org/blackboard/ctx/v1/iconStyle"
   ],
   "@type" : "ToolProxy",
   "@id" : "http://lms.example.com/ToolProxy/869e5ce5-214c-4e85-86c6-b99e8458a592",
