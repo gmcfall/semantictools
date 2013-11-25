@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -232,7 +235,7 @@ public class DocumentationGenerator {
       uploader.uploadAll(pubDir);
     }
     
-    validate(contextManager);
+    validate(contextManager, global);
     
     ontoManager.scan(rdfDir);
     ontoManager.upload();
@@ -240,12 +243,13 @@ public class DocumentationGenerator {
     ontoManager.publishToLocalRepository(contextManager.listContextProperties());
   }
   
-  private void validate(ContextManager manager) {
+  private void validate(ContextManager manager, GlobalProperties global) {
     if (repoDir == null) return;
     deleteDir(repoDir);
     repoDir.mkdirs();
     
-    LdProcessor processor = new LdProcessor(rdfDir, repoDir, false);
+    LdProcessor processor = createLdProcessor(global);
+    processor.getContextManager().setEnhance(true);
     
     List<ContextProperties> list = manager.listContextProperties();
     // Need to publish all the contexts first because some contexts
@@ -266,16 +270,36 @@ public class DocumentationGenerator {
 
 
 
+  private LdProcessor createLdProcessor(GlobalProperties global) {
+   LdProcessor processor = new LdProcessor(rdfDir, repoDir, false);
+   String list = global.getProperties().getProperty(ContextManager.SKIP_VALIDATION);
+   if (list != null) {
+     StringTokenizer tokenizer = new StringTokenizer(list, " \t\r\n");
+     Set<String> ignoredProperties = new HashSet<String>();
+     while (tokenizer.hasMoreTokens()) {
+       ignoredProperties.add(tokenizer.nextToken());
+     }
+     processor.getValidationService().setIgnoredProperties(ignoredProperties);
+   }
+   
+   return processor;
+  }
+
+
   private void publishJsonLdContext(LdProcessor processor,
       ContextProperties context) {
 
     File contextFile = context.getContextFile();
+    if (contextFile == null) {
+      return;
+    }
     try {
       String contextURI = context.getContextURI();
       URL url = contextFile.toURI().toURL();
       LdAsset asset = new LdAsset(contextURI, LdContentType.JSON_LD_CONTEXT, url);
       asset.loadContent();
       processor.publish(asset);
+      processor.publishEnhancedContext(contextURI);
       
     } catch (Exception e) {
       getLogger().severe("Failed to add context to repo: " + contextFile);

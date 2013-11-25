@@ -331,6 +331,7 @@ public class ContextBuilder {
     } else {
       
       addNamespace(context, rdfType);
+      addType(properties, context, rdfType, true);
       
       if (!properties.getExpandedValues().contains(propertyURI)) {
         String propertyTypeURI = rdfType.getUri();

@@ -17,11 +17,13 @@ package org.semantictools.context.renderer.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 public class GlobalProperties  extends BaseDocumentMetadata {
   
   private Set<String> ignoredOntology = new HashSet<String>();
+  private Properties properties;
   
   
   public GlobalProperties() {
@@ -32,6 +34,22 @@ public class GlobalProperties  extends BaseDocumentMetadata {
     createDefaultReferences();
   }
   
+
+  public Properties getProperties() {
+    return properties;
+  }
+
+
+
+
+
+
+  public void setProperties(Properties properties) {
+    this.properties = properties;
+  }
+
+
+
 
 
 

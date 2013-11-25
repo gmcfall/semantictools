@@ -1,8 +1,8 @@
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
 <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> a owl:Ontology  ;
@@ -13,6 +13,10 @@
 liso:Result rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
+    owl:onProperty      liso:comment;
+    rdfs:comment "A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      liso:resultScore;
     rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment."
   ] ; 
@@ -20,6 +24,11 @@ liso:Result rdf:type owl:Class;
 
 liso:Score rdf:type owl:Class ; 
   rdfs:comment "The score that a learner has received for engaging in some activity or submitting an assignment." .
+
+liso:comment rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:string ;
+  rdfs:comment "A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader." .
 
 liso:resultScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;

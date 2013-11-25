@@ -173,6 +173,10 @@ lti:ProductInstance rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:support ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:service_owner ;
     bind:associationType bind:Aggregation
   ] .
@@ -201,10 +205,6 @@ lti:ToolProxy rdfs:subClassOf
   ] .
 lti:ToolProxyBinding rdf:type bind:Addressable .
 lti:ToolProxyBinding rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty lti:tool_proxy ;
-    bind:associationType bind:Aggregation
-  ], 
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:context ;
     bind:associationType bind:Aggregation

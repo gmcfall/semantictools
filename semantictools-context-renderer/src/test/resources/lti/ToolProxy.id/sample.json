@@ -1,7 +1,0 @@
-{
-  "@context" : "http://purl.imsglobal.org/ctx/lti/v2/ToolProxyId",
-  "@type" : "ToolProxy",
-  "@id" : "http://lms.server.com/ToolProxy/869e5ce5-214c-4e85-86c6-b99e8458a592",
-  "tool_proxy_guid" : "869e5ce5-214c-4e85-86c6-b99e8458a592",
-  "custom_uri" : "http://lms.server.com/ToolProxy/869e5ce5-214c-4e85-86c6-b99e8458a592/custom"
-}

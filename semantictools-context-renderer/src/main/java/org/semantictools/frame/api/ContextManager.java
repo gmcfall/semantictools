@@ -38,6 +38,7 @@ public class ContextManager {
   
 //  private static final Logger logger = LoggerFactory.getLogger(ContextManager.class);
 
+  public static final String SKIP_VALIDATION = "skipValidation";
   private static final String RDFTYPE = "rdfType";
   private static final String RDFTYPE_REF = "rdfTypeRef";
   private static final String RDF_PROPERTY = "rdfProperty";

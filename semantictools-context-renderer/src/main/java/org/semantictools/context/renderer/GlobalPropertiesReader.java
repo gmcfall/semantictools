@@ -75,6 +75,7 @@ public class GlobalPropertiesReader {
     Properties properties = new Properties();
     FileReader reader = new FileReader(source);
     properties.load(reader);
+    global.setProperties(properties);
 
     for (Map.Entry<Object, Object> e : properties.entrySet()) {
       
