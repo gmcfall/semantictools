@@ -2,6 +2,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
+@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -205,7 +206,6 @@ lti:ProductProfile rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:allValuesFrom  xsd:normalizedString;
     owl:minCardinality  1;
     rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract."
   ] ,
@@ -475,7 +475,6 @@ lti:ToolProxy rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:allValuesFrom  xsd:token;
     owl:minCardinality  1;
     rdfs:comment "The LTI version that governs the integration between the Tool and ToolConsumer. "
   ] ,
@@ -516,6 +515,10 @@ lti:LtiLink rdf:type owl:Class ;
     owl:onProperty      lti:resource_link_id;
     owl:minCardinality  1;
     rdfs:comment "A globally unique identifier for this LTI link."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:lineItem;
+    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the assignment launched from this link should be recorded in the ResultContainer belonging to this LineItem."
   ] ; 
   rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
 
@@ -749,13 +752,7 @@ lti:lti_version rdf:type owl:FunctionalProperty ;
       lti:ToolProxy
     )
   ] ;
-  rdfs:range  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      xsd:normalizedString
-      xsd:token
-    )
-  ] ;
+  rdfs:range xsd:token ;
   rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract." .
 
 lti:service_offered rdf:type rdf:Property ;
@@ -965,6 +962,11 @@ lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:LtiLink ;
   rdfs:range lti-type:GUID.Type ;
   rdfs:comment "A globally unique identifier for this LTI link." .
+
+lti:lineItem rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:LtiLink ;
+  rdfs:range liso:LineItem ;
+  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the assignment launched from this link should be recorded in the ResultContainer belonging to this LineItem." .
 
 lti:id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;

@@ -1,0 +1,17 @@
+{
+  "@context" : "http://purl.imsglobal.org/ctx/lis/v2/LineItem",
+  "@type" : "LineItem",
+  "@id" : "http://tc.example.com/resources/LineItem/13702",
+  "assessmentContext" : "http://server.example.com/resources/section/85426",
+  "scoreConstraints" : {
+    "@type" : "NumericLimits",
+    "normalMaximum" : 100,
+    "extraCreditMaximum" : 10,
+    "totalMaximum" : 110
+  },
+  "assessedActivity" : {
+    "@id" : "http://tp.example.com/resources/assessment/66400"
+  },
+  "results" : "http://tc.example.com/resources/LineItem/13702/results",
+  "label" : "Chapter 5 Test"
+}

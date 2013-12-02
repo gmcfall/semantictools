@@ -1,0 +1,29 @@
+{
+  "@context" : "http://purl.imsglobal.org/ctx/lis/v2/outcomes/ResultContainer",
+  "@type" : "Page",
+  "@id" : "http://tc.example.com/resources/LineItem/94188/results?firstPage",
+  "nextPage" : "http://tc.example.com/resources/LineItem/94188/results?p=2",
+  "pageOf" : {
+    "@type" : "ResultContainer",
+    "membershipSubject" : 
+      { "@id" : "http://tc.example.com/resources/LineItem/94188",
+        "result" : [ 
+          { "@id" : "http://tc.example.com/resources/LineItem/94188/results/923937",
+            "comment" : "Nice work!",
+            "normalScore" : 85,
+            "penalty" : 0,
+            "totalScore" : 88,
+            "extraCreditScore" : 3,
+            "curvedScore" : 96
+          },
+          { "@id" : "http://tc.example.com/resources/LineItem/94188/results/9237264",
+            "comment" : "Please come see me.",
+            "normalScore" : 42,
+            "penalty" : 10,
+            "totalScore" : 52,
+            "extraCreditScore" : 0,
+            "curvedScore" : 61
+          }
+        ]
+      }
+}
