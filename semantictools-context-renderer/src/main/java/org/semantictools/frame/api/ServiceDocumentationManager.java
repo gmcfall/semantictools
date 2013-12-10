@@ -734,7 +734,7 @@ public class ServiceDocumentationManager {
       
       String createdDescription = null;
       
-      String idMediaType = null;
+      String idMediaType = doc.getPostResponseMediaType();
       if (idMediaType == null) {
         createdDescription = "The request has succeeded.\n" +
         "<p>The reponse will contain an empty body.</p>";
@@ -1034,14 +1034,14 @@ public class ServiceDocumentationManager {
   }
   
   static class ServiceMethodInfo {
-    private static String postCreatedDescription;
+    private String postCreatedDescription;
 
-    public static String getPostCreatedDescription() {
+    public String getPostCreatedDescription() {
       return postCreatedDescription;
     }
 
-    public static void setPostCreatedDescription(String postCreatedDescription) {
-      ServiceMethodInfo.postCreatedDescription = postCreatedDescription;
+    public void setPostCreatedDescription(String postCreatedDescription) {
+        this.postCreatedDescription = postCreatedDescription;
     }
     
     
