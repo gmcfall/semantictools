@@ -1,0 +1,26 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+
+ldp:Container rdf:type bind:Addressable .
+ldp:Container rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ldp:membershipPredicate ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ldp:membershipSubject ;
+    bind:associationType bind:Aggregation
+  ] .
+ldp:Page rdf:type bind:Addressable .
+ldp:Page rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ldp:pageOf ;
+    bind:inverseAssociationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty ldp:nextPage ;
+    bind:associationType bind:Aggregation
+  ] .
+

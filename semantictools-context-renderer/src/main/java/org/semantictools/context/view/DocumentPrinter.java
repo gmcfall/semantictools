@@ -33,10 +33,12 @@ public interface DocumentPrinter {
   void printTitlePage();
   void printTableOfContentsMarker();
   void printReferences();
+  void printReferences(HeadingPrinter headingPrinter);
   void printFooter();
   
   Heading createHeading(String heading);
   Heading createHeading(String text, String id);
+  Heading createHeading(Level level, String text, String id);
   
   Heading getCurrentHeading();
   void print(Heading heading);

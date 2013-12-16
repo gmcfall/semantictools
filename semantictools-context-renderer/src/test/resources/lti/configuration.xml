@@ -31,6 +31,36 @@
     <file>${basedir}/src/main/resources/rdf/ltic.ttl</file>
     <format>TURTLE</format>
   </ontology>
+  <ontology>
+    <prefix>liso</prefix>
+    <uri>http://purl.imsglobal.org/vocab/lis/v2/outcomes#</uri>
+    <file>${basedir}/src/main/resources/rdf/liso.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>liscm</prefix>
+    <uri>http://purl.imsglobal.org/vocab/lis/v2/cm#</uri>
+    <file>${basedir}/src/main/resources/rdf/liscm.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>exp</prefix>
+    <uri>http://purl.imsglobal.org/vocab/lis/v2/experience#</uri>
+    <file>${basedir}/src/main/resources/rdf/exp.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>ldp</prefix>
+    <uri>http://www.w3.org/ns/ldp#</uri>
+    <file>${basedir}/src/main/resources/rdf/ldp.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>rdfs</prefix>
+    <uri>http://www.w3.org/2000/01/rdf-schema#</uri>
+    <file>${basedir}/src/main/resources/rdf/rdfs.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
   </ontologies>
 </configuration>
 

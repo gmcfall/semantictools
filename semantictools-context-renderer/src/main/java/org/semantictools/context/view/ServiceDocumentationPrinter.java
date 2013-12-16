@@ -15,20 +15,30 @@
  ******************************************************************************/
 package org.semantictools.context.view;
 
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.semantictools.context.renderer.URLRewriter;
-import org.semantictools.context.renderer.model.DocumentMetadata;
-import org.semantictools.context.renderer.model.GlobalProperties;
+import org.semantictools.context.renderer.model.BibliographicReference;
 import org.semantictools.context.renderer.model.HttpHeaderInfo;
 import org.semantictools.context.renderer.model.HttpMethod;
 import org.semantictools.context.renderer.model.MethodDocumentation;
-import org.semantictools.context.renderer.model.Person;
 import org.semantictools.context.renderer.model.QueryParam;
+import org.semantictools.context.renderer.model.ReferenceManager;
 import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
+import org.semantictools.frame.api.LinkManager;
+import org.semantictools.frame.model.Uri;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ServiceDocumentationPrinter extends HtmlPrinter {
+public class ServiceDocumentationPrinter extends HtmlPrinter implements HeadingPrinter {
+  
+  private static final Logger logger = LoggerFactory.getLogger(ServiceDocumentationPrinter.class);
 
   private ServiceDocumentation doc;
   private DocumentPrinter printer;
@@ -56,7 +66,8 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     printRepresentation();
     printUrlTemplates();
     printServiceMethods();
-    printer.printReferences();
+
+    printer.printReferences(this);
     printer.printFooter();
     printer.endHTML();
     
@@ -94,17 +105,39 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     beginHeading(heading);
     printPostMethod();
     printGetMethod();
+    printGetFromContainer();
     printPutMethod();
     printDeleteMethod();
     
     endHeading();
   }
 
-  private void printGetMethod() {
-    if (!doc.contains(HttpMethod.GET)) return;
-    Heading heading = printer.createHeading("GET");
+  private void printGetFromContainer() {
+    if (doc.getContainerGetDocumentation()==null) return;
+    
+    Uri containerType = doc.getContainerType();
+    if (containerType == null) {
+      logger.warn("Cannot print 'GET from Container' for " + doc.getRdfType().getLocalName() + ": container type is not defined");
+      return;
+    }
+    
+    MethodDocumentation method = doc.getContainerGetDocumentation();
+    Uri rdfType = doc.getRdfType();
+    String typeName = rdfType.getLocalName();
+    String containerTypeName = containerType.getLocalName();
+    String containerArticle = StringUtil.article(containerTypeName);
+    
+    String headingText = MessageFormat.format(
+        "GET from {0} {1}", containerArticle, containerTypeName);
+    
+    Heading heading = printer.createHeading(Level.H3, headingText, "GET_from_container");
     print(heading);
-    MethodDocumentation method = doc.getGetDocumentation();
+    printGetDetails(method);
+
+    printResponse(method, "GET");
+  }
+  
+  private void printGetDetails(MethodDocumentation method) {
     print(method.getSummary());
 
     indent().print("<UL>");
@@ -114,8 +147,8 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     Caption requestHeadersCaption = null;
     Caption queryParamsCaption = null;
     
-    List<QueryParam> paramList = doc.getQueryParams();
-    if (!paramList.isEmpty()) {
+    List<QueryParam> paramList = method.getQueryParams();
+    if (paramList!=null && !paramList.isEmpty()) {
       queryParamsCaption = new Caption(CaptionType.Table, "Query Parameters", "queryParams", null);
       printer.assignNumber(queryParamsCaption);
       indent().print("<LI>The request may contain the query parameters specified in ");
@@ -138,7 +171,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     popIndent();
     indent().println("</UL>");
     
-    if (!paramList.isEmpty()) {
+    if (paramList!=null && !paramList.isEmpty()) {
       printer.printParagraph("&nbsp;");
       printQueryParams(paramList, queryParamsCaption);
       
@@ -151,13 +184,24 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     printer.beginParagraph();
     printer.printParagraph("&nbsp;");
     
+  }
+
+  private void printGetMethod() {
+    if (!doc.contains(HttpMethod.GET)) return;
+    
+    Heading heading = printer.createHeading(Level.H3, "GET", "GET");
+    print(heading);
+
+    MethodDocumentation method = doc.getGetDocumentation();
+    printGetDetails(method);
+    
     printResponse(method, "GET");
     
   }
 
   private void printPutMethod() {
     if (!doc.contains(HttpMethod.PUT)) return;
-    Heading heading = printer.createHeading("PUT");
+    Heading heading = printer.createHeading(Level.H3, "PUT", "PUT");
     print(heading);
     MethodDocumentation method = doc.getPutDocumentation();
     print(method.getSummary());
@@ -205,7 +249,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   
   private void printDeleteMethod() {
     if (!doc.contains(HttpMethod.DELETE)) return;
-    Heading heading = printer.createHeading("DELETE");
+    Heading heading = printer.createHeading(Level.H3, "DELETE", "DELETE");
     print(heading);
     MethodDocumentation method = doc.getDeleteDocumentation();
     print(method.getSummary());
@@ -264,6 +308,7 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     printer.printTH("HTTP Status");
     printer.printTH("Description");
     printer.endRow();
+    sort(method.getStatusCodes());
     for (ResponseInfo code : method.getStatusCodes()) {
       printer.beginRow();
       printer.printTD(code.getStatusCode() + "&nbsp;" + code.getLabel().replace(" ", "&nbsp;"));
@@ -276,10 +321,21 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
   }
 
 
+  private void sort(List<ResponseInfo> statusCodes) {
+
+    Collections.sort(statusCodes, new Comparator<ResponseInfo>() {
+      @Override
+      public int compare(ResponseInfo a, ResponseInfo b) {
+        return a.getStatusCode() - b.getStatusCode();
+      }
+    });
+    
+  }
+
   private void printPostMethod() {
     if (!doc.contains(HttpMethod.POST)) return;
     
-    Heading heading = printer.createHeading("POST");
+    Heading heading = printer.createHeading(Level.H3, "POST", "POST");
     print(heading);
     MethodDocumentation method = doc.getPostDocumentation();
     print(method.getSummary());
@@ -439,8 +495,10 @@ public class ServiceDocumentationPrinter extends HtmlPrinter {
     println("</DIV>");
     
   }
+  
 
-
-
+  public void print(Heading heading) {
+    super.print(heading);
+  }
 
 }

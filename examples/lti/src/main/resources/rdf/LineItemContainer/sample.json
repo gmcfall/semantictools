@@ -1,0 +1,38 @@
+{
+  "@context" : "http://purl.imsglobal.org/ctx/lis/v2/outcomes/LineItemContainer",
+  "@type" : "Page",
+  "@id" : "http://server.example.com/sections/2923/gradebook/?firstPage",
+  "nextPage" : "http://server.example.com/sections/2923/gradebook/?p=2",
+  "pageOf" : {
+    "@type" : "LineItemContainer",
+    "membershipSubject" : {
+      "@id" : "http://server.example.com/resources/Context/51455",
+      "lineItem" : [ 
+        { "@id" : "http://server.example.com/sections/2923/gradebook/items/1",
+          "label" : "Chapter 1 Quiz",
+          "assessmentContext" : "http://server.example.com/sections/2923",
+          "scoreConstraints" : {
+            "@type" : "NumericLimits",
+            "normalMaximum" : 100,
+            "extraCreditMaximum" : 10,
+            "totalMaximum" : 110
+          },
+          "assessedActivity" : "http://tp.example.com/biology/quiz/1",
+          "results" : "http://server.example.com/resources/ResultContainer/9157"
+        },
+        { "@id" : "http://server.example.com/sections/2923/gradebook/items/2",
+          "label" : "Chapter 2 Quiz",
+          "assessmentContext" : "http://server.example.com/resources/Context/55002",
+          "scoreConstraints" : {
+            "@type" : "NumericLimits",
+            "normalMaximum" : 50,
+            "extraCreditMaximum" : 5,
+            "totalMaximum" : 55
+          },
+          "assessedActivity" : "http://tp.example.com/biology/quiz/2",
+          "results" : "http://server.example.com/resources/ResultContainer/52440"
+        }
+      ]
+    }
+  }
+}

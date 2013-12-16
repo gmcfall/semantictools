@@ -18,6 +18,9 @@ package org.semantictools.context.renderer.model;
 public class QueryParam {
   private String name;
   private String description;
+  
+  public QueryParam() {}
+  
   public String getName() {
     return name;
   }

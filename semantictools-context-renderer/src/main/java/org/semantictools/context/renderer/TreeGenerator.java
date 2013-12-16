@@ -294,11 +294,16 @@ public class TreeGenerator {
       }
     }
     
+    boolean readOnly = 
+        field.getRdfType().canAsFrame() &&
+        (field.getRdfType().asFrame().getContainerRestriction() != null);
+    
     int maxCardinality = field.getMaxCardinality();
     if (contextProperties.getOptionalProperties().contains(uri)) {
       maxCardinality = 0;
     }
     
+    node.setReadOnly(readOnly);
     node.setKind(Kind.PROPERTY);
     node.setMinCardinality(field.getMinCardinality());
     node.setMaxCardinality(maxCardinality);
@@ -333,9 +338,7 @@ public class TreeGenerator {
       
     } 
     
-    if (contextProperties.isSimpleName(uri) ||
-        (frame!=null && frame.hasInstances())
-    ) {
+    if (contextProperties.isSimpleName(uri)) {
       node.setObjectPresentation(ObjectPresentation.SIMPLE_NAME);
     }
     

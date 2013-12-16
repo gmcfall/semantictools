@@ -16,6 +16,8 @@
 package org.semantictools.context.renderer.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MethodDocumentation {
@@ -23,8 +25,12 @@ public class MethodDocumentation {
   private String summary;
   private String requestBodyRequirement;
   
+  
+  private List<String> requestMediaTypes = new ArrayList<String>();
+  private List<String> responseMediaTypes = new ArrayList<String>();
   private List<HttpHeaderInfo> requestHeaders = new ArrayList<HttpHeaderInfo>();
   private List<ResponseInfo> statusCodes = new ArrayList<ResponseInfo>();
+  private List<QueryParam> queryParams = null;
   
   public String getSummary() {
     return summary;
@@ -37,6 +43,9 @@ public class MethodDocumentation {
   }
   
   public void addRequestHeader(String name, String value) {
+    for (HttpHeaderInfo info : requestHeaders) {
+      if (info.getHeaderName().equals(name)) return;
+    }
     requestHeaders.add(new HttpHeaderInfo(name, value));
   }
   public String getRequestBodyRequirement() {
@@ -48,7 +57,9 @@ public class MethodDocumentation {
   
   
   public void add(ResponseInfo statusCode) {
-    statusCodes.add(statusCode);
+    if (!contains(statusCode)) {
+      statusCodes.add(statusCode);
+    }
   }
   
   public boolean contains(ResponseInfo code) {
@@ -69,9 +80,22 @@ public class MethodDocumentation {
     return false;
   }
   
+  public List<String> getRequestContentTypes() {
+    return requestMediaTypes;
+  }
+  public List<String> getResponseMediaTypes() {
+    return responseMediaTypes;
+  }
   
+  public void add(QueryParam param) {
+    if (queryParams == null) {
+      queryParams = new ArrayList<QueryParam>();
+    }
+    queryParams.add(param);
+  }
   
-  
-  
+  public List<QueryParam> getQueryParams() {
+    return queryParams;
+  }
 
 }

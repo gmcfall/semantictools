@@ -21,13 +21,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.semantictools.frame.model.Frame;
+import org.semantictools.frame.model.Uri;
+
 public class ServiceDocumentation extends BaseDocumentMetadata  {
 
   
   private List<ContextProperties> contextPropertiesList = new ArrayList<ContextProperties>();
 
   private File serviceDocumentationFile;
-  private String rdfTypeURI;
+  private Uri rdfType;
+  private Frame frame;
   private String postResponseMediaType;
   private String postResponseMediaTypeRef;
   
@@ -46,13 +50,15 @@ public class ServiceDocumentation extends BaseDocumentMetadata  {
   private String getInstructions;
   private String putInstructions;
   
+  private Uri containerType;
+  
   private MethodDocumentation postDocumentation;
   private MethodDocumentation getDocumentation;
+  private MethodDocumentation containerGetDocumentation;
   private MethodDocumentation putDocumentation;
   private MethodDocumentation deleteDocumentation;
   
   private List<HttpMethod> methodList = new ArrayList<HttpMethod>();
-  private List<QueryParam> queryParams = new ArrayList<QueryParam>();
   private List<String> putRules = new ArrayList<String>();
   
   private Map<String, String> referenceMap = new HashMap<String, String>();
@@ -96,14 +102,29 @@ public class ServiceDocumentation extends BaseDocumentMetadata  {
   public void setPostProcessingRules(String postProcessingRules) {
     this.postProcessingRules = postProcessingRules;
   }
-  public String getRdfTypeURI() {
-    if (rdfTypeURI == null && !contextPropertiesList.isEmpty()) {
-      rdfTypeURI = contextPropertiesList.get(0).getRdfTypeURI();
+  public Uri getRdfType() {
+    if (rdfType == null && !contextPropertiesList.isEmpty()) {
+      String rdfTypeURI = contextPropertiesList.get(0).getRdfTypeURI();
+      rdfType = new Uri(rdfTypeURI);
     }
-    return rdfTypeURI;
+    return rdfType;
   }
-  public void setRdfTypeURI(String rdfTypeURI) {
-    this.rdfTypeURI = rdfTypeURI;
+  
+  
+  
+  private String getLocalName(String type) {
+    if (type == null) {
+      return null;
+    }
+    int mark = type.lastIndexOf('#');
+    if (mark < 0) {
+      mark = type.lastIndexOf('/');
+    }
+    return mark > 0 ? type.substring(mark+1) : null;
+  }
+
+  public void setRdfType(Uri rdfType) {
+    this.rdfType = rdfType;
   }
   
   public Map<String,String> getMediaTypeUriMap() {
@@ -266,9 +287,7 @@ public class ServiceDocumentation extends BaseDocumentMetadata  {
   public void setGetInstructions(String getInstructions) {
     this.getInstructions = getInstructions;
   }
-  public List<QueryParam> getQueryParams() {
-    return queryParams;
-  }
+  
   public List<String> getPutRules() {
     return putRules;
   }
@@ -278,6 +297,32 @@ public class ServiceDocumentation extends BaseDocumentMetadata  {
   public void setPutInstructions(String putInstructions) {
     this.putInstructions = putInstructions;
   }
+
+  public MethodDocumentation getContainerGetDocumentation() {
+    return containerGetDocumentation;
+  }
+
+  public void setContainerGetDocumentation(
+      MethodDocumentation collectionGetDocumentation) {
+    this.containerGetDocumentation = collectionGetDocumentation;
+  }
+
+  public Uri getContainerType() {
+    return containerType;
+  }
+
+  public void setContainerType(Uri containerType) {
+    this.containerType = containerType;
+  }
+
+  public Frame getFrame() {
+    return frame;
+  }
+
+  public void setFrame(Frame frame) {
+    this.frame = frame;
+  }
+  
   
 
 }

@@ -1,0 +1,19 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.w3.org/2000/01/rdf-schema#> a owl:Ontology  ;
+  rdfs:label "rdfs" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "rdfs" .
+
+rdfs:Resource rdf:type owl:Class .
+
+rdfs:label rdf:type rdf:Property ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook." .
+

@@ -18,11 +18,7 @@
 	<classpathentry kind="var" path="M2_REPO/joda-time/joda-time/2.0/joda-time-2.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/4.4/junit-4.4.jar" sourcepath="M2_REPO/junit/junit/4.4/junit-4.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar" sourcepath="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/semantictools/semantictools-jsonld/1.17/semantictools-jsonld-1.17.jar" sourcepath="M2_REPO/org/semantictools/semantictools-jsonld/1.17/semantictools-jsonld-1.17-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:/Users/umcfag1/.m2/repository/org/semantictools/semantictools-jsonld/1.17/semantictools-jsonld-1.17-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/semantictools/semantictools-jsonld/1.24/semantictools-jsonld-1.24.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-log4j12/1.6.4/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.10.0/xercesImpl-2.10.0.jar"/>

@@ -32,13 +32,16 @@ import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.semantictools.frame.model.BindVocabulary;
+import org.semantictools.frame.model.ContainerRestriction;
 import org.semantictools.frame.model.Datatype;
 import org.semantictools.frame.model.DublinCoreTerms;
+import org.semantictools.frame.model.Field;
 import org.semantictools.frame.model.Frame;
 import org.semantictools.frame.model.ListType;
 import org.semantictools.frame.model.OntologyInfo;
 import org.semantictools.frame.model.OntologyType;
 import org.semantictools.frame.model.RdfType;
+import org.semantictools.frame.model.Uri;
 import org.semantictools.frame.model.VannVocabulary;
 import org.xml.sax.SAXException;
 
@@ -237,9 +240,36 @@ public class TypeManager {
       info.setLabel(label);
       add(info);
     }
+    
+    analyzeContainers();
   }
   
   
+  private void analyzeContainers() {
+   
+    Collection<Frame> frameList = listFrames();
+    for (Frame frame : frameList) {
+      ContainerRestriction r = frame.getContainerRestriction();
+      if (r != null) {
+        Uri membershipSubject = r.getMembershipSubject();
+        Uri membershipPredicate = r.getMembershipPredicate();
+        Frame subject = getFrameByUri(membershipSubject.stringValue());
+        if (subject != null) {
+          Field field = subject.getFieldByURI(membershipPredicate.stringValue());
+          if (field != null) {
+            RdfType type = field.getRdfType();
+            if (type.canAsFrame()) {
+              Frame target = type.asFrame();
+              target.addContainer(frame);
+            }
+          }
+        }
+      }
+    }
+    
+  }
+
+
   public String getQName(String uri) {
     int hash = uri.lastIndexOf('#');
     int slash = uri.lastIndexOf('/');

@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
+@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+
+liscm:Context rdf:type bind:Addressable .
+liscm:Context rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:lineItem ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liscm:lineItems ;
+    bind:associationType bind:Composition
+  ] .
+

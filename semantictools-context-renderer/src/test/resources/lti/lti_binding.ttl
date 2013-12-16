@@ -2,6 +2,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 @prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
+@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 
 lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
 lti:BaseUrlChoice rdfs:subClassOf
@@ -210,6 +211,11 @@ lti:ToolProxyBinding rdfs:subClassOf
     bind:associationType bind:Aggregation
   ] .
 lti:LtiLink rdf:type bind:Addressable .
+lti:LtiLink rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:lineItem ;
+    bind:associationType bind:Aggregation
+  ] .
 lti:Context rdf:type bind:Addressable .
 lti:ToolSettingsContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;

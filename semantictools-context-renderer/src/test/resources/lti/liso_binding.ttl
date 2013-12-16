@@ -9,6 +9,25 @@ liso:Result rdfs:subClassOf
     bind:onProperty liso:resultScore ;
     bind:associationType bind:Composition
   ] .
-liso:Score rdf:type bind:EmbeddableClass .
-liso:Score rdf:type bind:AbstractClass .
+liso:LineItem rdf:type bind:Addressable .
+liso:LineItem rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:assessedActivity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:scoreConstraints ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:result ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:results ;
+    bind:associationType bind:Composition
+  ] .
+liso:ScoreConstraints rdf:type bind:Addressable .
+liso:ScoreConstraints rdf:type bind:AbstractClass .
+liso:NumericLimits rdf:type bind:Addressable .
 

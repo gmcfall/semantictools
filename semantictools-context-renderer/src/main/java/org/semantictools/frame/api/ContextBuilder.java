@@ -199,10 +199,13 @@ public class ContextBuilder {
     
     history.add(typeURI);
     
+    FrameConstraints constraints = properties.getFrameConstraints(localName);
+    
     List<Field> fieldList = frame.listAllFields();
     for (Field field : fieldList) {
-      
-      addField(properties, context, field, frame);
+      if (constraints == null || constraints.isIncludedProperty(field.getURI())) {
+        addField(properties, context, field, frame);
+      }
     }
     
     addSubtypes(properties, context, frame);

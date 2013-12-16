@@ -46,6 +46,7 @@ import org.semantictools.context.renderer.TreeGenerator;
 import org.semantictools.context.renderer.impl.NodeComparatorFactoryImpl;
 import org.semantictools.context.renderer.model.ContextProperties;
 import org.semantictools.context.renderer.model.CreateDiagramRequest;
+import org.semantictools.context.renderer.model.FrameConstraints;
 import org.semantictools.context.renderer.model.GlobalProperties;
 import org.semantictools.context.renderer.model.JsonContext;
 import org.semantictools.context.renderer.model.ObjectPresentation;
@@ -1309,13 +1310,17 @@ public class ContextHtmlPrinter extends PrintEngine {
     if (list.isEmpty())
       return null;
 
+    FrameConstraints constraints = contextProperties.getFrameConstraints(frame.getLocalName());
     for (Field field : list) {
       if (field.getMinCardinality() == 0 && field.getMaxCardinality() == 1
           && !field.getRdfType().canAsListType()
-          && context.getTermInfoByURI(field.getURI()) != null) {
+          && context.getTermInfoByURI(field.getURI()) != null 
+          && (constraints==null || constraints.isIncludedProperty(field.getURI()))
+      ) {
         return field;
       }
       RdfType type = field.getRdfType();
+      
       if (type != null && type.canAsFrame()) {
         Field result = getAnyOptionalField(history, type.asFrame());
         if (result != null)
@@ -1356,6 +1361,9 @@ public class ContextHtmlPrinter extends PrintEngine {
     List<Field> list = root.listAllFields();
     if (list.isEmpty())
       return null;
+    
+    FrameConstraints constraints = contextProperties.getFrameConstraints(root.getLocalName());
+    
 
     // Ideally, we'd rather not return an RDFS property (like "label")
     // or an OWL property (like "sameAs").
@@ -1365,11 +1373,13 @@ public class ContextHtmlPrinter extends PrintEngine {
       String uri = field.getType().getURI();
       if (uri != null && !uri.startsWith(RDFS.getURI())
           && !uri.startsWith(OWL.NS)
-          && context.getTermInfoByURI(field.getURI()) != null) {
+          && context.getTermInfoByURI(field.getURI()) != null
+          && (constraints==null || constraints.isIncludedProperty(field.getURI()))
+      ) {
         return field;
       }
     }
-    return list.get(0);
+    return null;
   }
 
   private void printFigure(String src, Caption caption) {
@@ -1912,14 +1922,13 @@ public class ContextHtmlPrinter extends PrintEngine {
     ){
       return;
     }
-
-    if (frame.getCategory() != RestCategory.ENUMERABLE && !frame.hasInstances())
-      return;
+    
+    if (frame.getCategory() != RestCategory.ENUMERABLE) return;
 
     List<NamedIndividual> list = frame.listInstances(false);
-
-    if (list.isEmpty())
-      return;
+    
+    
+    if (list.isEmpty()) return;
 
     Collections.sort(list, new Comparator<NamedIndividual>() {
 
@@ -2148,6 +2157,9 @@ public class ContextHtmlPrinter extends PrintEngine {
     println("</TD>");
 
     indent().print("<TD>");
+    if (field.isReadOnly()) {
+      print("<em>Read Only</em>. ");
+    }
     print(description);
     println("</TD>");
 

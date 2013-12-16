@@ -249,7 +249,7 @@ public class JsonSampleGenerator {
 
     boolean iriReference = term!=null && term.isCoercedAsIriRef();
     
-    if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE || frame.hasInstances()) {
+    if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE) {
       createEnumReference(branch, frame, callback);
       
     } else if (iriReference) {

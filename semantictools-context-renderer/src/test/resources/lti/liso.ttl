@@ -1,8 +1,12 @@
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
+@prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
 <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> a owl:Ontology  ;
@@ -17,21 +21,208 @@ liso:Result rdf:type owl:Class;
     rdfs:comment "A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader."
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      liso:normalScore;
+    rdfs:comment "The score earned by the learner before adding extra credit or subtracting penalties."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:extraCreditScore;
+    rdfs:comment "The number of exta credit points earned by the learner."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:penalty;
+    rdfs:comment "The number of points deducted from the normal score due to some penalty such as submitting an assignment after the due date."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:totalScore;
+    rdfs:comment """The total score on the assignment given by 
+<pre>
+    totalScore = normalScore + extraCreditScore - penalty
+</pre>
+This value does not take into account the effects of curving.
+"""
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:curvedScore;
+    rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:lineItem;
+    owl:allValuesFrom  liso:LineItem;
+    owl:minCardinality  1;
+    owl:maxCardinality  1;
+    rdfs:comment "The LineItem within which this Result is contained."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      liso:resultScore;
-    rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment."
+    rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade."
   ] ; 
-  rdfs:comment "A container that holds the result of some scorable activity or assignment." .
+  rdfs:comment "An object that holds the result of some scorable activity or assignment." .
 
-liso:Score rdf:type owl:Class ; 
-  rdfs:comment "The score that a learner has received for engaging in some activity or submitting an assignment." .
+liso:LineItem rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      rdfs:label;
+    owl:maxCardinality  1;
+    rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:assessmentContext;
+    rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:assessedActivity
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:scoreConstraints
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:result;
+    rdfs:comment "A result associated with this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:results;
+    owl:minCardinality  1;
+    rdfs:comment "The container holding the Results for this LineItem.  This property is <em>read-only</em>; it should not be supplied in POST or PUT requests."
+  ] .
+
+liso:ScoreConstraints rdf:type owl:Class ; 
+  rdfs:comment "The abstract base class for all the various kinds of constraints that might be imposed on the Results associated with a LineItem." .
+
+liso:NumericLimits rdf:type owl:Class ;
+  rdfs:subClassOf liso:ScoreConstraints ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:normalMaximum;
+    rdfs:comment "The maximum number of points that a learner may earn without extra credit."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:extraCreditMaximum;
+    rdfs:comment "The maximum number of extra credit points that a learner may earn."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:totalMaximum;
+    rdfs:comment """The maximum number of points that a learner may earn.  This value is given by
+<pre>
+    totalMaximum = normalMaximum + extraCreditMaximum
+</pre>"""
+  ] ; 
+  rdfs:comment "Defines the maximum values for numerical scores." .
+
+liso:ResultContainer rdf:type owl:Class ;
+  rdfs:subClassOf ldp:Container ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipPredicate;
+    owl:hasValue liso:result
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipSubject;
+    owl:allValuesFrom  liso:LineItem
+  ] ; 
+  rdfs:comment "A container that holds a collection of Result resources." .
+
+liso:LineItemContainer rdf:type owl:Class ;
+  rdfs:subClassOf ldp:Container ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipPredicate;
+    owl:hasValue liso:lineItem
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipSubject;
+    owl:allValuesFrom  liscm:Context
+  ] ; 
+  rdfs:comment "A container that holds a collection of LineItem resources." .
+
+liso:lineItem rdf:type rdf:Property ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      lti:LtiLink
+      liso:Result
+      liscm:Context
+    )
+  ] ;
+  rdfs:range liso:LineItem ;
+  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity." .
 
 liso:comment rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
   rdfs:range xsd:string ;
   rdfs:comment "A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader." .
 
+liso:normalScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The score earned by the learner before adding extra credit or subtracting penalties." .
+
+liso:extraCreditScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The number of exta credit points earned by the learner." .
+
+liso:penalty rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The number of points deducted from the normal score due to some penalty such as submitting an assignment after the due date." .
+
+liso:totalScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:float ;
+  rdfs:comment """The total score on the assignment given by 
+<pre>
+    totalScore = normalScore + extraCreditScore - penalty
+</pre>
+This value does not take into account the effects of curving.
+""" .
+
+liso:curvedScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score." .
+
 liso:resultScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range liso:Score ;
-  rdfs:comment "The score that the Learner received for engaging in some activity or submitting an assignment." .
+  rdfs:range rdfs:Literal ;
+  rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade." .
+
+liso:assessmentContext rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liscm:Context ;
+  owl:inverseOf liso:lineItem ;
+  rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context." .
+
+liso:assessedActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range exp:Activity .
+
+liso:scoreConstraints rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:ScoreConstraints .
+
+liso:result rdf:type rdf:Property ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:Result ;
+  owl:inverseOf liso:lineItem ;
+  rdfs:comment "A result associated with this LineItem." .
+
+liso:results rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:ResultContainer ;
+  rdfs:comment "The container holding the Results for this LineItem.  This property is <em>read-only</em>; it should not be supplied in POST or PUT requests." .
+
+liso:normalMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum number of points that a learner may earn without extra credit." .
+
+liso:extraCreditMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment "The maximum number of extra credit points that a learner may earn." .
+
+liso:totalMaximum rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:NumericLimits ;
+  rdfs:range xsd:float ;
+  rdfs:comment """The maximum number of points that a learner may earn.  This value is given by
+<pre>
+    totalMaximum = normalMaximum + extraCreditMaximum
+</pre>""" .
 

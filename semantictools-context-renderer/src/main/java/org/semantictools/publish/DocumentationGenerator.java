@@ -206,7 +206,7 @@ public class DocumentationGenerator {
     }
     
     ServiceDocumentationPrinter servicePrinter = new ServiceDocumentationPrinter(rewriter);
-    ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(global, contextManager, serviceFileManager, servicePrinter);
+    ServiceDocumentationManager serviceManager = new ServiceDocumentationManager(typeManager, global, contextManager, serviceFileManager, servicePrinter);
     serviceManager.scan(rdfDir);
     if (generate) {
       serviceManager.writeAll();

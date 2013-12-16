@@ -1,0 +1,58 @@
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://www.w3.org/ns/ldp#> a owl:Ontology  ;
+  rdfs:label "W3C Linked Data Platform" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "ldp" .
+
+ldp:Container rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipPredicate;
+    owl:minCardinality  1;
+    rdfs:comment "Indicates which predicate of the container's subject should be used to determine membership in the container."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipSubject;
+    owl:minCardinality  1;
+    rdfs:comment "Indicates which resource is the subject for the members of the container."
+  ] ; 
+  rdfs:comment "A container that holds a collection of resources.  New resources are added to the container by submitting an HTTP POST request to the container endpoint. " .
+
+ldp:Page rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:pageOf;
+    owl:minCardinality  1;
+    rdfs:comment "Associates a page with its container."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:nextPage;
+    owl:minCardinality  1
+  ] ; 
+  rdfs:comment "A resource that represents a limited set of members of a LDP Container." .
+
+ldp:membershipPredicate rdf:type owl:FunctionalProperty ;
+  rdfs:domain ldp:Container ;
+  rdfs:range rdf:Property ;
+  rdfs:comment "Indicates which predicate of the container's subject should be used to determine membership in the container." .
+
+ldp:membershipSubject rdf:type owl:FunctionalProperty ;
+  rdfs:domain ldp:Container ;
+  rdfs:range rdfs:Resource ;
+  rdfs:comment "Indicates which resource is the subject for the members of the container." .
+
+ldp:pageOf rdf:type owl:FunctionalProperty ;
+  rdfs:domain ldp:Page ;
+  rdfs:range ldp:Container ;
+  rdfs:comment "Associates a page with its container." .
+
+ldp:nextPage rdf:type owl:FunctionalProperty ;
+  rdfs:domain ldp:Page ;
+  rdfs:range ldp:Page .
+

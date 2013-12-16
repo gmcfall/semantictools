@@ -39,56 +39,70 @@ import org.semantictools.context.renderer.model.ResponseInfo;
 import org.semantictools.context.renderer.model.ServiceDocumentation;
 import org.semantictools.context.renderer.model.ServiceFileManager;
 import org.semantictools.context.view.ServiceDocumentationPrinter;
+import org.semantictools.context.view.StringUtil;
+import org.semantictools.frame.model.Frame;
+import org.semantictools.frame.model.Uri;
 import org.semantictools.index.model.ServiceDocumentationList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ServiceDocumentationManager {
 
-  private static final String TITLE = "title";
-  private static final String SUBTITLE = "subtitle";
-  private static final String CONTENT_NEGOTIATION = "contentNegotiation";
-  private static final String MEDIATYPE = "mediaType";
-  private static final String RDFTYPE = "rdfType";
-  private static final String STATUS = "status";
-  private static final String DATE = "date";
+  private static final Logger logger = LoggerFactory.getLogger(ServiceDocumentationManager.class);
+  
   private static final String ABSTRACT = "abstract";
-  private static final String EDITORS = "editors";
   private static final String AUTHORS = "authors";
-  private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
-  private static final String INTRODUCTION = "introduction";
-  private static final String METHODS = "methods";
-  private static final String GET_INSTRUCTIONS = "GET.instructions";
-  private static final String GET_SUMMARY = "GET.summary";
-  private static final String QUERY_PARAM = "GET?";
-  private static final String GET_REQUEST_HEADERS = "GET.requestHeaders";
+  private static final String CONTAINER_RDFTYPE = "container.rdfType";
+  private static final String CONTAINER_GET_MEDIATYPE = "container.GET.mediaType";
+  private static final String CONTAINER_GET_PARAM = "container.GET?";
+  private static final String CONTENT_NEGOTIATION = "contentNegotiation";
+  private static final String DATE = "date";
   private static final String DEFAULT_MEDIA_TYPE = "GET.default.mediaType";
+  private static final String EDITORS = "editors";
+  private static final String ENABLE_VERSION_HISTORY = "enableVersionHistory";
+  private static final String GET_INSTRUCTIONS = "GET.instructions";
   private static final String GET_REQUEST_BODY = "GET.requestBody";
-  private static final String POST_RESPONSE_MEDIATYPE = "POST.response.mediaType";
-  private static final String URL_TEMPLATES = "urlTemplates";
+  private static final String GET_REQUEST_BODY_DEFAULT = "The request body must be empty.";
+  private static final String GET_REQUEST_HEADERS = "GET.requestHeaders";
+  private static final String GET_STATUS = "GET.status.";
+  private static final String GET_SUMMARY = "GET.summary";
   private static final String HTML_FORMAT_DOCUMENTATION = "htmlFormatDocumentation";
+  private static final String INTRODUCTION = "introduction";
+  private static final String MEDIATYPE = "mediaType";
   private static final String MEDIA_TYPE_URI_PREFIX = "mediaType.uri.";
+  private static final String METHODS = "methods";
+  private static final String POST_CREATED_DESCRIPTION = "POST.created.description";
   private static final String POST_PROCESSING_RULES = "POST.processing.rules";
-  private static final String REPRESENTATIONS_HEADING = "representations.heading";
-  private static final String REPRESENTATIONS_TEXT = "representations.text";
+  private static final String POST_REQUEST_MEDIATYPE = "POST.request.mediaType";
+  private static final String POST_RESPONSE_MEDIATYPE = "POST.response.mediaType";
   private static final String PUT_INSTRUCTIONS = "PUT.instructions";
   private static final String PUT_RULES = "PUT.rules";
-  private static final String POST_CREATED_DESCRIPTION = "POST.created.description";
-  
-  private static final String GET_REQUEST_BODY_DEFAULT = "The request body must be empty.";
+  private static final String QUERY_PARAM = "GET?";
+  private static final String RDFTYPE = "rdfType";
+  private static final String REPRESENTATIONS_HEADING = "representations.heading";
+  private static final String REPRESENTATIONS_TEXT = "representations.text";
+  private static final String STATUS = "status";
+  private static final String SUBTITLE = "subtitle";
+  private static final String TITLE = "title";
+  private static final String URL_TEMPLATES = "urlTemplates";
   
   private Map<String, ServiceDocumentationList> map = new HashMap<String, ServiceDocumentationList>();
   private ContextManager contextManager;
+  private TypeManager typeManager;
   private ServiceFileManager serviceFileManager;
   private ServiceDocumentationPrinter printer;
   private DocumentMetadata global;
   
   
   public ServiceDocumentationManager(
+      TypeManager typeManager,
       DocumentMetadata global,
       ContextManager contextManager, 
       ServiceFileManager fileManager, 
       ServiceDocumentationPrinter printer
   ) {
+    this.typeManager = typeManager;
     this.global = global;
     this.contextManager = contextManager;
     serviceFileManager = fileManager;
@@ -155,6 +169,12 @@ public class ServiceDocumentationManager {
         sink.setSubtitle(value);
       } else if (RDFTYPE.equals(key)) {
         setRdfType(sink, value);
+      } else if (CONTAINER_RDFTYPE.equals(key)) {
+        sink.setContainerType(new Uri(value));
+      } else if (CONTAINER_GET_MEDIATYPE.equals(key)) {
+        setContainerGetMediaType(sink, value);
+      } else if (key.startsWith(CONTAINER_GET_PARAM)) {
+        addContainerGetParam(sink, key, value);
       } else if (CONTENT_NEGOTIATION.equals(key)) {
         sink.setContentNegotiation("true".equals(value));
       } else if (STATUS.equals(key)) {
@@ -183,6 +203,8 @@ public class ServiceDocumentationManager {
         setGetRequestHeaders(sink, value);
       } else if (key.startsWith(QUERY_PARAM)) {
         addQueryParam(sink, key, value);
+      } else if (POST_REQUEST_MEDIATYPE.equals(key)) {
+        setPostRequestMediaType(sink, value);
       } else if (POST_RESPONSE_MEDIATYPE.equals(key)) {
         setPostResponseMediaType(sink, value);
       } else if (URL_TEMPLATES.equals(key)) {
@@ -205,13 +227,59 @@ public class ServiceDocumentationManager {
     }
 
     validate(sink);
-    addDefaults(sink, methodInfo);
+    addDefaults(properties, sink, methodInfo);
     
     put(sink);
     
   }
 
 
+
+  private void setContainerGetMediaType(ServiceDocumentation sink, String value) {
+   
+    MethodDocumentation method = sink.getContainerGetDocumentation();
+    if (method == null) {
+      sink.setContainerGetDocumentation(method = new MethodDocumentation());
+    }
+    List<String> list = method.getResponseMediaTypes();
+    
+    StringTokenizer tokens = new StringTokenizer(value);
+    while (tokens.hasMoreTokens()) {
+      list.add(tokens.nextToken());
+    }
+    
+  }
+
+  private void setPostRequestMediaType(ServiceDocumentation sink, String value) {
+
+    MethodDocumentation method = sink.getPostDocumentation();
+    if (method == null) {
+      method = new MethodDocumentation();
+      sink.setPostDocumentation(method);
+    }
+    List<String> list = method.getRequestContentTypes();
+    StringTokenizer tokens = new StringTokenizer(value);
+    while (tokens.hasMoreTokens()) {
+      list.add(tokens.nextToken());
+    }
+  }
+
+  private void setGetStatus(Properties properties, ServiceDocumentation sink) {
+    
+    MethodDocumentation method = sink.getGetDocumentation();
+    for (ResponseInfo info : ResponseInfo.all) {
+      StringBuilder builder = new StringBuilder();
+      builder.append(GET_STATUS);
+      builder.append(info.getStatusCode());
+      String key = builder.toString();
+      String description = properties.getProperty(key);
+      if (description != null) {
+        info = info.copy(description);
+        method.add(info);
+      }
+    }
+    
+  }
 
   private void setPutRules(ServiceDocumentation sink, String value) {
     StringTokenizer tokens = new StringTokenizer(value, "\r\n");
@@ -222,14 +290,41 @@ public class ServiceDocumentationManager {
     
   }
 
-  private void addQueryParam(ServiceDocumentation doc, String key, String value) {
+
+  private void addContainerGetParam(ServiceDocumentation sink, String key,
+      String value) {
+    
+    MethodDocumentation method = sink.getContainerGetDocumentation();
+    if (method == null) {
+      method = new MethodDocumentation();
+      sink.setContainerGetDocumentation(method);
+    }
+    
     int qmark = key.indexOf('?');
     String paramName = key.substring(qmark+1);
     QueryParam param = new QueryParam();
     param.setName(paramName);
     param.setDescription(value);
     
-    doc.getQueryParams().add(param);
+    method.add(param);
+    
+  }
+
+  private void addQueryParam(ServiceDocumentation doc, String key, String value) {
+    
+    MethodDocumentation method = doc.getGetDocumentation();
+    if (method == null) {
+      method = new MethodDocumentation();
+      doc.setGetDocumentation(method);
+    }
+    
+    int qmark = key.indexOf('?');
+    String paramName = key.substring(qmark+1);
+    QueryParam param = new QueryParam();
+    param.setName(paramName);
+    param.setDescription(value);
+    
+    method.add(param);
     
     
   }
@@ -240,14 +335,14 @@ public class ServiceDocumentationManager {
   }
 
   private void setRdfType(ServiceDocumentation sink, String value) {
-    sink.setRdfTypeURI(value);
+    sink.setRdfType(new Uri(value));
   }
 
   private void put(ServiceDocumentation sink) {
-    ServiceDocumentationList list = map.get(sink.getRdfTypeURI());
+    ServiceDocumentationList list = map.get(sink.getRdfType().stringValue());
     if (list == null) {
-      list = new ServiceDocumentationList(sink.getRdfTypeURI());
-      map.put(sink.getRdfTypeURI(), list);
+      list = new ServiceDocumentationList(sink.getRdfType().stringValue());
+      map.put(sink.getRdfType().stringValue(), list);
     }
     list.add(sink);
     
@@ -336,12 +431,20 @@ public class ServiceDocumentationManager {
   }
 
   private void validate(ServiceDocumentation sink) {
-    if (sink.getRdfTypeURI() == null) {
+    if (sink.getRdfType() == null) {
       throw new ServiceDocumentationSyntaxError("rdfType is not not defined");
     }
     if (sink.listContextProperties().isEmpty()) {
       throw new ServiceDocumentationSyntaxError("'mediaType property' is missing");
     }
+    
+    Frame frame = typeManager.getFrameByUri(sink.getRdfType().stringValue());
+    
+    if (frame == null) {
+      throw new RuntimeException("Frame not found: " + sink.getRdfType().stringValue());
+    }
+    
+    sink.setFrame(frame);
     
   }
 
@@ -398,11 +501,11 @@ public class ServiceDocumentationManager {
     return localName;
   }
   
-  private void addDefaults(ServiceDocumentation doc, ServiceMethodInfo methodInfo) {
+  private void addDefaults(Properties properties, ServiceDocumentation doc, ServiceMethodInfo methodInfo) {
     List<ContextProperties> contextList = doc.listContextProperties();
     if (contextList.isEmpty()) return;
     
-    String typeName = getLocalName(doc.getRdfTypeURI());
+    String typeName = doc.getRdfType().getLocalName();
 
     setServiceDocumentationFile(doc);
     setCssFile(doc);
@@ -412,14 +515,113 @@ public class ServiceDocumentationManager {
     setAbstractText(doc, typeName);
     setIntroduction(doc, typeName);
     setRepresentationHeading(doc, typeName);
-    setRepresentationText(doc, typeName);
     setPostDoc(doc, methodInfo, typeName);
-    setGetDoc(doc, typeName);
+    setGetDoc(properties, doc, typeName);
+    setContainerGetDoc(properties, doc, typeName);
     setPutDoc(doc, typeName);
     setDeleteDoc(doc, typeName);
-    setGetResponseDefault(doc);
+    setRepresentationText(doc, typeName);
   }
   
+
+  private void setContainerGetDoc(Properties properties,  ServiceDocumentation doc, String typeName) {
+    
+    
+    Frame frame = doc.getFrame();
+    
+    List<Frame> containerList = frame.getContainerList();
+    if (containerList == null || containerList.isEmpty()) {
+      return;
+    }
+    
+    MethodDocumentation method = doc.getContainerGetDocumentation();
+    if (method == null) {
+      method = new MethodDocumentation();
+      doc.setContainerGetDocumentation(method);
+    }
+    Uri containerType = null;
+    String containerURI = null;
+    if (doc.getContainerType() != null) {
+      containerType = doc.getContainerType();
+    } else  {
+      containerType = new Uri(containerList.get(0).getUri());
+      doc.setContainerType(containerType);
+    }
+   
+    // TODO: deal with the cases where there is more than one acceptable containerFormat or
+    //       more than one container type.
+    
+    
+    String summary = method.getSummary();
+    if (summary == null) {
+      
+      summary = MessageFormat.format(
+        "To get a paginated list of {0} resources from a {1}, the client submits an HTTP " +
+        "GET request to the container endpoint in accordance with the following rules:", 
+        typeName, containerType.getLocalName());
+      method.setSummary(summary);
+    }
+
+    String containerFormat = null;
+    List<String> list = method.getResponseMediaTypes();
+    if (list.isEmpty()) {
+      List<ContextProperties> contextList = 
+          contextManager.listContextPropertiesForClass(containerType.stringValue());
+      
+      if (!contextList.isEmpty()) {
+        ContextProperties p = contextList.get(0);
+        containerFormat = p.getMediaType();
+      }
+    }
+    if (containerFormat == null) {
+      List<String> responseTypeList = method.getResponseMediaTypes();
+      containerFormat = responseTypeList.isEmpty() ? "???" : responseTypeList.get(0);
+    }
+    if (list.isEmpty()) {
+      list.add(containerFormat);
+    }
+    
+    
+    // Request Headers
+    method.addRequestHeader("Authorization", "Authorization parameters dictated by the OAuth Body Hash Protocol");
+    
+    // Status Codes
+    
+    
+    if (!method.contains(ResponseInfo.OK)) {
+
+      
+      String description = MessageFormat.format(
+        "<p>The request was successful.</p>\n" +
+        "<p>The response body contains the first <a href=\"http://www.w3.org/TR/ldp/#paging\">Page</a>\n" +
+        "of {0} resources in the format defined by the <code>{1}</code> media type. This Page has its own URL\n" +
+        "which is distinct from the URL of the <code>{2}</code>. The URL of the first Page is supplied in\n" +
+        "the <code>Content-Location</code> header.</p>\n" +
+        "<p>Clients should be aware that a server may send a 303 redirect to the first Page (see below)\n" +
+        "instead of delivering this Page directly in the entity body. Likewise a server may send a 301\n" +
+        "or 307 redirect.", 
+        typeName, containerFormat, containerType.getLocalName());
+      
+      method.add(ResponseInfo.OK.copy(description));
+    }
+    
+    method.add(ResponseInfo.MOVED_PERMANENTLY);
+   
+    if (!method.contains(ResponseInfo.SEE_OTHER)) {
+      String description = MessageFormat.format(
+        "This status code signals that the <code>{0}</code> itself cannot be delivered in the response.\n" +
+        "Instead, the client may receive the first page from a paginated list of {1} resources at the\n" +
+        "address specified by the <code>Location</code> header.", 
+        containerType.getLocalName(), typeName);
+      method.add(ResponseInfo.SEE_OTHER.copy(description));
+    }
+    method.add(ResponseInfo.TEMPORARY_REDIRECT);
+    method.add(ResponseInfo.UNAUTHORIZED);
+    method.add(ResponseInfo.NOT_FOUND);
+    method.add(ResponseInfo.INTERNAL_SERVER_ERROR);
+  }
+
+
 
   private void setCssFile(ServiceDocumentation doc) {
 
@@ -431,7 +633,7 @@ public class ServiceDocumentationManager {
   }
 
   private void setServiceDocumentationFile(ServiceDocumentation doc) {
-    doc.setServiceDocumentationFile(serviceFileManager.getServiceDocumentationFile(doc.getRdfTypeURI()));
+    doc.setServiceDocumentationFile(serviceFileManager.getServiceDocumentationFile(doc.getRdfType().stringValue()));
   }
 
   private void setMethods(ServiceDocumentation doc) {
@@ -454,7 +656,7 @@ public class ServiceDocumentationManager {
   }
 
 
-  private void setGetDoc(ServiceDocumentation doc, String typeName) {
+  private void setGetDoc(Properties properties, ServiceDocumentation doc, String typeName) {
 
     if (doc.getGetDocumentation()==null) {
      
@@ -472,9 +674,10 @@ public class ServiceDocumentationManager {
       method.setRequestBodyRequirement(GET_REQUEST_BODY_DEFAULT);
       
       
-      setGetResponseDefault(doc);
       
     }
+    setGetStatus(properties, doc);
+    setGetResponseDefault(doc);
     
   } 
   
@@ -555,7 +758,7 @@ public class ServiceDocumentationManager {
         builder.append("  <LI><code>text/html</code>\n");
       }
       if (doc.isAllowArbitraryFormat()) {
-        String type = TypeManager.getLocalName(doc.getRdfTypeURI());
+        String type = doc.getRdfType().getLocalName();
         builder.append("  <LI> ...any other media type for ");
         builder.append(article(type));
         builder.append(type);
@@ -647,7 +850,7 @@ public class ServiceDocumentationManager {
       }
       builder.append("</UL>\n");
       if (doc.isAllowArbitraryFormat()) {
-        String typeName = TypeManager.getLocalName(doc.getRdfTypeURI());
+        String typeName = doc.getRdfType().getLocalName();
         builder.append("<p>Or any arbitrary media type for ");
         builder.append(article(typeName));
         builder.append(typeName);
@@ -711,65 +914,106 @@ public class ServiceDocumentationManager {
 
   private void setPostDoc(ServiceDocumentation doc, ServiceMethodInfo methodInfo, String typeName) {
     List<HttpMethod> list = doc.getMethodList();
-    if (!list.isEmpty() && !list.contains(HttpMethod.POST)) {
+    if (!list.contains(HttpMethod.POST)) {
       return;
     }
-    if (doc.getPostDocumentation()==null) {
+    
+    MethodDocumentation method=doc.getPostDocumentation();
+    if (method == null) {
+      method = new MethodDocumentation();
+      doc.setPostDocumentation(method);
+    }
+    
+    if (method.getSummary()==null) {
       String pattern =
           "To create a new {0} instance within the server, a client submits an HTTP POST request to the server''s " +
-          "{0} collection endpoint in accordance with the following rules: ";
+          "{0} container endpoint in accordance with the following rules: ";
      
-      MethodDocumentation method = new MethodDocumentation();
-      doc.setPostDocumentation(method);
-      
       method.setSummary(format(pattern, typeName));   
-      
-      addContentTypeHeader(doc, method);
-      method.addRequestHeader("Authorization", "<em>Authorization parameters dictated by the OAuth Body Hash Protocol</em>");
-      
+    }
+    
+    if (method.getRequestBodyRequirement() == null) {
       method.setRequestBodyRequirement(
         "The request body MUST be a JSON document that conforms to the format specified by the Content-Type header.");
-      
-
-      
-      String createdDescription = null;
-      
-      String idMediaType = doc.getPostResponseMediaType();
-      if (idMediaType == null) {
-        createdDescription = "The request has succeeded.\n" +
-        "<p>The reponse will contain an empty body.</p>";
-      } else {
-        ContextProperties context = contextManager.getContextPropertiesByMediaType(idMediaType);
-        if (context == null) {
-          throw new ServiceDocumentationSyntaxError("Unknown media type: " + idMediaType);
-        }
-        LinkManager linkManager = new LinkManager(doc.getServiceDocumentationFile());
-        String href = linkManager.relativize(context.getMediaTypeDocFile());
-        StringBuilder anchor = new StringBuilder();
-        appendAnchor(anchor, href, idMediaType);
-        createdDescription = methodInfo.getPostCreatedDescription();
-        if (createdDescription == null) {
-            createdDescription = 
-              "The request has succeeded.\n" +
-              "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
-              "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
-              "The <code>Content-Type</code> header of the response will be set to this media type.";
-        }
-        createdDescription = format(createdDescription, typeName, anchor.toString());
-        
-      }
-      
-      
-      addResponse(method, ResponseInfo.CREATED.copy(createdDescription));
-      addResponse(method, ResponseInfo.BAD_REQUEST);
-      addResponse(method, ResponseInfo.UNAUTHORIZED);
-      addResponse(method, ResponseInfo.INTERNAL_SERVER_ERROR);
     }
+
+    applyRequestMediaTypes(doc, method);
+
+    String idMediaType = doc.getPostResponseMediaType();
+    String createdDescription = null;
+      
+    // TODO: Support the option of multiple response types, in which case one of them
+    //       will be a default, but others may be requested via the Accept header.
+    
+    if (idMediaType == null) {
+      createdDescription = "The request has succeeded.\n" +
+      "<p>The reponse will contain an empty body.</p>";
+    } else {
+      
+      ContextProperties context = contextManager.getContextPropertiesByMediaType(idMediaType);
+      if (context == null) {
+        throw new ServiceDocumentationSyntaxError("Unknown media type: " + idMediaType);
+      }
+      LinkManager linkManager = new LinkManager(doc.getServiceDocumentationFile());
+      String href = linkManager.relativize(context.getMediaTypeDocFile());
+      StringBuilder anchor = new StringBuilder();
+      appendAnchor(anchor, href, idMediaType);
+      createdDescription = methodInfo.getPostCreatedDescription();
+      if (createdDescription == null) {
+          createdDescription = 
+            "The request has succeeded.\n" +
+            "<p>The response contains a small JSON document that provides the endpoint URI for the newly created " +
+            "<code>{0}</code> resource.  This JSON document must conform to the <code>{1}</code> format.  " +
+            "The <code>Content-Type</code> header of the response will be set to this media type.";
+      }
+      createdDescription = format(createdDescription, typeName, anchor.toString());
+      
+    }
+
+    method.addRequestHeader("Authorization", "<em>Authorization parameters dictated by the OAuth Body Hash Protocol</em>");
+    
+    
+    addResponse(method, ResponseInfo.CREATED.copy(createdDescription));
+    addResponse(method, ResponseInfo.BAD_REQUEST);
+    addResponse(method, ResponseInfo.UNAUTHORIZED);
+    addResponse(method, ResponseInfo.INTERNAL_SERVER_ERROR);
+   
     
   }
   
   
 
+
+  private void applyRequestMediaTypes(ServiceDocumentation doc, MethodDocumentation method) {
+    
+    List<String> typeList = method.getRequestContentTypes();
+    String value = null;
+    if (!typeList.isEmpty()) {
+      
+      if (typeList.size() == 1) {
+        value = typeList.get(0);
+      } else {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<em>One of</em>\n");
+        builder.append("<ul>\n");
+        for (String type : typeList) {
+          builder.append("<li><code>");
+          builder.append(type);
+          builder.append("</code>\n");
+        }
+        builder.append("</ul>");
+        value = builder.toString();
+      }
+    } else if (doc.isAllowArbitraryFormat()) {
+      value = "<em>An arbitrary media type</em>";
+    }
+    
+    if (value != null) {
+      method.addRequestHeader("Content-Type", value);
+    }
+    
+    
+  }
 
   private void appendAnchor(StringBuilder builder, String href, String text) {
     builder.append("<a href=\"");
@@ -788,10 +1032,11 @@ public class ServiceDocumentationManager {
         String mediaType = list.get(0).getMediaType();
         String mediaTypeRef = list.get(0).getMediaTypeRef();
         String pattern =
-            "<code>{0}</code> resources manipulated via this REST API are represented as JSON documents in " +
-            "the <code>{1}</code> format.  For detailed information about this media type, see {2}.";
+            "<p><code>{0}</code> resources manipulated via this REST API are represented as JSON documents in " +
+            "the <code>{1}</code> format.  For detailed information about this media type, see {2}.</p>";
         
         doc.setRepresentationText(format(pattern, typeName, mediaType, mediaTypeRef));
+        
         
       } else {
         StringBuilder builder = new StringBuilder();
@@ -852,6 +1097,46 @@ public class ServiceDocumentationManager {
         
       }
       
+      MethodDocumentation method = doc.getContainerGetDocumentation();
+      if (method != null) {
+        
+        String text = null;
+        List<String> mediaTypeList = method.getResponseMediaTypes();
+        
+        String containerName = doc.getContainerType().getLocalName();
+        String containerArticle = StringUtil.article(containerName);
+        
+        if (mediaTypeList.size()==1) {
+          
+          String containerMediaType = mediaTypeList.get(0);
+          ContextProperties context = contextManager.getContextPropertiesByMediaType(containerMediaType);
+          
+          if (context == null) {
+            logger.warn("ContextProperties not found: " + containerMediaType);
+          } else {
+            String containerFormat = context.getMediaTypeRef();
+            String pattern = 
+                "<p>It is also possible to obtain a paginated list of <code>{0}</code> resources from " +
+                "{1} <code>{2}</code> in the <code>{3}</code> format.  For detailed information about this media type, " +
+                "see {4}."
+                ;
+            
+            text = MessageFormat.format(pattern, typeName, containerArticle, containerName, containerMediaType, containerFormat);
+            
+          }
+              
+        }
+        
+        // TODO: handle the case where mediaTypeList.size() > 1
+        
+        if (text != null) {
+          StringBuilder builder = new StringBuilder(doc.getRepresentationText());
+          builder.append("\n");
+          builder.append(text);
+          
+          doc.setRepresentationText(builder.toString());
+        }
+      }
     }
     
   }
@@ -896,7 +1181,7 @@ public class ServiceDocumentationManager {
             "</P>\n" +
             "<P>Implementations of this REST API may be incomplete; a given server " +
             "might support only a subset of the HTTP verbs. A server that supports the complete API will \n" +
-            "expose two different kinds of endpoints: a <em>collection</em> endpoint for receiving POST \n" +
+            "expose two different kinds of endpoints: a <em>container</em> endpoint for receiving POST \n" +
             "requests and <em>item</em> endpoints for manipulating individual instances.  This specification \n" +
             "document does not prescribe a method for discovering the endpoint URLs.</P>"
             ;
@@ -1019,7 +1304,7 @@ public class ServiceDocumentationManager {
     
     String text = printer.print(doc);
     
-    File htmlFile = serviceFileManager.getServiceDocumentationFile(doc.getRdfTypeURI());
+    File htmlFile = serviceFileManager.getServiceDocumentationFile(doc.getRdfType().stringValue());
     htmlFile.getParentFile().mkdirs();
     
     OutputStream out = new FileOutputStream(htmlFile);

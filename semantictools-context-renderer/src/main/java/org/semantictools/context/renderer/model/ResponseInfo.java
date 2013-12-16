@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.semantictools.context.renderer.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ResponseInfo {
   public final static ResponseInfo OK = new ResponseInfo(200, "OK", "The request was successful.");
   
@@ -27,9 +30,15 @@ public class ResponseInfo {
       "processing actually takes place. There is no facility for re-sending a status code from " +
       "an asynchronous operation such as this.");
   
+  public final static ResponseInfo SEE_OTHER = new ResponseInfo(303, "See Other", 
+      "The correct response can be found under the URI specified by the LOCATION header.  This status " +
+      "indicates that the requested entity itself cannot be delivered by the server, but there is a " +
+      "related resource that contains information about or related to the requested entity at the " +
+      "specified LOCATION.");
+  
   public final static ResponseInfo MOVED_PERMANENTLY = new ResponseInfo(301, "Moved Permanently", 
       "The URI for the requested resource has changed.  <p>In this case, the response body is empty, " +
-      "and the new URI is provided in the <code>Location</code> header field.  The client should " +
+      "and the new URI is provided in the <code>Location</code> header.  The client should " +
       "GET the resource from the new location, and furthermore, it should send all future requests " +
       "to the new location as well.</p>");
   
@@ -53,6 +62,22 @@ public class ResponseInfo {
   
   public final static ResponseInfo NOT_ACCEPTABLE = new ResponseInfo(406, "Not Acceptable",
       "The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request.");
+  
+  
+  public static final List<ResponseInfo> all = new ArrayList<ResponseInfo>();
+  static {
+    all.add(ACCEPTED);
+    all.add(BAD_REQUEST);
+    all.add(CREATED);
+    all.add(INTERNAL_SERVER_ERROR);
+    all.add(MOVED_PERMANENTLY);
+    all.add(NOT_ACCEPTABLE);
+    all.add(NOT_FOUND);
+    all.add(OK);
+    all.add(SEE_OTHER);
+    all.add(TEMPORARY_REDIRECT);
+    all.add(UNAUTHORIZED);
+  }
   
   private int code;
   private String label;

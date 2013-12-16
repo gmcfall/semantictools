@@ -33,6 +33,7 @@ public class TreeNode implements Comparable<TreeNode> {
   
   private int minCardinality;
   private int maxCardinality;
+  private boolean readOnly;
   private String description="";
   private ObjectPresentation objectPresentation = ObjectPresentation.NONE;
   private Kind kind = Kind.PROPERTY;
@@ -149,6 +150,14 @@ public class TreeNode implements Comparable<TreeNode> {
       }
       Collections.sort(children);
     }
+  }
+
+  public boolean isReadOnly() {
+    return readOnly;
+  }
+
+  public void setReadOnly(boolean readOnly) {
+    this.readOnly = readOnly;
   }
   
   

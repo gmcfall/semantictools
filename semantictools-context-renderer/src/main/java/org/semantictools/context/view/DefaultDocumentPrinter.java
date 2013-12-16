@@ -427,55 +427,7 @@ public class DefaultDocumentPrinter extends PrintEngine implements DocumentPrint
   @Override
   public void printReferences() {
 
-    ReferenceManager manager = metadata.getReferenceManager();
-    if (manager == null) {
-      return;
-    }
-    
-    String text = popText();
-    
-    List<BibliographicReference> targetList = new ArrayList<BibliographicReference>();
-    List<BibliographicReference> list = manager.listReferences();
-    Collections.sort(list);
-    for (BibliographicReference ref : list) {
-      String htmlLabel = ref.htmlLabel();
-      String textLabel = ref.textLabel();
-      if (text.contains(htmlLabel) || text.contains(textLabel)) {
-        targetList.add(ref);
-      }
-    }
-    
-    
-    if (targetList.isEmpty()) {
-      print(text);
-      return;
-    }
-    
-    linkToBibliography(targetList, text);
-    
-    
-    
-    Heading heading = createHeading("References");
-    print(heading);
-    indent().print("<DL");
-    printAttr("class", "references");
-    println(">");
-    File thisFile = metadata.getLocalFile();
-    LinkManager linkManager = thisFile==null ? null : new LinkManager(thisFile);
-    
-    for (BibliographicReference r : targetList) {
-      
-      File otherFile = r.getLocalFile();
-      if (otherFile != null && thisFile !=null) {
-        String uri = linkManager.relativize(otherFile);
-        r.setUri(uri);
-      }
-      String html = r.htmlText();
-      
-      indent().print("<DT>");
-      printReferenceAnchor(r).println("</DT>");
-      indent().print("<DD>").print(html).println("</DD>");
-    }
+    printReferences(null);
     
     
   }
@@ -766,7 +718,9 @@ public class DefaultDocumentPrinter extends PrintEngine implements DocumentPrint
   
   @Override
   public void printListItem(String text) {
-    indent().print("<LI>").print(text).println("</LI>");
+    if (text != null) {
+      indent().print("<LI>").print(text).println("</LI>");
+    }
     
   }
 
@@ -813,5 +767,72 @@ public class DefaultDocumentPrinter extends PrintEngine implements DocumentPrint
     
     return result;
   }
+  
+  @Override
+  public Heading createHeading(Level level, String text, String id) {
+    Heading heading = new Heading(level, text, id);
+    currentHeading.add(heading);
+    return heading;
+  }
 
+
+  @Override
+  public void printReferences(HeadingPrinter headingPrinter) {
+    ReferenceManager manager = metadata.getReferenceManager();
+    if (manager == null) {
+      return;
+    }
+    
+    String text = popText();
+    
+    List<BibliographicReference> targetList = new ArrayList<BibliographicReference>();
+    List<BibliographicReference> list = manager.listReferences();
+    Collections.sort(list);
+    for (BibliographicReference ref : list) {
+      String htmlLabel = ref.htmlLabel();
+      String textLabel = ref.textLabel();
+      if (text.contains(htmlLabel) || text.contains(textLabel)) {
+        targetList.add(ref);
+      }
+    }
+    
+    
+    if (targetList.isEmpty()) {
+      print(text);
+      return;
+    }
+    
+    linkToBibliography(targetList, text);
+    
+    
+    
+    Heading heading = createHeading(Level.H2, "References", "References");
+    if (headingPrinter == null) {
+      print(heading);
+    } else {
+      headingPrinter.print(heading);
+    }
+    indent().print("<DL");
+    printAttr("class", "references");
+    println(">");
+    File thisFile = metadata.getLocalFile();
+    LinkManager linkManager = thisFile==null ? null : new LinkManager(thisFile);
+    
+    for (BibliographicReference r : targetList) {
+      
+      File otherFile = r.getLocalFile();
+      if (otherFile != null && thisFile !=null) {
+        String uri = linkManager.relativize(otherFile);
+        r.setUri(uri);
+      }
+      String html = r.htmlText();
+      
+      indent().print("<DT>");
+      printReferenceAnchor(r).println("</DT>");
+      indent().print("<DD>").print(html).println("</DD>");
+    }
+    
+  }
+
+  
 }

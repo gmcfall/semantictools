@@ -1071,6 +1071,7 @@ function Field(uml, parent, umlPackage, universe) {
   this.stereotypeName = null;
   this.isXmlAttribute = false;
   this.isXmlValue = false;
+  this.isFunctional = null;
   this.visibility = null;
   this.ordinal = 1000;
   this.inverseOf = null;
@@ -1170,8 +1171,9 @@ function Field_handleAttachment(key, value) {
     this.domainURI = value;
   } if (key == "uri") {
     this.uri = value;
-    
-  } 
+  } if (key == "functional") {
+    this.isFunctional = value;
+  }
   if (key == "preserveRestriction") {
     this.preserveRestriction = "true" == value;
   }
@@ -1521,6 +1523,7 @@ function OntologyWriter_printRestrictions(delim, rdfClass) {
         this.print(r.minCardinality);
         
       }
+      logger.debug("    " + r.property.name + ": maxCardinality=" + r.maxCardinality + ", functional=" + functional);
       if (r.maxCardinality && r.maxCardinality != INFINITY && !functional) {
         this.println(";");
         this.indent().print(maxCardinality);
@@ -2623,6 +2626,11 @@ function RdfProperty(ontology, name, umlField) {
   this.usage = new Array();
   this.domainList = new Array();
   this.rangeList = new Array();
+  this.isFunctional = null;
+  
+  if (umlField) {
+    this.isFunctional = umlField.isFunctional;
+  }
 
   ontology.universe.putRdfObject(this.uri, this);
   append(ontology.propertyList, this);
@@ -2634,7 +2642,6 @@ function RdfProperty_setType() {
 }
 
 function RdfProperty_normalize() {
-  logger.debug("normalize: " + this.uri);
   this.domainList = this.removeDuplicates(this.domainList);
   this.rangeList = this.removeDuplicates(this.rangeList);
   
@@ -2643,15 +2650,20 @@ function RdfProperty_normalize() {
   // If all uses of this property have maxCardinality=1, then
   // this property is functional.
   var list = this.usage;
-  var functional = list.length>0;
-  for (var i=0; i<list.length; i++) {
-    var r = list[i];
-    if (r.maxCardinality != 1) {
-      functional = false;
-      break;
+  if ("false" == this.isFunctional) {
+    this.functional = false;
+  } else {
+    var functional = list.length>0;
+    for (var i=0; i<list.length; i++) {
+      var r = list[i];
+      if (r.maxCardinality != 1) {
+        functional = false;
+        break;
+      }
     }
+    this.functional = functional;
   }
-  this.functional = functional;
+  logger.debug("normalize: " + this.uri + " functional=" + functional + " [" + list.length + "]");
   
 }
 
@@ -2741,14 +2753,17 @@ function PropertyBuilder_computeImports() {
 
 
 function PropertyBuilder_scanAll() {
+  logger.debug("PropertyBuilder_scanAll");
   var list = this.universe.ontologyList;
   for (var i=0; i<list.length; i++) {
     var ontology = list[i];
     this.scanOntology(ontology);
   }
+  logger.debug("END scanAll");
 }
 
 function PropertyBuilder_scanOntology(ontology) {
+  logger.debug("PropertyBuilder_scanOntology " + ontology.uri);
   var list = ontology.propertyList;
   for (var i=0; i<list.length; i++) {
     var p = list[i];
@@ -2756,6 +2771,7 @@ function PropertyBuilder_scanOntology(ontology) {
       this.handleSuperProperty(p);
     }
   }
+  logger.debug("END scanOntology " + ontology.uri);
 }
 
 function PropertyBuilder_handleSuperProperty(subProperty) {
@@ -2853,6 +2869,7 @@ function OntologyBuilder(universe) {
   this.buildImports = OntologyBuilder_buildImports;
   this.addOntologyImportsFromList = OntologyBuilder_addOntologyImportsFromList;
   this.setSubtypes = OntologyBuilder_setSubtypes;
+  this.normalizeAllProperties = OntologyBuilder_normalizeAllProperties;
   
   this.universe = universe;
   this.ontology = null;
@@ -2883,6 +2900,7 @@ function OntologyBuilder_getLocalName(uri) {
 }
 
 function OntologyBuilder_buildIndividuals(pkg, ontology) {
+  logger.debug("OntologyBuilder_buildIndividuals " + ontology.uri);
   for (var i=0; i<pkg.individualList.length; i++) {
     var umlObject = pkg.individualList[i];
     
@@ -2896,6 +2914,7 @@ function OntologyBuilder_buildIndividuals(pkg, ontology) {
     append(ontology.individualList, individual);
     
   }
+  logger.debug("END buildIndividuals " + ontology.uri);
 }
 
 
@@ -2987,6 +3006,7 @@ function OntologyBuilder_buildAllQualifiers() {
     this.buildQualifiers(pkg, ontology);
     this.buildIndividuals(pkg, ontology);
   }
+  logger.trace("End buildAllQualifiers");
 }
 
 function OntologyBuilder_buildExplicitProperties() {
@@ -3391,7 +3411,6 @@ function OntologyBuilder_buildProperties() {
       this.createProperties(rdfClass);
     }
   }
-  this.normalizeProperties();
 }
 
 function OntologyBuilder_buildClass(type) {
@@ -3480,10 +3499,21 @@ function OntologyBuilder_buildAll() {
   var builder = new PropertyBuilder(this.universe, this);
   builder.scanAll();
   builder.computeImports();
+
   this.normalizeAllRestrictions();
   this.buildImports();
+  this.normalizeAllProperties();
   
   
+}
+
+function OntologyBuilder_normalizeAllProperties() {
+
+  var olist = this.universe.ontologyList;
+  for (var i=0; i<olist.length; i++) {
+    this.ontology = olist[i];
+    this.normalizeProperties();
+  }
 }
 
 function OntologyBuilder_normalizeAllRestrictions() {
@@ -4628,6 +4658,9 @@ function getProjectAttachments(project) {
   return result;
 }
 
+
+
+
 function writeOntology() {
 
   var project = current();
@@ -4671,20 +4704,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4659):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4692):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4659):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4692):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4659):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4692):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4715,20 +4748,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4669):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4702):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4669):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4702):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4669):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4702):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4774,20 +4807,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4694):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4727):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4694):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4727):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4694):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4727):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4816,20 +4849,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4735):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4735):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4735):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4861,20 +4894,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4713):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4746):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4713):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4746):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4713):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4746):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4903,13 +4936,13 @@ currentItemStack.push(currentItem);
 try {
     eval('var rootElem = currentItem');
 }catch (ex) {
-    log('template.cot(4721):<@REPEAT@> Error exists in  path expression.');
+    log('template.cot(4754):<@REPEAT@> Error exists in  path expression.');
     throw ex
 }
 try {
     eval('var elemArr1 = getAllElements(false, rootElem, \'UMLModel\', \'\', \'\')');
 }catch (ex) {
-    log('template.cot(4721):<@REPEAT@> Error exists in path, type, collection name.');
+    log('template.cot(4754):<@REPEAT@> Error exists in path, type, collection name.');
     throw ex
 }
 try {
@@ -4924,20 +4957,20 @@ try {
         try {
             eval('currentItem = currentItem');
         } catch (ex) {
-            log('template.cot(4722):<@DISPLAY@> Error exists in path expression.');
+            log('template.cot(4755):<@DISPLAY@> Error exists in path expression.');
             throw ex;
         }
         var value;
         try {
             eval('value = OUTPUT');
         } catch (ex) {
-            log('template.cot(4722):<@DISPLAY@> Error exists in arguments.');
+            log('template.cot(4755):<@DISPLAY@> Error exists in arguments.');
             throw ex;
         }
         try {
            print(value);
         } catch (ex) {
-            log('template.cot(4722):<@DISPLAY@> Error exists in command.');
+            log('template.cot(4755):<@DISPLAY@> Error exists in command.');
             throw ex;
         }
         currentItem = currentItemStack.pop();
@@ -4948,7 +4981,7 @@ try {
 
     }
 } catch (ex) {
-    log('template.cot(4721):<@REPEAT@> Error exists in command.');
+    log('template.cot(4754):<@REPEAT@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();

@@ -23,10 +23,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.semantictools.bind.LDP;
 import org.semantictools.frame.api.TypeManager;
 
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
+import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.OWL;
 
@@ -43,14 +48,51 @@ public class Frame implements Comparable<Frame>, RdfType {
   private List<Frame> subtypeList = new ArrayList<Frame>();
   private List<Field> declaredFields = new ArrayList<Field>();
   private List<Datatype> subdatatypeList = new ArrayList<Datatype>();
+  private List<Frame> containerList;
   private boolean isAbstract = false;
   private Map<String, OntClass> propertyUri2Restriction = new HashMap<String, OntClass>();
+  
+  private ContainerRestriction containerRestriction;
   
   public Frame(TypeManager typeManager, OntClass type) {
     this.typeManager = typeManager;
     this.type = type;
+    setContainerRestriction();
   }
   
+  private void setContainerRestriction() {
+    
+    Uri membershipSubject = null;
+    Uri membershipPredicate = null;
+    
+    List<OntClass> superList = type.listSuperClasses().toList();
+    for (OntClass superType : superList) {
+      if (superType.canAs(Restriction.class)) {
+        Restriction restriction = superType.as(Restriction.class);
+        OntProperty property = restriction.getOnProperty();
+        if (LDP.membershipPredicate.equals(property.getURI())) {
+          if (restriction.canAs(HasValueRestriction.class)) {
+            HasValueRestriction hasValue = restriction.as(HasValueRestriction.class);
+            String value = hasValue.getHasValue().asResource().getURI();
+            membershipPredicate = new Uri(value);
+          }
+        } else if (
+           LDP.membershipSubject.equals(property.getURI()) &&
+           restriction.canAs(AllValuesFromRestriction.class)
+        ) {
+          AllValuesFromRestriction r = restriction.as(AllValuesFromRestriction.class);
+          String value = r.getAllValuesFrom().asResource().getURI();
+          membershipSubject = new Uri(value);
+        }
+      }
+    }
+    
+    if (membershipSubject != null || membershipPredicate != null) {
+      containerRestriction = new ContainerRestriction(this, membershipSubject, membershipPredicate);
+    }
+    
+  }
+
   public TypeManager getTypeManager() {
     return typeManager;
   }
@@ -334,5 +376,34 @@ public class Frame implements Comparable<Frame>, RdfType {
     return null;
   }
   
+  public ContainerRestriction getContainerRestriction() {
+    return containerRestriction;
+  }
+
+  public void addContainer(Frame frame) {
+    if (containerList == null) {
+      containerList = new ArrayList<Frame>();
+    }
+    containerList.add(frame);
+  }
+  
+  public List<Frame> getContainerList() {
+    return containerList;
+  }
+
+  public Field getFieldByURI(String predicateURI) {
+    for (Field field : declaredFields) {
+      if (predicateURI.equals(field.getURI())) {
+        return field;
+      }
+    }
+    for (Frame type : supertypeList) {
+      Field field = type.getFieldByURI(predicateURI);
+      if (field != null) {
+        return field;
+      }
+    }
+    return null;
+  }
 
 }
