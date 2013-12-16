@@ -11,19 +11,28 @@
           { "@id" : "http://tc.example.com/resources/LineItem/94188/results/923937",
             "comment" : "Nice work!",
             "normalScore" : 85,
+            "extraCreditScore" : 3,
             "penalty" : 0,
             "totalScore" : 88,
-            "extraCreditScore" : 3,
-            "curvedScore" : 96
+            "curvedScore" : 96,
+            "resultScore" : {
+              "@datatype" : "decimal",
+              "@value" : "96"
+            }
           },
           { "@id" : "http://tc.example.com/resources/LineItem/94188/results/9237264",
             "comment" : "Please come see me.",
             "normalScore" : 42,
+            "extraCreditScore" : 0,
             "penalty" : 10,
             "totalScore" : 52,
-            "extraCreditScore" : 0,
-            "curvedScore" : 61
+            "curvedScore" : 61,
+            "resultScore" : {
+              "@datatype" : "decimal",
+              "@value" : "96"
+            }
           }
         ]
       }
+  }
 }

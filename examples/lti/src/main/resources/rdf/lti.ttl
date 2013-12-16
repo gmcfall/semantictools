@@ -61,11 +61,13 @@ lti:ServiceProvider rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:guid;
+    owl:allValuesFrom  lti-type:GUID.Type;
     owl:minCardinality  1;
     rdfs:comment "A globally unique identifier for the service provider.  As a best practice, this value should match an Internet domain name assigned by ICANN, but any globally unique identifier is acceptable.  "
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
+    owl:allValuesFrom  xsd:dateTime;
     owl:minCardinality  1;
     rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current."
   ] ,
@@ -76,10 +78,12 @@ lti:ServiceProvider rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:description;
+    owl:allValuesFrom  lti:LocalizedText;
     rdfs:comment "A description of the service provider, suitable for display to end-users."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:support;
+    owl:allValuesFrom  lti:Contact;
     rdfs:comment "Contact information for support from a service provider."
   ] ; 
   rdfs:comment "This resource represents the service provider that hosts a product (Tool or Tool Consumer)." .
@@ -92,6 +96,7 @@ lti:IconInfo rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:key;
+    owl:allValuesFrom  lti-type:Name.Type;
     rdfs:comment "If localization is supported then the 'key' attribute identifies a property in the resource bundle provided in response to the get-bundle-request message. The value of that property is the locale-specific path to the icon."
   ] ,
   [ a owl:Restriction ;
@@ -112,6 +117,7 @@ lti:LocalizedName rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:key;
+    owl:allValuesFrom  lti-type:Name.Type;
     rdfs:comment "The key used to lookup the locale-specific value from a resource bundle."
   ] ,
   [ a owl:Restriction ;
@@ -125,6 +131,7 @@ lti:LocalizedText rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:key;
+    owl:allValuesFrom  lti-type:Name.Type;
     rdfs:comment "If localization is supported then the key identifies a property in the bundle returned by the get-bundle-request message handler. "
   ] ,
   [ a owl:Restriction ;
@@ -138,6 +145,7 @@ lti:MessageHandler rdf:type owl:Class ;
   rdfs:subClassOf lti:Endpoint ,
   [ a owl:Restriction ;
     owl:onProperty      lti:enabled_capability;
+    owl:allValuesFrom  lti:Capability;
     rdfs:comment "A capability that is enabled for messages handled by this MessageHandler."
   ] ,
   [ a owl:Restriction ;
@@ -165,6 +173,7 @@ lti:ProductInfo rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:description;
+    owl:allValuesFrom  lti:LocalizedText;
     rdfs:comment "This is a description of the product suitable for display to end-users."
   ] ,
   [ a owl:Restriction ;
@@ -206,6 +215,7 @@ lti:ProductProfile rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
+    owl:allValuesFrom  xsd:token;
     owl:minCardinality  1;
     rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract."
   ] ,
@@ -229,6 +239,7 @@ lti:ToolConsumerProfile rdf:type owl:Class ;
   rdfs:subClassOf lti:ProductProfile ,
   [ a owl:Restriction ;
     owl:onProperty      lti:guid;
+    owl:allValuesFrom  lti-type:GUID.Type;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
@@ -239,6 +250,10 @@ lti:ToolConsumerProfile rdf:type owl:Class ;
 
 lti:ToolProfile rdf:type owl:Class ;
   rdfs:subClassOf lti:ProductProfile ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:message;
+    owl:allValuesFrom  lti:MessageHandler
+  ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:base_url_choice;
     owl:minCardinality  1
@@ -253,12 +268,17 @@ lti:ResourceHandler rdf:type owl:Class;
     rdfs:comment "The name of the resource handler suitable for display in the TC user interface."
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      lti:description;
+    owl:allValuesFrom  lti:LocalizedText
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      lti:resource_type;
     owl:minCardinality  1;
     rdfs:comment "Identifies the type of resource associated with this ResourceHandler.  Resource types are identified by a code that is unique within a given ProductFamily."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:message;
+    owl:allValuesFrom  lti:MessageHandler;
     owl:minCardinality  1;
     rdfs:comment "Defines the features of a message handler associated with the resource described by this ResourceHandler."
   ] ,
@@ -289,6 +309,7 @@ lti:ShortLocalizedName rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:key;
+    owl:allValuesFrom  lti-type:Name.Type;
     rdfs:comment "The key used to lookup the locale-specific value from a resource bundle."
   ] ,
   [ a owl:Restriction ;
@@ -302,6 +323,7 @@ lti:Vendor rdf:type owl:Class ;
   rdfs:subClassOf lti:HasCode ,
   [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
+    owl:allValuesFrom  xsd:dateTime;
     owl:minCardinality  1;
     rdfs:comment "A timestamp for the Vendor record. This value is useful for determining which record is most current."
   ] ,
@@ -312,6 +334,7 @@ lti:Vendor rdf:type owl:Class ;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:description;
+    owl:allValuesFrom  lti:LocalizedText;
     rdfs:comment "This is a human-readable description of the Vendor."
   ] ,
   [ a owl:Restriction ;
@@ -386,6 +409,7 @@ lti:RestServiceProfile rdf:type owl:Class ;
   rdfs:subClassOf lti:ServiceProfile ,
   [ a owl:Restriction ;
     owl:onProperty      lti:action;
+    owl:allValuesFrom  lti:HttpMethod;
     owl:minCardinality  1;
     rdfs:comment "Specifies an HTTP method (POST, GET, PUT, etc.) which the integration partner intends to use.   A RestServiceProfile may include more than one action.  However, the set of actions declared in a RestServiceProfile must be a subset of actions declared in the RestService referenced by the <code>service</code> property."
   ] ; 
@@ -422,6 +446,7 @@ lti:RestService rdf:type owl:Class ;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:action;
+    owl:allValuesFrom  lti:HttpMethod;
     owl:minCardinality  1;
     rdfs:comment "Specifies an HTTP action that is supported at the REST endpoint.  A given endpoint may support more than one action.  For example, it is common practice for a collection endpoint to accept POST requests, and a different item endpoint to accept GET, PUT, and DELETE requests."
   ] ; 
@@ -431,6 +456,7 @@ lti:ProductInstance rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:guid;
+    owl:allValuesFrom  lti-type:GUID.Type;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
@@ -448,6 +474,7 @@ lti:ProductInstance rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:support;
+    owl:allValuesFrom  lti:Contact;
     rdfs:comment "Contact information for support on this deployed instance of the product (Tool or ToolConsumer)."
   ] ,
   [ a owl:Restriction ;
@@ -460,13 +487,19 @@ lti:ServiceOwner rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:timestamp;
+    owl:allValuesFrom  xsd:dateTime;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:service_owner_name
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      lti:description;
+    owl:allValuesFrom  lti:LocalizedText
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      lti:support;
+    owl:allValuesFrom  lti:Contact;
     rdfs:comment "Contact information for support from the service owner."
   ] ; 
   rdfs:comment "The entity that owns the services provided by a product instance." .
@@ -475,6 +508,7 @@ lti:ToolProxy rdf:type owl:Class ;
   rdfs:subClassOf lti:ToolSettingsContainer ,
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
+    owl:allValuesFrom  xsd:token;
     owl:minCardinality  1;
     rdfs:comment "The LTI version that governs the integration between the Tool and ToolConsumer. "
   ] ,
@@ -497,6 +531,10 @@ lti:ToolProxy rdf:type owl:Class ;
     owl:onProperty      lti:tool_consumer_profile;
     owl:minCardinality  1;
     rdfs:comment "The profile of the Tool Consumer that is participating in the integration governed by this ToolProxy."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:enabled_capability;
+    owl:allValuesFrom  lti:Capability
   ] ; 
   rdfs:comment "This entity defines the integration contract between a ToolConsumer and a Tool.   It is called a \"ToolProxy\" because its primary purpose is to provide the ToolConsumer with all of the information needed to embed a given Tool within the ToolConsumer system." .
 
@@ -517,8 +555,10 @@ lti:LtiLink rdf:type owl:Class ;
     rdfs:comment "A globally unique identifier for this LTI link."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      lti:lineItem;
-    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the assignment launched from this link should be recorded in the ResultContainer belonging to this LineItem."
+    owl:onProperty      liso:lineItem;
+    owl:allValuesFrom  liso:LineItem;
+    owl:maxCardinality  1;
+    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity."
   ] ; 
   rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
 
@@ -527,6 +567,9 @@ lti:Context rdf:type owl:Class;
   [ a owl:Restriction ;
     owl:onProperty      lti:id;
     owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:sourcedId
   ] ; 
   rdfs:comment "A learning context, such as a Course Section." .
 
@@ -962,11 +1005,6 @@ lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:LtiLink ;
   rdfs:range lti-type:GUID.Type ;
   rdfs:comment "A globally unique identifier for this LTI link." .
-
-lti:lineItem rdf:type owl:FunctionalProperty ;
-  rdfs:domain lti:LtiLink ;
-  rdfs:range liso:LineItem ;
-  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the assignment launched from this link should be recorded in the ResultContainer belonging to this LineItem." .
 
 lti:id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;

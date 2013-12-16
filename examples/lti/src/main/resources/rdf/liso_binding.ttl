@@ -4,12 +4,13 @@
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 
 liso:Result rdf:type bind:Addressable .
+liso:Result rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:resultScore ;
+    bind:associationType bind:Composition
+  ] .
 liso:LineItem rdf:type bind:Addressable .
 liso:LineItem rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:assessmentContext ;
-    bind:inverseAssociationType bind:Composition
-  ], 
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty liso:assessedActivity ;
     bind:associationType bind:Aggregation

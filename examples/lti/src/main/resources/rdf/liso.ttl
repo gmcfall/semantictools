@@ -1,8 +1,9 @@
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
 @prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
-@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
 @prefix ldp: <http://www.w3.org/ns/ldp#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -43,6 +44,17 @@ This value does not take into account the effects of curving.
   [ a owl:Restriction ;
     owl:onProperty      liso:curvedScore;
     rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:lineItem;
+    owl:allValuesFrom  liso:LineItem;
+    owl:minCardinality  1;
+    owl:maxCardinality  1;
+    rdfs:comment "The LineItem within which this Result is contained."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:resultScore;
+    rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade."
   ] ; 
   rdfs:comment "An object that holds the result of some scorable activity or assignment." .
 
@@ -50,11 +62,18 @@ liso:LineItem rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      rdfs:label;
-    owl:maxCardinality  1
+    owl:maxCardinality  1;
+    rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      liso:assessmentContext;
     rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:assessedActivity
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:scoreConstraints
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      liso:result;
@@ -101,8 +120,28 @@ liso:ResultContainer rdf:type owl:Class ;
   rdfs:comment "A container that holds a collection of Result resources." .
 
 liso:LineItemContainer rdf:type owl:Class ;
-  rdfs:subClassOf ldp:Container ; 
+  rdfs:subClassOf ldp:Container ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipPredicate;
+    owl:hasValue liso:lineItem
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      ldp:membershipSubject;
+    owl:allValuesFrom  liscm:Context
+  ] ; 
   rdfs:comment "A container that holds a collection of LineItem resources." .
+
+liso:lineItem rdf:type rdf:Property ;
+  rdfs:domain  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      lti:LtiLink
+      liso:Result
+      liscm:Context
+    )
+  ] ;
+  rdfs:range liso:LineItem ;
+  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity." .
 
 liso:comment rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
@@ -139,9 +178,15 @@ liso:curvedScore rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:float ;
   rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score." .
 
+liso:resultScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:Result ;
+  rdfs:range rdfs:Literal ;
+  rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade." .
+
 liso:assessmentContext rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:LineItem ;
   rdfs:range liscm:Context ;
+  owl:inverseOf liso:lineItem ;
   rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context." .
 
 liso:assessedActivity rdf:type owl:FunctionalProperty ;
@@ -155,6 +200,7 @@ liso:scoreConstraints rdf:type owl:FunctionalProperty ;
 liso:result rdf:type rdf:Property ;
   rdfs:domain liso:LineItem ;
   rdfs:range liso:Result ;
+  owl:inverseOf liso:lineItem ;
   rdfs:comment "A result associated with this LineItem." .
 
 liso:results rdf:type owl:FunctionalProperty ;

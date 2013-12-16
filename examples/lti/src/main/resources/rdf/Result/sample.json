@@ -1,9 +1,16 @@
-{
-  "@context" : "http://purl.imsglobal.org/ctx/lis/v2/Result",
+
+{ "@context" : "http://purl.imsglobal.org/ctx/lis/v2/Result",
   "@type" : "Result",
+  "@id" : "http://tc.example.com/resources/LineItem/94188/results/923937",
+  "lineItem" : "http://server.example.com/sections/2923/gradebook/items/1",
+  "comment" : "Nice work!",
+  "normalScore" : 85,
+  "penalty" : 0,
+  "totalScore" : 88,
+  "extraCreditScore" : 3,
+  "curvedScore" : 96,
   "resultScore" : {
     "@type" : "decimal",
-    "@value" : 0.83
-  },
-  "comment" : "Nice Work!"
+    "@value" : "96"
+  }
 }
