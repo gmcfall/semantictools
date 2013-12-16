@@ -9,7 +9,7 @@
   <groupId>org.semantictools</groupId>
   <artifactId>semantictools-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.24</version>
+  <version>1.25</version>
   <name>semantictools maven plugin</name>
   <description>A Maven plugin used to generate documentation for a REST API based on RDF schemas</description>
   <url>https://github.com/gmcfall/semantictools</url>
@@ -31,8 +31,8 @@
       <email>gregory.mcfall@gmail.com</email>
     </developer>
   </developers>
+ 
 
-<!--  
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-snapshots</id>
@@ -40,7 +40,7 @@
       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
   </distributionManagement>
--->
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.semantictools</groupId>
       <artifactId>semantictools-context-renderer</artifactId>
-      <version>1.24</version>
+      <version>1.25</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -65,7 +65,7 @@
     <resources>
     </resources>
     <plugins>
-<!--     
+ 
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -92,7 +92,7 @@
           </execution>
         </executions>
       </plugin>
--->
+     
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>
