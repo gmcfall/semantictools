@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * @author Greg McFall
  *
  */
-public class LdDatatype  {
+public class LdDatatype implements LdType {
   
   
   private String localName;
@@ -56,10 +56,10 @@ public class LdDatatype  {
   public void setLocalName(String localName) {
     this.localName = localName;
   }
-  public String getUri() {
+  public String getURI() {
     return uri;
   }
-  public void setUri(String uri) {
+  public void setURI(String uri) {
     this.uri = uri;
   }
   public LdDatatype getBase() {

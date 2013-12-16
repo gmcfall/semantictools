@@ -19,8 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.semantictools.jsonld.AmbiguousRestrictionException;
 import org.semantictools.jsonld.LdClass;
@@ -35,12 +34,14 @@ import org.semantictools.jsonld.LdProperty;
 import org.semantictools.jsonld.LdQualifiedRestriction;
 import org.semantictools.jsonld.LdRestriction;
 import org.semantictools.jsonld.LdTerm;
+import org.semantictools.jsonld.LdType;
 import org.semantictools.jsonld.LdValidationMessage;
 import org.semantictools.jsonld.LdValidationReport;
 import org.semantictools.jsonld.LdValidationResult;
 import org.semantictools.jsonld.LdValidationService;
 
 public class LdValidationServiceImpl implements LdValidationService {
+  private Set<String> ignoredProperties;
   
   public LdValidationServiceImpl() {
   }
@@ -48,7 +49,7 @@ public class LdValidationServiceImpl implements LdValidationService {
   @Override
   public LdValidationReport validate(LdNode node) {
     // To ensure that this method is threadsafe, use a delegate.
-    Delegate delegate = new Delegate();
+    Delegate delegate = new Delegate(ignoredProperties);
     return delegate.validate(node);
   }
   
@@ -61,7 +62,16 @@ public class LdValidationServiceImpl implements LdValidationService {
    */
   static class Delegate implements LdValidationService {
 
+  private Set<String> ignoredProperties;
   private LdValidationReport report;
+  
+  
+  
+  public Delegate(Set<String> ignoredProperties) {
+    this.ignoredProperties = ignoredProperties;
+  }
+
+
   @Override
   public LdValidationReport validate(LdNode node) {
     report = new LdValidationReport();
@@ -231,6 +241,9 @@ public class LdValidationServiceImpl implements LdValidationService {
   private void validateField(String path, LdField field) {
    
     if (field == null) return;
+    if (ignoredProperties!=null && ignoredProperties.contains(field.getPropertyURI())) {
+      return;
+    }
     
     LdNode value = field.getValue();
 
@@ -384,7 +397,7 @@ public class LdValidationServiceImpl implements LdValidationService {
       return;
     }
     
-    String ownerType = owner.getTypeIRI();
+    String ownerType = getOwnerType(field);
     if (ownerType == null) {
       String msg =
           "Cannot evaluate the domain of this property because the type of the parent object is not known.";
@@ -396,6 +409,42 @@ public class LdValidationServiceImpl implements LdValidationService {
      String msg = "Invalid domain for this property";
      report(LdValidationResult.ERROR, path, msg);
    }
+  }
+
+
+  private String getOwnerType(LdField field) {
+   
+    LdObject parent = field.getOwner();
+    String parentType = parent.getTypeIRI();
+    if (parentType == null) {
+      LdField parentField = parent.owner();
+      if (parentField != null) {
+        String parentPropertyURI = parentField.getPropertyURI();
+        LdObject grandParent = parentField.getOwner();
+        String grandParentType = grandParent.getTypeIRI();
+        if (grandParentType != null) {
+          LdTerm term = grandParent.getContext().getTerm(grandParentType);
+          if (term != null) {
+            LdClass grandParentClass = term.getRdfClass();
+            if (grandParentClass != null) {
+              List<LdRestriction> restrictions = grandParentClass.listRestrictions();
+              if (restrictions != null) {
+                for (LdRestriction r : restrictions) {
+                  if (parentPropertyURI.equals(r.getPropertyURI())) {
+                    String parentLdType = r.getAllValuesFrom();
+                    if (parentLdType != null) {
+                      parent.setTypeIRI(parentLdType);
+                      return parentLdType;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return parentType;
   }
 
 
@@ -583,6 +632,36 @@ public class LdValidationServiceImpl implements LdValidationService {
     }
     
     }
+
+
+
+
+
+
+
+  @Override
+  public void setIgnoredProperties(Set<String> propertySet) {
+    this.ignoredProperties = propertySet;
+    
+  }
+
+
+  @Override
+  public Set<String> getIgnoredProperties() {
+    
+    return ignoredProperties;
+  }
+  }
+
+
+  @Override
+  public void setIgnoredProperties(Set<String> propertySet) {
+    this.ignoredProperties = propertySet;
+  }
+
+  @Override
+  public Set<String> getIgnoredProperties() {
+    return ignoredProperties;
   }
 
   

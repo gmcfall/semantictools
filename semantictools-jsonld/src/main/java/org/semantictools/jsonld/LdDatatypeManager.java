@@ -67,10 +67,10 @@ public class LdDatatypeManager {
     LD_DAYTIMEDURATION.setBase(LD_DURATION);
 
     LD_DAYTIMEDURATION.setNamespace("http://www.w3.org/2004/10/xpath-datatypes#");
-    LD_DAYTIMEDURATION.setUri("http://www.w3.org/2004/10/xpath-datatypes#dayTimeDuration");
+    LD_DAYTIMEDURATION.setURI("http://www.w3.org/2004/10/xpath-datatypes#dayTimeDuration");
     LD_DAYTIMEDURATION.setLocalName("dayTimeDuration");
     LD_DAYTIMEDURATION.setXsdType(XsdType.DURATION);
-    map.put(LD_DAYTIMEDURATION.getUri(), LD_DAYTIMEDURATION);
+    map.put(LD_DAYTIMEDURATION.getURI(), LD_DAYTIMEDURATION);
     
   }
   
@@ -79,10 +79,10 @@ public class LdDatatypeManager {
     LdDatatype datatype = new LdDatatype();
     datatype.setNamespace(XsdType.URI);
     datatype.setLocalName(xsdType.getLocalName());
-    datatype.setUri(XsdType.URI + xsdType.getLocalName());
+    datatype.setURI(XsdType.URI + xsdType.getLocalName());
     datatype.setXsdType(xsdType);
     
-    map.put(datatype.getUri(), datatype);
+    map.put(datatype.getURI(), datatype);
     
     return datatype;
   }

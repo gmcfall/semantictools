@@ -34,6 +34,9 @@ public class LdRestriction implements Serializable {
   private Integer minCardinality;
   private Integer maxCardinality;
   private List<LdQualifiedRestriction> qlist;
+  private String allValuesFrom;
+  
+  public LdRestriction() {}
   
   /**
    * Returns the domain to which this LdRestriction applies.
@@ -54,6 +57,14 @@ public class LdRestriction implements Serializable {
     return null;
   }
   
+  public String getAllValuesFrom() {
+    return allValuesFrom;
+  }
+
+  public void setAllValuesFrom(String allValuesFrom) {
+    this.allValuesFrom = allValuesFrom;
+  }
+
   /**
    * Sets the domain to which this LdRestriction applies.
    */

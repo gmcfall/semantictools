@@ -71,5 +71,11 @@ public class NetworkContextManager implements LdContextManager {
     return null;
   }
 
+  @Override
+  public void setEnhance(boolean value) {
+    throw new RuntimeException("Enhance property not supported");
+    
+  }
+
 
 }

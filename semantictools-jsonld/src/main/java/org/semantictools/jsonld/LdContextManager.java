@@ -26,6 +26,8 @@ import org.semantictools.jsonld.impl.LdContextEnhanceException;
  */
 public interface LdContextManager {
   
+  void setEnhance(boolean value);
+  
   /**
    * Returns the JSON-LD context with the specified URI.
    * The return value may be from a local cache.

@@ -53,6 +53,12 @@ public class InMemoryLdContextManager implements LdContextManager {
     return enhancedContextMap.get(contextURI);
   }
 
+  @Override
+  public void setEnhance(boolean value) {
+   throw new RuntimeException("Enhance property not supported");
+    
+  }
+
   
   
 

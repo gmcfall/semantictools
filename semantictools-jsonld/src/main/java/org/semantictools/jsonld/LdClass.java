@@ -30,7 +30,7 @@ import java.util.Map;
  * @author Greg McFall
  *
  */
-public class LdClass implements Serializable {
+public class LdClass implements Serializable, LdType {
   private static final long serialVersionUID = 1L;
   
   private String uri;

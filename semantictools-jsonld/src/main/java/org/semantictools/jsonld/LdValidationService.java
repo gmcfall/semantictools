@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.semantictools.jsonld;
 
+import java.util.Set;
+
 
 public interface LdValidationService {
   
@@ -23,5 +25,12 @@ public interface LdValidationService {
    * Validate the given node, and return a report.
    */
   LdValidationReport validate(LdNode node);
+  
+  /**
+   * A set of URI values for properties that should be ignored by the validator.
+   */
+  void setIgnoredProperties(Set<String> propertySet);
+  
+  Set<String> getIgnoredProperties();
 
 }

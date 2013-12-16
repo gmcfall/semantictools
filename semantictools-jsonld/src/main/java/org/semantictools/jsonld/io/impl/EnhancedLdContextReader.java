@@ -23,19 +23,21 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.semantictools.jsonld.LdContext;
 import org.semantictools.jsonld.LdContextEnhancer;
+import org.semantictools.jsonld.LdContextManager;
 import org.semantictools.jsonld.LdContextParseException;
 import org.semantictools.jsonld.impl.LdContextEnhanceException;
 import org.semantictools.jsonld.io.ErrorHandler;
 import org.semantictools.jsonld.io.LdContextReader;
 
-public class EnhancedLdContextReader implements LdContextReader {
+public class EnhancedLdContextReader extends LdContextReaderImpl {
   
   private LdContextEnhancer enhancer;
   private LdContextReader reader;
   
 
 
-  public EnhancedLdContextReader(LdContextEnhancer enhancer,  LdContextReader reader) {
+  public EnhancedLdContextReader(LdContextManager manager, LdContextEnhancer enhancer,  LdContextReader reader) {
+    super(manager);
     this.enhancer = enhancer;
     this.reader = reader;
   }
@@ -82,10 +84,13 @@ public class EnhancedLdContextReader implements LdContextReader {
     return reader.getErrorHandler();
   }
 
-  @Override
-  public LdContext parseContext(JsonNode node) throws LdContextParseException {
-    // TODO Auto-generated method stub
-    return null;
+  protected void handleError(Throwable oops) throws IOException, LdContextParseException {
+    ErrorHandler handler = getErrorHandler();
+    if (handler == null) {
+      super.handleError(oops);
+    } else {
+      handler.handleError(oops);
+    }
   }
 
 }

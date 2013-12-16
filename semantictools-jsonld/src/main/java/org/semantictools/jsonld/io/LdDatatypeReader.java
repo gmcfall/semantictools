@@ -236,7 +236,7 @@ public class LdDatatypeReader {
           term.setIRI(typeURI);
           
           type.setLocalName(this.shortName);
-          type.setUri(typeURI);
+          type.setURI(typeURI);
           type.setLength(length);
           type.setFractionDigits(fractionDigits);
           type.setMaxExclusive(maxExclusive);
@@ -261,7 +261,7 @@ public class LdDatatypeReader {
               String baseName = getLocalName(baseURI);
               base = new LdDatatype();
               base.setLocalName(baseName);
-              base.setUri(baseURI);
+              base.setURI(baseURI);
             }
             type.setBase(base);
             

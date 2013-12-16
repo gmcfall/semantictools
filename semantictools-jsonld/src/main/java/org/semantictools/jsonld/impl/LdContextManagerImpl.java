@@ -30,6 +30,7 @@ public class LdContextManagerImpl implements LdContextManager{
   private LdAssetManager assetManager;
   private LdContextReader contextReader;
   private LdContextEnhancer contextEnhancer;
+  private boolean enhance;
   
   public LdContextManagerImpl(LdAssetManager assetManager, LdContextReader contextReader,
       LdContextEnhancer contextEnhancer) {
@@ -37,8 +38,21 @@ public class LdContextManagerImpl implements LdContextManager{
     this.contextEnhancer = contextEnhancer;
     this.contextReader = contextReader;
   }
+  
+  public void setEnhance(boolean enhance) {
+    this.enhance = enhance;
+  }
+  
   @Override
   public LdContext findContext(String contextURI) throws LdContextParseException, IOException {
+    
+    if (enhance) {
+      try {
+        return findEnhancedContext(contextURI);
+      } catch (LdContextEnhanceException e) {
+        throw new LdContextParseException(e);
+      }
+    }
     
     LdAsset asset = assetManager.findAsset(contextURI);
     if (asset == null) {

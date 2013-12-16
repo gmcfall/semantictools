@@ -163,6 +163,9 @@ public class LdAssetRepository extends LdAssetManagerImpl implements LdPublisher
           }
         }
            
+        if (fileName == null) {
+          return null;
+        }
         File contentFile = new File(assetDir, fileName);
         URL location = contentFile.toURI().toURL();
         

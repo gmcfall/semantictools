@@ -260,6 +260,10 @@ public class LdContextReaderImpl implements LdContextReader {
       } else if ("qualifiedRestriction".equals(fieldName)) {
         parseQualifiedRestrictionArray(parser, restriction);
         
+      } else if ("allValuesFrom".equals(fieldName)) {
+        
+        restriction.setAllValuesFrom(readString(parser));
+        
       } else {
         skipValue(parser);
       }
@@ -335,7 +339,7 @@ public class LdContextReaderImpl implements LdContextReader {
       if (fieldName.equals("base")) {
         String baseURI = readString(parser);
         LdDatatype base = new LdDatatype();
-        base.setUri(baseURI);
+        base.setURI(baseURI);
         datatype.setBase(base);
         
       } else if ("length".equals(fieldName)) {
@@ -646,12 +650,12 @@ public class LdContextReaderImpl implements LdContextReader {
       
       datatype.setLocalName(localName);
       datatype.setNamespace(uri.substring(0, mark));
-      datatype.setUri(uri);
+      datatype.setURI(uri);
       
       
       LdDatatype base = datatype.getBase();
       if (base != null) {
-        String baseURI = base.getUri();
+        String baseURI = base.getURI();
         LdDatatype newBase = LdDatatypeManager.getXsdTypeByURI(baseURI);
         if (newBase == null) {
           LdTerm baseTerm = context.getTerm(baseURI);
@@ -707,13 +711,23 @@ public class LdContextReaderImpl implements LdContextReader {
   private LdContext loadExternalContext(String contextURI) throws IOException, LdContextParseException {
     if (manager == null) {
       String msg = "Cannot load external contexts";
-      throw new LdContextParseException(msg);
+      handleError( new LdContextParseException(msg) );
     }
     LdContext context = manager.findContext(contextURI);
     if (context == null) {
-      throw new LdContextParseException("JSON-LD context not found: " + contextURI);
+      handleError( new LdContextParseException("JSON-LD context not found: " + contextURI));
     }
     return context;
+  }
+  
+  protected void handleError(Throwable oops) throws IOException, LdContextParseException {
+    if (errorHandler==null) {
+      if (oops instanceof IOException) throw (IOException) oops;
+      if (oops instanceof LdContextParseException) throw (LdContextParseException) oops;
+      throw new LdContextParseException(oops);
+    } else {
+      errorHandler.handleError(oops);
+    }
   }
 
   @Override
@@ -766,7 +780,9 @@ public class LdContextReaderImpl implements LdContextReader {
           LdContext child;
           try {
             child = loadExternalContext(node.getTextValue());
-            context.add(child);
+            if (child != null) {
+              context.add(child);
+            }
           } catch (LdContextParseException e) {
             if (errorHandler != null) {
               errorHandler.handleError(e);
@@ -1018,7 +1034,7 @@ public class LdContextReaderImpl implements LdContextReader {
       if (fieldName.equals("base")) {
         String baseURI = value.getTextValue();
         LdDatatype base = new LdDatatype();
-        base.setUri(baseURI);
+        base.setURI(baseURI);
         datatype.setBase(base);
         
       } else if ("length".equals(fieldName)) {

@@ -123,7 +123,7 @@ public class LdProcessor implements LdPublisher {
     return contextReader;
   }
 
-  private LdContextManager getContextManager() {
+  public LdContextManager getContextManager() {
     if (contextManager == null) {      
       contextManager = new LdContextManagerImpl(getAssetManager(), getContextReader(), getContextEnhancer());
     }
@@ -160,13 +160,13 @@ public class LdProcessor implements LdPublisher {
   
   private LdParser getLdParser() {
     if (jsonldParser == null) {
-      LdContextReader reader = new EnhancedLdContextReader(getContextEnhancer(), getContextReader());
+      LdContextReader reader = new EnhancedLdContextReader(getContextManager(), getContextEnhancer(), getContextReader());
       jsonldParser = new LdTreeReader(reader);
     }
     return jsonldParser;
   }
   
-  private LdValidationService getValidationService() {
+  public LdValidationService getValidationService() {
     if (validationService == null) {
       validationService = new LdValidationServiceImpl();
     }

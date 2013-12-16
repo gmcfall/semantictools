@@ -32,9 +32,10 @@ import org.semantictools.jsonld.LdProperty;
 import org.semantictools.jsonld.LdQualifiedRestriction;
 import org.semantictools.jsonld.LdRestriction;
 import org.semantictools.jsonld.LdTerm;
+import org.semantictools.jsonld.LdType;
 import org.semantictools.jsonld.io.LdDatatypeReader;
 
-import com.hp.hpl.jena.ontology.ConversionException;
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
 import com.hp.hpl.jena.ontology.MinCardinalityRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -42,12 +43,13 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
-import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -106,9 +108,9 @@ public class LdContextEnhancerImpl implements LdContextEnhancer {
         
 //        buildOntModel();
         computeTermTypes();
+        buildDatatypes();
         buildRestrictions();
         buildHierarchy();
-        buildDatatypes();
         addFunctionalPropertyRestrictions();
         
 //        if (errorBuilder.length()>0) {
@@ -404,12 +406,14 @@ public class LdContextEnhancerImpl implements LdContextEnhancer {
         Integer minCardinality = minCardinality(restriction);
         Integer maxCardinality = maxCardinality(restriction);
         String rangeURI = onClass(restriction);
+        String allValuesFrom = allValuesFrom(restriction);
         
         LdRestriction r = new LdRestriction();
         r.setDomain(rdfClass);
         r.setPropertyURI(propertyURI);
         r.setMaxCardinality(maxCardinality);
         r.setMinCardinality(minCardinality);
+        r.setAllValuesFrom(allValuesFrom);
         if (rangeURI != null) {
           addQualifiedRestriction(restriction, r, rangeURI);
         }
@@ -420,6 +424,26 @@ public class LdContextEnhancerImpl implements LdContextEnhancer {
       }
     }
     
+    private String allValuesFrom(Restriction restriction) {
+      StmtIterator sequence = restriction.listProperties(OWL.allValuesFrom);
+      while (sequence.hasNext()) {
+        Statement s = sequence.next();
+        RDFNode object = s.getObject();
+        if (object.canAs(Resource.class)) {
+          Resource resource = object.asResource();
+          
+          String uri = resource.getURI();
+          if (uri != null) {
+            return uri;
+          }
+        }
+        
+      }
+      return null;
+    }
+
+
+
     private String getOnPropertyURI(Restriction restriction) {
       RDFNode node = restriction.getPropertyValue(OWL.onProperty);
       return node.isResource() ? node.asResource().getURI() : null;

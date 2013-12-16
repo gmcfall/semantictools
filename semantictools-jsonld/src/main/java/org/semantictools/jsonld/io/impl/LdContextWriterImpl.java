@@ -145,7 +145,7 @@ public class LdContextWriterImpl implements LdContextWriter {
       if (datatype == null) return comma;
       
       LdDatatype base = datatype.getBase();
-      String baseURI = (base==null) ? null : base.getUri();
+      String baseURI = (base==null) ? null : base.getURI();
       
       println(comma);
       comma = "";
@@ -283,6 +283,7 @@ public class LdContextWriterImpl implements LdContextWriter {
         comma = writeField(comma, "onProperty", r.getPropertyURI());
         comma = writeField(comma, "maxCardinality", r.getMaxCardinality());
         comma = writeField(comma, "minCardinality", r.getMinCardinality());
+        comma = writeField(comma, "allValuesFrom", r.getAllValuesFrom());
         comma = writeQualifiedRestrictions(comma, r);
       endObject();
       return ",";

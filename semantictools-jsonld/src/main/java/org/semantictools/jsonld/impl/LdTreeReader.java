@@ -113,16 +113,20 @@ public class LdTreeReader implements LdParser {
     
     JsonNode contextNode = node.get("@context");
     LdContext context = null;
-    if (contextNode == null) {
-      context = parent.getContext();
-    }
+    LdContext parentContext = (parent==null) ? null : parent.getContext();
     if (contextNode != null) {
       try {
         context = contextReader.parseContext(contextNode);
+        context.setParentContext(parentContext);
         
       } catch (Exception e) {
         throw new LdParseException(e);
       } 
+    } else {
+      context = parentContext;
+    }
+    if (context == null) {
+      context = new LdContext();
     }
     LdObjectImpl object = new LdObjectImpl(context);
     object.setOwner(owner);
