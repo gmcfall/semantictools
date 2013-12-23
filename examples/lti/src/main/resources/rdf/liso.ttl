@@ -46,15 +46,15 @@ This value does not take into account the effects of curving.
     rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score."
   ] ,
   [ a owl:Restriction ;
+    owl:onProperty      liso:resultScore;
+    rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade."
+  ] ,
+  [ a owl:Restriction ;
     owl:onProperty      liso:lineItem;
     owl:allValuesFrom  liso:LineItem;
     owl:minCardinality  1;
     owl:maxCardinality  1;
     rdfs:comment "The LineItem within which this Result is contained."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:resultScore;
-    rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade."
   ] ; 
   rdfs:comment "An object that holds the result of some scorable activity or assignment." .
 
@@ -70,10 +70,12 @@ liso:LineItem rdf:type owl:Class;
     rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      liso:assessedActivity
+    owl:onProperty      liso:assessedActivity;
+    rdfs:comment "The Activity that learners engage with to produce the Results associated with this LineItem."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      liso:scoreConstraints
+    owl:onProperty      liso:scoreConstraints;
+    rdfs:comment "Constraints on the scores recorded in the Results associated with this LineItem."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      liso:result;
@@ -191,11 +193,13 @@ liso:assessmentContext rdf:type owl:FunctionalProperty ;
 
 liso:assessedActivity rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:LineItem ;
-  rdfs:range exp:Activity .
+  rdfs:range exp:Activity ;
+  rdfs:comment "The Activity that learners engage with to produce the Results associated with this LineItem." .
 
 liso:scoreConstraints rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:LineItem ;
-  rdfs:range liso:ScoreConstraints .
+  rdfs:range liso:ScoreConstraints ;
+  rdfs:comment "Constraints on the scores recorded in the Results associated with this LineItem." .
 
 liso:result rdf:type rdf:Property ;
   rdfs:domain liso:LineItem ;
