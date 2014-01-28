@@ -1,6 +1,4 @@
 <@SCRIPT
-log("Begin script");
-
 
 function append(array, e) {
   array[array.length] = e;
@@ -9,6 +7,8 @@ function append(array, e) {
 function debugDump(obj) {
   log("debugDump: " + obj);
   for (var name in obj) {
+    var value = obj[name];
+    if (typeof value == "function") continue;
     log(name + " = " + obj[name]);
   }
 }
@@ -36,12 +36,15 @@ COMPOSITE = 2;
 INFINITY = "*";
 
 /* Log levels */
-TRACE = 0;
-DEBUG = 1;
-INFO = 2;
-WARN = 3;
-ERROR = 4;
-NONE = 5;
+LogLevels = new Object();
+TRACE = LogLevels.TRACE = 0;
+DEBUG = LogLevels.DEBUG = 1;
+INFO = LogLevels.INFO = 2;
+WARN = LogLevels.WARN = 3;
+ERROR = LogLevels.ERROR = 4;
+NONE = LogLevels.NONE = 5;
+
+
 function Logger(level, failFast) {
   this.error = Logger_error;
   this.warn = Logger_warn;
@@ -67,7 +70,7 @@ function Logger_error(message) {
 }
 function Logger_warn(message) {
   if (this.level <= WARN) {
-    log("WARNING: " + message);
+    log("WARN: " + message);
   }
 }
 function Logger_info(message) {
@@ -85,7 +88,7 @@ function Logger_trace(message) {
     log("TRACE: " + message);
   }
 }
-logger = new Logger(TRACE, false);
+logger = new Logger(WARN, false);
 
 function Universe() {
   this.getFacet = Universe_getFacet;
@@ -96,6 +99,11 @@ function Universe() {
   this.getRdfObject = Universe_getRdfObject;
   this.putXsdObject = Universe_putXsdObject;
   this.getXsdObject = Universe_getXsdObject;
+  this.getMembershipSubjectProperty = Universe_getMembershipSubjectProperty;
+  this.getMembershipPredicateProperty = Universe_getMembershipPredicateProperty;
+  this.createMembershipSubjectProperty = Universe_createMembershipSubjectProperty;
+  this.createMembershipPredicateProperty = Universe_createMembershipPredicateProperty;
+  this.createLdpOntology = Universe_createLdpOntology;
   this.ontologyList = new Array();
   this.getUriList = Universe_getUriList;
   this.addAggregation = Universe_addAggregation;
@@ -109,6 +117,7 @@ function Universe() {
   
 
   this.classMap = new Object();
+  this.propertyList = new Array();
   this.packageList = new Array();
   this.xsdSchemaList = new Array();
   this.simpleTypeSchemas = new Array();
@@ -118,6 +127,46 @@ function Universe() {
   this.pathMap = new Object();
 
   this.xsd = new XmlSchema(this);
+  this.rdfs = new RdfSchema(this);
+}
+
+function Universe_createLdpOntology() {
+  var ont = new Ontology(this, "ldp", "http://www.w3.org/ns/ldp#");
+  append(this.ontologyList, ont);
+  return ont;
+}
+
+function Universe_createMembershipPredicateProperty() {
+  var ont = this.getRdfObject("http://www.w3.org/ns/ldp#");
+  if (!ont) {
+    ont = this.createLdpOntology();
+  }
+  
+  return new RdfProperty(ont, "membershipPredicate");
+}
+function Universe_createMembershipSubjectProperty() {
+  var ont = this.getRdfObject("http://www.w3.org/ns/ldp#");
+  if (!ont) {
+    ont = this.createLdpOntology();
+  }
+  
+  return new RdfProperty(ont, "membershipSubject");
+}
+
+function Universe_getMembershipSubjectProperty() {
+  var result = this.getRdfObject("http://www.w3.org/ns/ldp#membershipSubject");
+  if (!result) {
+    result = this.createMembershipSubjectProperty();
+  }
+  return result;
+}
+
+function Universe_getMembershipPredicateProperty() {
+  var result = this.getRdfObject("http://www.w3.org/ns/ldp#membershipPredicate");
+  if (!result) {
+    result = this.createMembershipPredicateProperty();
+  }
+  return result;
 }
 
 function Universe_toNamespaceURI(uri) {
@@ -257,6 +306,20 @@ function ClassExtras(classURI) {
   this.associationQualifierMap = new Object();
 }
 
+function RdfSchema(universe) {
+  this.universe = universe;
+  this.isOntology = true;
+  this.prefix = "rdfs";
+  this.uri = "http://www.w3.org/2000/01/rdf-schema#";
+  this.localType = new Object();
+  this.LITERAL = new Literal(this, "Literal");
+  
+  for (var name in this.localType) {
+    var obj = this.localType[name];
+    universe.putRdfObject(obj.uri, obj);
+  }
+}
+
 
 function XmlSchema(universe) {
   this.universe = universe;
@@ -340,6 +403,7 @@ function ModelBuilder() {
   this.addQualifiers = ModelBuilder_addQualifiers;
   this.scanObject = ModelBuilder_scanObject;
   this.handleParticipantAttachment = ModelBuilder_handleParticipantAttachment;
+  this.scanProperty = ModelBuilder_scanProperty;
   
   this.universe = null; /* will be assigned later */
   
@@ -374,7 +438,7 @@ function ModelBuilder_scanGeneralizations() {
        var childName = elem.Child.Name;
        var parentName = elem.Parent.Name;
        
-       
+       logger.debug(childName + " hasGeneralization " + parentName);
 
        var childClass = this.universe.pathMap[elem.Child.Pathname];
        
@@ -387,6 +451,20 @@ function ModelBuilder_scanGeneralizations() {
        if (childClass.constructor == XsdSimpleType) {
          var name = elem.Parent.Name;
          parentClass = this.universe.xsd.localType[name];
+         
+       } else if (childClass.constructor == UmlProperty) {
+         var superProperty = this.universe.pathMap[elem.Parent.Pathname];
+         if (!superProperty) {
+           logger.error("UmlProperty not found: " + elem.Parent.Pathname);
+         } else if (superProperty.constructor == UmlProperty) {
+           logger.debug(childName + " is subproperty of " + parentName);
+           append(childClass.superList, superProperty);
+         } else if (superProperty.constructor == ClassType) {
+           logger.debug(childName + " is type of " + parentName);
+           append(childClass.typeList, superProperty);
+         }
+         continue;
+         
        } else {
            parentClass = this.universe.pathMap[elem.Parent.Pathname];
          
@@ -406,6 +484,8 @@ function ModelBuilder_scanGeneralizations() {
        }
        append(parentClass.subTypes, childClass);
        
+    } else {
+      logger.warn("Invalid Generalization encountered.");
     } 
   }
 }
@@ -429,18 +509,17 @@ function ModelBuilder_scanAssociations() {
           var n1 = e1.Participant.Name;
           var n2 = e2.Participant.Name;
          
-          
-          log("before qualifier count");
-          log("qualifierCount = " + elem.getConnectionAt(0).GetQualifierCount());
+          logger.trace("before qualifier count");
+          logger.trace("qualifierCount = " + elem.getConnectionAt(0).GetQualifierCount());
           
           var t1 = this.universe.pathMap[e1.Participant.Pathname];
           var t2 = this.universe.pathMap[e2.Participant.Pathname];
           if (!t1) {
-            log("WARNING: Ignoring the association " + n1 + " => " + n2 + " because the type " + n1 + " is not known");
+            logger.warn("Ignoring the association " + n1 + " => " + n2 + " because the type " + n1 + " is not known");
             continue;
           }
           if (!t2) {
-            log("WARNING: Ignoring the association " + n1 + " => " + n2 + " because the type " + n2 + " is not known");
+            logger.warn("Ignoring the association " + n1 + " => " + n2 + " because the type " + n2 + " is not known");
             continue;
           }
           
@@ -503,6 +582,7 @@ function ModelBuilder_createFieldFromAssociation(declaringClass, fieldType, conn
   }
   
   logger.debug("declaringClass=" + declaringClass.name + ", package=" + declaringClass.umlPackage);
+
   var field = new Field(null, declaringClass, declaringClass.umlPackage, this.universe);
   field.type = fieldType;
   field.name = fieldName;
@@ -580,8 +660,10 @@ function ModelBuilder_handleParticipantAttachment(field, key, value) {
     field.domainURI = value;
   } if (key == "uri") {
     field.uri = value;
+  } if (key == "preserveRestriction" && "true"==value) {
+    field.preserveRestriction = true;
   }
-}
+} 
 
 
 
@@ -640,8 +722,8 @@ function ModelBuilder_scanContainer(container, jsContainer) {
       if ("simpleType" == stereotype) {
          new SimpleType(elem, jsContainer, this.currentPackage(), this.universe);
         
-      } else if ("individual" == stereotype) {
-        /* TODO: scanIndividual */
+      } else if ("property" == stereotype) {
+        this.scanProperty(elem, jsContainer);
       } else {
         this.scanClass(elem, jsContainer);
       }
@@ -668,6 +750,12 @@ function ModelBuilder_scanContainer(container, jsContainer) {
   }
 }
 
+function ModelBuilder_scanProperty(uml, parent) {
+  logger.debug("scanProperty: " + uml.Name);
+  var pkg = this.currentPackage();
+  append(this.universe.propertyList, new UmlProperty(uml, pkg, this.universe));
+}
+
 function ModelBuilder_scanEnum(uml, parent) {
   logger.debug("scanEnum");
   var enumType = new EnumType(uml, parent, this.currentPackage(), this.universe);
@@ -680,6 +768,17 @@ function ModelBuilder_scanFields(type) {
       var attr = type.uml.MOF_GetCollectionItem("Attributes", i);
       var field = new Field(attr, type, type.umlPackage, this.universe);      
     }
+}
+
+function UmlProperty(uml, pkg, universe) {
+  this.uml = uml;
+  this.pkg = pkg;
+  this.uri = pkg.uri + uml.Name;
+  this.superList = new Array();
+  this.typeList = new Array();
+
+  universe.putUmlObject(this.uri, this);
+  universe.pathMap[uml.Pathname] = this;
 }
 
 
@@ -718,7 +817,7 @@ function UmlObject(uml, parent, umlPackage, universe) {
   if (umlPackage) {
     umlPackage.localType[this.name] = this;
   }
-  if (umlPackage && universe && (this.constructor != Model)) {
+  if (umlPackage && universe && (this.constructor != Model) && (this.constructor != EnumLiteral)) {
     this.uri = umlPackage.uri + this.name;
     universe.putUmlObject(this.uri, this);
   }
@@ -820,7 +919,7 @@ function Package_parseAttachment(key, value) {
   if (key == "uri") {
     this.uri = value;
   } else if (key == "prefix") {
-    log("PREFIX = " + value);
+    logger.debug("PREFIX = " + value);
     this.prefix = value;
   } else if (key == "orgId") {
     this.orgId = value;
@@ -841,6 +940,7 @@ function EnumType(uml, parent, umlPackage, universe) {
   logger.debug("new EnumType " + uml.Name);
   this.UmlObject = UmlObject;
   this.UmlObject(uml, parent, umlPackage, universe);
+  this.superTypes = null;
   append(umlPackage.enumList, this);
   this.literalList = new Array();
   if (uml) {
@@ -967,6 +1067,7 @@ function Field(uml, parent, umlPackage, universe) {
   this.stereotypeName = null;
   this.isXmlAttribute = false;
   this.isXmlValue = false;
+  this.isFunctional = null;
   this.visibility = null;
   this.ordinal = 1000;
   this.inverseOf = null;
@@ -998,6 +1099,10 @@ function Field(uml, parent, umlPackage, universe) {
       var typeName = uml.TypeExpression;
       if (typeName) {
         this.type = universe.xsd.localType[typeName];
+        if (!this.type) {
+          logger.trace("Checking to see if the field type is an RDFS Literal");
+          this.type = universe.rdfs.localType[typeName];
+        }
       }
     }
     
@@ -1062,8 +1167,9 @@ function Field_handleAttachment(key, value) {
     this.domainURI = value;
   } if (key == "uri") {
     this.uri = value;
-    
-  } 
+  } if (key == "functional") {
+    this.isFunctional = value;
+  }
   if (key == "preserveRestriction") {
     this.preserveRestriction = "true" == value;
   }
@@ -1202,7 +1308,9 @@ function OntologyWriter() {
   this.printEnumList = OntologyWriter_printEnumList;
   this.printExtensibleEnum = OntologyWriter_printExtensibleEnum;
   this.printProperties = OntologyWriter_printProperties;
+  this.printSuperProperties = OntologyWriter_printSuperProperties;
   this.printProperty = OntologyWriter_printProperty;
+  this.printPropertyTypeList = OntologyWriter_printPropertyTypeList;
   this.printDomain = OntologyWriter_printDomain;
   this.printRange = OntologyWriter_printRange;
   this.printUnion = OntologyWriter_printUnion;
@@ -1232,6 +1340,7 @@ function OntologyWriter() {
   this.printPropertyAsList = OntologyWriter_printPropertyAsList;
   this.addBindingImportsFromAssociationQualifiers = OntologyWriter_addBindingImportsFromAssociationQualifiers;
   this.printAssociationQualifier = OntologyWriter_printAssociationQualifier;
+  this.printPrimitiveSubtypes = OntologyWriter_printPrimitiveSubtypes;
   
   this.ontology = null;
   logger.trace("end new OntologyWriter");
@@ -1381,12 +1490,13 @@ function OntologyWriter_printQualifier(qualifier) {
 
 
 function OntologyWriter_printRestrictions(delim, rdfClass) {
+  var list = rdfClass.restrictions;
+  if (!list || list.length==0) return;
+  
   logger.debug("printRestrictions " + rdfClass.name + "(" + rdfClass.restrictions.length + ")");
   
 
 
-  var list = rdfClass.restrictions;
-  if (!list || list.length==0) return;
   
   for (var i=0; i<list.length; i++) {
     var r = list[i];
@@ -1403,16 +1513,23 @@ function OntologyWriter_printRestrictions(delim, rdfClass) {
         this.indent().print("owl:allValuesFrom  ");
         this.printQName(r.range);
       }
-      if (r.minCardinality != 0) {
+      if ((typeof r.minCardinality != "undefined") && r.minCardinality != 0) {
         this.println(";");
         this.indent().print(minCardinality);
         this.print(r.minCardinality);
         
       }
-      if (r.maxCardinality != INFINITY && !functional) {
+      logger.debug("    " + r.property.name + ": maxCardinality=" + r.maxCardinality + ", functional=" + functional);
+      if (r.maxCardinality && r.maxCardinality != INFINITY && !functional) {
         this.println(";");
         this.indent().print(maxCardinality);
         this.print(r.maxCardinality);
+      }
+      if (r.hasValue) {
+        this.println(";");
+        this.indent().print("owl:hasValue ");
+        /* TODO: support literal values for hasValue */
+        this.printQName(r.hasValue);
       }
       if (r.comment) {
         this.println(";");
@@ -1542,14 +1659,31 @@ function OntologyWriter_printUnion(list) {
 }
 
 function OntologyWriter_printDomain(property) {
+
   logger.debug("printDomain");
   
   var list = property.domainList;
+  if (list.length==0) return;
+  
+  this.println(" ;");
+  
+  this.indent().print("rdfs:domain ");
   if (list.length == 1) {
     this.printQName(list[0]);
   } else {
     this.printUnion(list);
     
+  }
+  
+}
+function OntologyWriter_printPropertyTypeList(property) {
+  logger.debug("printPropertyTypeList");
+  var list = property.typeList;
+  if (list.length==0) return;
+  for (var i=0; i<list.length; i++) {
+    var type = list[i];
+    this.print(", ");
+    this.printQName(type);
   }
 }
 
@@ -1563,16 +1697,18 @@ function OntologyWriter_printProperty(property) {
   
   this.println();
   this.indent().printQName(property);
-  this.println(" rdf:type " + propertyType + " ;");
+  this.print(" rdf:type " + propertyType);
+  this.printPropertyTypeList(property);
   this.pushIndent();
-  this.indent().print("rdfs:domain ");
   this.printDomain(property);
-  this.println(" ;");
-  this.indent().print("rdfs:range ");
   
   if (listName) {
+    this.println(" ;");
+    this.indent().print("rdfs:range ");
     this.print(listName);
-  } else {
+  } else if (property.rangeList.length>0) {
+    this.println(" ;");
+    this.indent().print("rdfs:range ");
     this.printRange(property);
   }
   if (property.subPropertyOf) {
@@ -1580,6 +1716,8 @@ function OntologyWriter_printProperty(property) {
     this.indent().print("rdfs:subPropertyOf ");
     this.printURI(property.subPropertyOf);
   }
+  this.printSuperProperties(property);
+  
   if (property.inverseOf) {
     this.println(" ;");
     this.indent().print("owl:inverseOf ");
@@ -1595,11 +1733,25 @@ function OntologyWriter_printProperty(property) {
   this.popIndent();
 }
 
+function OntologyWriter_printSuperProperties(property) {
+  logger.debug("printSuperProperties: " + property.name);
+  var list = property.superList;
+  if (list.length==0) return;
+  this.println(" ;");
+  this.indent().print("rdfs:subPropertyOf");
+  var comma = " ";
+  for (var i=0; i<list.length; i++) {
+    this.print(comma);
+    comma = ", ";
+    var superProperty = list[i];
+    this.printQName(superProperty);
+  }
+}
 
 
 function OntologyWriter_printProperties() {
-  logger.debug("printProperties");
   var list = this.ontology.propertyList;
+  logger.debug("printProperties " + this.ontology.uri + " " + list.length);
   for (var i=0; i<list.length; i++) {
     this.printProperty(list[i]);
   }
@@ -1656,7 +1808,12 @@ function OntologyWriter_printList(listType) {
   this.indent().println("[ rdf:type owl:Restriction ;")
   this.pushIndent();
     this.indent().println("owl:onProperty rdf:rest ;");
-    this.indent().print("owl:allValuesFrom ").printQName(listType).println(" ;");
+    this.indent().println("owl:allValuesFrom [");
+    this.indent().println("  owl:unionOf (");
+    this.indent().println("    [ owl:oneOf ( rdf:nil ) ]");
+    this.indent().print  ("    ").printQName(listType).println();
+    this.indent().println("  )");
+    this.indent().println("]");
   this.popIndent();
   this.indent().println("] .");
   this.popIndent();
@@ -1681,6 +1838,28 @@ function OntologyWriter_printClass(rdfClass) {
   this.println(" .");
   this.popIndent();
   
+  this.printPrimitiveSubtypes(rdfClass);
+  
+}
+
+function OntologyWriter_printPrimitiveSubtypes(rdfClass) {
+  logger.debug("printPrimitiveSubtypes(" + rdfClass.name + ")");
+  var list = rdfClass.subTypes;
+  logger.debug(!list ? "   list is null" : "list.length=" + list.length);
+  if (!list) return;
+  var object = rdfClass.ontology.prefix + ":" + rdfClass.name;
+  for (var i=0; i<list.length; i++) {
+    var type = list[i];
+    logger.debug("   " + type.ontology.uri + type.name);
+    if (type.ontology.uri == "http://www.w3.org/2001/XMLSchema#") {
+      
+      var subject = "xsd:" + type.name;
+      var predicate = "owl:subClassOf";
+     
+      this.println(subject + " " + predicate + " " + object + " .");
+      
+    }
+  }
 }
 
 function OntologyWriter_printSubClassOf(rdfClass) {
@@ -1690,7 +1869,7 @@ function OntologyWriter_printSubClassOf(rdfClass) {
   var rList = rdfClass.restrictionList;
   var rLength = rList ? rList.length : 0;
   var count = superLength + rLength;
-  if (count == 0) {
+  if (count == 0 && rdfClass.restrictions) {
     if (rdfClass.restrictions.length>0) {
       this.println(";");
       this.indent().print("rdfs:subClassOf ")
@@ -1698,6 +1877,8 @@ function OntologyWriter_printSubClassOf(rdfClass) {
     }
     return;
   }
+  logger.debug("supertype count: " + count);
+  if (count == 0) return;
   this.println(" ;");
   this.indent().print("rdfs:subClassOf ");
   var delim = "";
@@ -1774,8 +1955,10 @@ function OntologyWriter_printEnum(rdfEnum) {
   
   this.println();
   this.indent().printQName(rdfEnum);
-  this.indent().println(" a owl:Class ;");
+  this.indent().print(" a owl:Class ");
   this.pushIndent();
+  this.printSubClassOf(rdfEnum);
+  this.println(" ;");
   this.indent().println("owl:equivalentClass [");
   this.pushIndent();
     this.indent().println("owl:oneOf (");
@@ -2147,14 +2330,19 @@ function RdfClass(ontology, name, umlClass) {
   this.buildCompositionList = RdfClass_buildCompositionList;
   this.normalizeRestrictions = RdfClass_normalizeRestrictions;
   this.buildAssociationQualifierMap = RdfClass_buildAssociationQualifierMap;
+  this.computeLdpRestrictions = RdfClass_computeLdpRestrictions;
+  this.applyContainerRestrictions = RdfClass_applyContainerRestrictions;
+  this.isSubclassOf = RdfClass_isSubclassOf;
   this.ontology = ontology;
   this.name = name;
   this.uri = ontology.uri + name;
   this.restrictions = new Array();
+  this.propertyList = new Array();
   this.aggregationList = null;
   this.compositionList = null;
   this.inlineList = null;
   this.superTypes = null;
+  this.subTypes = null;
   this.stereotypeName = null;
   this.umlClass = umlClass;
   this.documentation = null;
@@ -2179,6 +2367,91 @@ function RdfClass(ontology, name, umlClass) {
   ontology.universe.putRdfObject(this.uri, this);
 }
 
+function RdfClass_isSubclassOf(child, parentURI) {
+  if (!child) {
+    logger.warn( "isSubclassOf received undefined child");
+    return false;
+  }
+  if (!child.uri) {
+    logger.warn("isSubclassOf received child without a URI value");
+    return false;
+  }
+  logger.trace("isSubclassOf "+ child.name + " " + parentURI);
+  if (child.uri==parentURI) return true;
+  if (child.superTypes) {
+    var list = child.superTypes;
+    for (var i=0; i<list.length; i++) {
+      var result = this.isSubclassOf(list[i], parentURI);
+      if (result) return result;
+    }
+  }
+  return false;
+}
+
+function RdfClass_computeLdpRestrictions() {
+  logger.debug("computeLdpRestrictions " + this.name);
+  var list = this.propertyList;
+  for (var i=0; i<list.length; i++) {
+    var p = list[i];
+    var rangeList = p.rangeList;
+    logger.trace("    " + p.name + " " + rangeList.length);
+    for (var j=0; j<rangeList.length; j++) {
+      var range = rangeList[j];
+      if (this.isSubclassOf(range, "http://www.w3.org/ns/ldp#Container")) {
+        
+        this.applyContainerRestrictions(p, range);
+        
+        
+      }
+    }
+  }
+}
+
+function RdfClass_applyContainerRestrictions(property, containerClass) {
+  logger.debug("applyContainerRestrictions " + property.name);
+  
+  /* Compute the word stem from the property name by dropping the plural suffix "s" or "es" */
+  var stem = property.name;
+  var end = stem.length-1;
+  if (stem.charAt(end-1)=='e') {
+    end--;
+  }
+  stem = stem.substring(0, end);
+  
+  /* Search for another property that matches the word stem */
+  var regex = new RegExp("^" + stem);
+  var list = this.propertyList;
+  var match = null;
+  for (var i=0; i<list.length; i++) {
+    var p = list[i];
+    if (p.name == property.name) continue;
+    if (p.name.match(regex)) {
+      if (match) {
+        var msg = "Multiple matches found for container property " + property.name + ": " + match.name + ", " + p.name;
+        logger.warn(msg);
+        return;
+      }
+      match = p;
+    }
+  }
+  if (match) {
+
+    // We found a unique match, so create the restrictions.
+    
+    var predicate = this.ontology.universe.getMembershipPredicateProperty();
+    var r = new RdfRestriction(predicate);
+    r.hasValue = match;
+    r.preserve = true;
+    append(containerClass.restrictions, r);
+    predicate = this.ontology.universe.getMembershipSubjectProperty();
+    r = new RdfRestriction(predicate);
+    r.range = this;
+    r.preserve = true;
+    append(containerClass.restrictions, r);
+  }
+  
+}
+
 function RdfClass_normalizeRestrictions() {
   logger.debug("RdfClass_normalizeRestrictions: " + this.name);
   var array = new Array();
@@ -2190,8 +2463,12 @@ function RdfClass_normalizeRestrictions() {
       r.maxCardinality = 1;
     }
     
-    var msg = "   property = " + r.property.name + ", multiplicity=[" + r.minCardinality + ".." + r.maxCardinality + "]";
-    msg += ", range = " + r.range.name;
+    var rangeName = (r.range && r.range.name) ? r.range.name : "undefined";
+    var minCard = (typeof r.minCardinality == "undefined") ? "undefined" : r.minCardinality;
+    var maxCard = (typeof r.maxCardinality == "undefined") ? "undefined" : r.maxCardinality;
+    
+    var msg = "   property = " + r.property.name + ", multiplicity=[" + minCard + ".." + maxCard + "]";
+    msg += ", range = " + rangeName;
     if (!r.preserve && (r.property.rangeList.length == 1)) {
       
       /* If the range declared in the restriction is identical to the
@@ -2280,6 +2557,7 @@ function RdfClass_getMaxCardinalityRestriction(propertyUri) {
 
 function RdfEnum(ontology, name, extensible, documentation) {
   logger.debug("new RdfEnum " + name);
+  this.superTypes = null;
   this.ontology = ontology;
   this.name = name;
   this.uri = ontology.uri + name;
@@ -2313,11 +2591,14 @@ function RdfIndividual(ontology, name, type, documentation) {
   this.uri = ontology.uri + name;
   this.type = type;
   this.documentation = documentation;
-  ontology.universe.putRdfObject(this.uri, this);
 }
 
 function RdfProperty(ontology, name, umlField) {
   logger.debug("new RdfProperty " + name);
+  if (!ontology) {
+    logger.error("ontology is not defined for property '" + name + "'");
+    return;
+  }
   this.removeDuplicates = RdfProperty_removeDuplicates;
   this.normalize = RdfProperty_normalize;
   this.setType = RdfProperty_setType;
@@ -2328,6 +2609,9 @@ function RdfProperty(ontology, name, umlField) {
   this.functional = false;
   this.inverseOf = null;
   this.umlField = umlField;
+  this.typeList = new Array();
+  this.superList = new Array();
+  /* TODO: eliminate subPropertyOf and use superList only */
   this.subPropertyOf = umlField ? umlField.subPropertyOf : null;
   this.comment = umlField ? umlField.description : null;
   logger.debug("   comment=" + this.comment);
@@ -2338,6 +2622,11 @@ function RdfProperty(ontology, name, umlField) {
   this.usage = new Array();
   this.domainList = new Array();
   this.rangeList = new Array();
+  this.isFunctional = null;
+  
+  if (umlField) {
+    this.isFunctional = umlField.isFunctional;
+  }
 
   ontology.universe.putRdfObject(this.uri, this);
   append(ontology.propertyList, this);
@@ -2349,7 +2638,6 @@ function RdfProperty_setType() {
 }
 
 function RdfProperty_normalize() {
-  logger.debug("normalize: " + this.uri);
   this.domainList = this.removeDuplicates(this.domainList);
   this.rangeList = this.removeDuplicates(this.rangeList);
   
@@ -2358,15 +2646,20 @@ function RdfProperty_normalize() {
   // If all uses of this property have maxCardinality=1, then
   // this property is functional.
   var list = this.usage;
-  var functional = true;
-  for (var i=0; i<list.length; i++) {
-    var r = list[i];
-    if (r.maxCardinality != 1) {
-      functional = false;
-      break;
+  if ("false" == this.isFunctional) {
+    this.functional = false;
+  } else {
+    var functional = list.length>0;
+    for (var i=0; i<list.length; i++) {
+      var r = list[i];
+      if (r.maxCardinality != 1) {
+        functional = false;
+        break;
+      }
     }
+    this.functional = functional;
   }
-  this.functional = functional;
+  logger.debug("normalize: " + this.uri + " functional=" + functional + " [" + list.length + "]");
   
 }
 
@@ -2401,6 +2694,7 @@ function RdfRestriction(property, domain, range, minCardinality, maxCardinality,
   this.range = range;
   this.minCardinality = minCardinality;
   this.maxCardinality = maxCardinality;
+  this.hasValue = null;
   this.preserve = false;
 }
 
@@ -2455,14 +2749,17 @@ function PropertyBuilder_computeImports() {
 
 
 function PropertyBuilder_scanAll() {
+  logger.debug("PropertyBuilder_scanAll");
   var list = this.universe.ontologyList;
   for (var i=0; i<list.length; i++) {
     var ontology = list[i];
     this.scanOntology(ontology);
   }
+  logger.debug("END scanAll");
 }
 
 function PropertyBuilder_scanOntology(ontology) {
+  logger.debug("PropertyBuilder_scanOntology " + ontology.uri);
   var list = ontology.propertyList;
   for (var i=0; i<list.length; i++) {
     var p = list[i];
@@ -2470,6 +2767,7 @@ function PropertyBuilder_scanOntology(ontology) {
       this.handleSuperProperty(p);
     }
   }
+  logger.debug("END scanOntology " + ontology.uri);
 }
 
 function PropertyBuilder_handleSuperProperty(subProperty) {
@@ -2552,6 +2850,8 @@ function OntologyBuilder(universe) {
   this.normalizeProperties = OntologyBuilder_normalizeProperties;
   this.buildClassHierarchy = OntologyBuilder_buildClassHierarchy;
   this.buildAllProperties = OntologyBuilder_buildAllProperties;
+  this.buildExplicitProperties = OntologyBuilder_buildExplicitProperties;
+  this.buildPropertyHierarchy = OntologyBuilder_buildPropertyHierarchy;
   this.setSuperTypes = OntologyBuilder_setSuperTypes;
   this.buildQualifiers = OntologyBuilder_buildQualifiers;
   this.buildAllQualifiers = OntologyBuilder_buildAllQualifiers;
@@ -2564,6 +2864,8 @@ function OntologyBuilder(universe) {
   this.getLocalName = OntologyBuilder_getLocalName;
   this.buildImports = OntologyBuilder_buildImports;
   this.addOntologyImportsFromList = OntologyBuilder_addOntologyImportsFromList;
+  this.setSubtypes = OntologyBuilder_setSubtypes;
+  this.normalizeAllProperties = OntologyBuilder_normalizeAllProperties;
   
   this.universe = universe;
   this.ontology = null;
@@ -2594,6 +2896,7 @@ function OntologyBuilder_getLocalName(uri) {
 }
 
 function OntologyBuilder_buildIndividuals(pkg, ontology) {
+  logger.debug("OntologyBuilder_buildIndividuals " + ontology.uri);
   for (var i=0; i<pkg.individualList.length; i++) {
     var umlObject = pkg.individualList[i];
     
@@ -2603,9 +2906,11 @@ function OntologyBuilder_buildIndividuals(pkg, ontology) {
     var type = this.universe.getRdfObject(path);
     var documentation = umlObject.documentation;
     var individual = new RdfIndividual(ontology, name, type, documentation);
+    ontology.universe.putRdfObject(individual.uri, individual);
     append(ontology.individualList, individual);
     
   }
+  logger.debug("END buildIndividuals " + ontology.uri);
 }
 
 
@@ -2662,6 +2967,7 @@ function OntologyBuilder_finishAllClasses() {
   var list = this.universe.ontologyList;
   for (var i=0; i<list.length; i++) {
     var ontology = list[i];
+    
     this.finishClasses(ontology);
     this.setListElemTypes(ontology);
   }
@@ -2670,6 +2976,12 @@ function OntologyBuilder_finishAllClasses() {
 function OntologyBuilder_finishClasses(ontology) {
   logger.trace("finishClasses " + ontology.prefix);
   var list = ontology.classList;
+
+  logger.debug("enumList.length=" + ontology.enumList.length);
+  for (var i=0; i<ontology.enumList.length; i++) {
+    this.setSuperTypes(ontology.enumList[i].umlEnum);
+  }
+  
   for (var i=0; i<list.length; i++) {
     list[i].buildAssociationQualifierMap();
     /* deprecated
@@ -2690,11 +3002,72 @@ function OntologyBuilder_buildAllQualifiers() {
     this.buildQualifiers(pkg, ontology);
     this.buildIndividuals(pkg, ontology);
   }
+  logger.trace("End buildAllQualifiers");
+}
+
+function OntologyBuilder_buildExplicitProperties() {
+  logger.debug("buildExplicitProperties");
+  var list = this.universe.propertyList;
+  for (var i=0; i<list.length; i++) {
+    
+    var p = list[i];
+    var name = p.uml.Name;
+    var ontologyURI = p.pkg.uri;
+    var onto = this.universe.getRdfObject(ontologyURI);
+    if (!onto) {
+      logger.warn("Ignoring Property  '" + name + "' because ontology not found: " + ontologyURI);
+      return;
+    }
+    var uri = ontologyURI + name;
+    var property = this.universe.getRdfObject(uri);
+    if (!property) {
+      p.rdfProperty = property = new RdfProperty(onto, name);
+    }
+    
+    p.rdfProperty.comment = p.uml.Documentation;
+    
+  }
+  this.buildPropertyHierarchy();
+}
+
+function OntologyBuilder_buildPropertyHierarchy() {
+  logger.debug("buildPropertyHierarchy");
+  var list = this.universe.propertyList;
+  for (var i=0; i<list.length; i++) {
+    var child = list[i].rdfProperty;
+    var superList = list[i].superList;
+    logger.debug(child.name + " has " + superList.length + " super properties");
+    for (var j=0; j<superList.length; j++) {
+      var parent = superList[j].rdfProperty;
+      if (parent) {
+        append(child.superList, parent);
+        logger.debug(child.name + " subPropertyOf " + parent.name);
+      } else {
+        logger.error("Missing RDF Property: " + superList[j].uri);
+      }
+    }
+    
+    var typeList = list[i].typeList;
+    logger.debug(child.name + " has " + typeList.length + " super types");
+    for (var j=0; j<typeList.length; j++) {
+      var superType = this.universe.getRdfObject(typeList[j].uri);
+      if (superType) {
+        append(child.typeList, superType);
+        logger.debug(child.name + " rdf:type " + superType.name);
+      } else {
+        logger.error("Missing OWL Class: " + typeList[j].uri);
+      }
+    }
+  }
+  
 }
 
 function OntologyBuilder_buildAllProperties() {
   logger.debug("buildAllProperties");
   this.propertyList = new Array();
+  
+  this.buildExplicitProperties();
+  
   for (var i=0; i<this.universe.ontologyList.length; i++) {
     this.ontology = this.universe.ontologyList[i];
     this.buildProperties();
@@ -2734,7 +3107,7 @@ function OntologyBuilder_setSuperTypes(umlClass) {
   }
 
   for (var i=0; i<list.length; i++) {
-    logger.debug(i + ". " + list[i].name);
+    logger.debug(i + ". " + list[i].uri);
   }
   for (var i=0; i<list.length; i++) {
     var superType = list[i].rdfClass;
@@ -2743,7 +3116,36 @@ function OntologyBuilder_setSuperTypes(umlClass) {
     }
     append(rdfClass.superTypes, superType);
   }
+  
   logger.debug("END setSupertypes");
+}
+
+function OntologyBuilder_setSubtypes(umlClass) {
+  logger.debug("setSubtypes " + umlClass.name);
+  return;
+  var rdfClass = umlClass.rdfClass;
+  if (!rdfClass) return;
+  
+  var list = umlClass.subTypes;
+  if (!list) {
+    logger.debug("   No subtypes recorded.");
+  } else {
+    if (!rdfClass.subTypes) {
+      rdfClass.subTypes = new Array();
+    }
+    for (var i=0; i<list.length; i++) {
+      logger.debug("   " + list[i].uri);
+      
+      logger.debug("   getRdfObject");
+      var subtype = this.universe.getRdfObject(list[i].uri);
+      logger.debug("   got Rdf Object");
+    
+      if (!subtype) {
+        throw "RDF class not defined: " + list[i].name;
+      }
+      append(rdfClass.subTypes, subtype);
+    }
+  }
 }
 
 function OntologyBuilder_buildClassHierarchy() {
@@ -2753,6 +3155,7 @@ function OntologyBuilder_buildClassHierarchy() {
   for (var key in map) {
     var umlClass = map[key];
     this.setSuperTypes(umlClass);
+    this.setSubtypes(umlClass);
   }
   
   this.finishAllClasses();
@@ -2781,9 +3184,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   this.addImport(map, ont);
   for (var i=0; i<list.length; i++) {
     var property = list[i];
-
     this.addOntologyImportsFromList(map, property.domainList);
     this.addOntologyImportsFromList(map, property.rangeList);
+    this.addOntologyImportsFromList(map, property.typeList);
+    this.addOntologyImportsFromList(map, property.superList);
     
     for (var j=0; j<property.usage.length; j++) {
       var restriction = property.usage[j];
@@ -2804,10 +3208,11 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   logger.debug("Add imports for supertypes");
   for (var i=0; i<list.length; i++) {
     var type = list[i];
-    if (!type.superTypes) continue;
-    for (var j=0; j<type.superTypes.length; j++) {
-      var s = type.superTypes[j];
-      this.addImport(map, s.ontology);
+    if (type.superTypes) {
+      for (var j=0; j<type.superTypes.length; j++) {
+        var s = type.superTypes[j];
+        this.addImport(map, s.ontology);
+      }
     }
     logger.debug("Compute imports for restrictions on " + type.name);
     var rlist = type.restrictions;
@@ -2838,6 +3243,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   }
   
   logger.debug("end computeImportedOntologies");
+  
+}
+
+function OntologyBuilder_addImportsFromRestrictions(map, type) {
   
 }
 
@@ -2909,6 +3318,18 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   }
 
   
+  if (field.stereotypeName == "list") {
+    var listURI = objectUri + "List";
+    var listName = object.name + "List";
+    var listType = universe.getRdfObject(listURI);
+    if (listType == null) {
+      listType = new RdfList(object.ontology, listName, null);
+      listType.elemType = object;
+    }
+    object = listType;
+  }
+  
+  
   var subject = rdfClass;
   if (field.domainURI) {
     subject = universe.getRdfObject(field.domainURI);
@@ -2934,8 +3355,7 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   
   append(property.domainList, domain);
   append(property.rangeList, range);
-  
-  
+  append(rdfClass.propertyList, property);
   
   
 }
@@ -2946,6 +3366,8 @@ function OntologyBuilder_buildEnums(umlPackage) {
   for (var i=0; i<list.length; i++) {
     var umlEnum = list[i];
     var rdfEnum = new RdfEnum(this.ontology, umlEnum.name, umlEnum.isExtensible, umlEnum.documentation);
+    umlEnum.rdfClass = rdfEnum;
+    rdfEnum.umlEnum = umlEnum;
     this.universe.putRdfObject(umlEnum.Pathname, rdfEnum);
     for (var j=0; j<umlEnum.literalList.length; j++) {
       var value = umlEnum.literalList[j].name;
@@ -2985,7 +3407,6 @@ function OntologyBuilder_buildProperties() {
       this.createProperties(rdfClass);
     }
   }
-  this.normalizeProperties();
 }
 
 function OntologyBuilder_buildClass(type) {
@@ -3026,7 +3447,10 @@ function OntologyBuilder_buildOntology(pkg) {
   if (pkg.name == "rdf") return;
   logger.debug("buildOntology: " + pkg.name);
   
-  var onto = new Ontology(this.universe, pkg.prefix, pkg.uri, pkg.orgId, pkg.contextURI);
+  var onto = this.universe.getRdfObject(pkg.uri);
+  if (onto == null) {
+    onto = new Ontology(this.universe, pkg.prefix, pkg.uri, pkg.orgId, pkg.contextURI);
+  }
   onto.label = pkg.name;
   append(this.universe.ontologyList, onto);
   this.ontology = onto;
@@ -3071,10 +3495,21 @@ function OntologyBuilder_buildAll() {
   var builder = new PropertyBuilder(this.universe, this);
   builder.scanAll();
   builder.computeImports();
+
   this.normalizeAllRestrictions();
   this.buildImports();
+  this.normalizeAllProperties();
   
   
+}
+
+function OntologyBuilder_normalizeAllProperties() {
+
+  var olist = this.universe.ontologyList;
+  for (var i=0; i<olist.length; i++) {
+    this.ontology = olist[i];
+    this.normalizeProperties();
+  }
 }
 
 function OntologyBuilder_normalizeAllRestrictions() {
@@ -3085,6 +3520,7 @@ function OntologyBuilder_normalizeAllRestrictions() {
     var clist = ont.classList;
     for (var j=0; j<clist.length; j++) {
       var c = clist[j];
+      c.computeLdpRestrictions();
       c.normalizeRestrictions();
     }
   }
@@ -3392,7 +3828,7 @@ function XsdComplexType_assignOrdinals() {
 
 function XsdComplexType_buildSequence() {
   logger.debug("begin buildSequence " + this.uri);
-  logger.error("This method needs to be rewritten because propertyStatements list no longer exists");
+  logger.debug("This method needs to be rewritten because propertyStatements list no longer exists");
 //  
 //  var list = this.rdfClass.propertyStatements;
 //  var universe = this.schema.universe;
@@ -4036,6 +4472,7 @@ function XsdWriter_printUniverse() {
 }
 
 function XsdWriter_printSimpleType(type) {
+  logger.debug("printSimpleType " + type.name);
   var xs = this.xsdPrefix;
   
   var id = type.name;
@@ -4207,12 +4644,18 @@ function getProjectAttachments(project) {
     if (colon > 0) {
       var key = line.substring(0, colon);
       var value = line.substring(colon+1);
+      if (key == "logLevel" && (typeof LogLevels[value] != "undefined")) {
+        logger.level = LogLevels[value];
+      }
       result[key] = value;
       logger.debug("Model attachment, " + key + " = " + value);
     }
   }
   return result;
 }
+
+
+
 
 function writeOntology() {
 
@@ -4268,8 +4711,9 @@ function writeOntology() {
   writer = new XsdWriter(universe);
     
   var list = universe.simpleTypeSchemas;
-  
   for (var i=0; i<list.length; i++) {
+    
+    logger.debug("preparing to print XSD ... " + list[i].uri);
   
     if (list[i].uri.indexOf("http://www.w3.org/")==0) continue;
     
@@ -4305,7 +4749,6 @@ function writeOntology() {
   
 }
 writeOntology();
-log("end script");
 @>
 
 <@REPEAT ;UMLModel;;@>
