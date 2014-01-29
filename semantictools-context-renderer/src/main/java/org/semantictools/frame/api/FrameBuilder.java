@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import com.hp.hpl.jena.ontology.FunctionalProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
@@ -159,6 +160,9 @@ public class FrameBuilder {
         property = model.createOntProperty(resource.getURI());
       }
       
+      if (property != null && property.canAs(FunctionalProperty.class)) {
+        maxCardinality = 1;
+      }
       
       if (restriction.hasProperty(OWL.minCardinality)) {
         minCardinality = restriction.getProperty(OWL.minCardinality).getInt();
