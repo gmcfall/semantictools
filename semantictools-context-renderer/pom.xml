@@ -10,7 +10,7 @@
 	<groupId>org.semantictools</groupId>
 	<artifactId>semantictools-context-renderer</artifactId>
 	<packaging>jar</packaging>
-	<version>1.25</version>
+	<version>1.26</version>
 	<name>SemanticTools Context Renderer</name>
   <description>
     A library used to generate documentation for media types associated with a JSON-LD context
@@ -155,7 +155,7 @@
 		</resources>
 		<plugins>
 
-     
+<!--      
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -181,7 +181,7 @@
           </execution>
         </executions>
       </plugin>
-
+ -->
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>
