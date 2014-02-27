@@ -9,7 +9,7 @@
   <groupId>org.semantictools</groupId>
   <artifactId>semantictools-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.26</version>
+  <version>1.27</version>
   <name>semantictools maven plugin</name>
   <description>A Maven plugin used to generate documentation for a REST API based on RDF schemas</description>
   <url>https://github.com/gmcfall/semantictools</url>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.semantictools</groupId>
       <artifactId>semantictools-context-renderer</artifactId>
-      <version>1.26</version>
+      <version>1.27</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -66,6 +66,7 @@
     </resources>
     <plugins>
  
+ <!-- 
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -92,7 +93,21 @@
           </execution>
         </executions>
       </plugin>
-     
+        
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+-->
       <plugin>
          <artifactId>maven-compiler-plugin</artifactId>
          <version>2.0.2</version>
@@ -110,19 +125,6 @@
               <skipTests>true</skipTests>
             </configuration>
         </plugin>
-        
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
     </plugins>
   </build>
