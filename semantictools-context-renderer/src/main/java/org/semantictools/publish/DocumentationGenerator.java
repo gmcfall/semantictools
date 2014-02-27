@@ -177,6 +177,9 @@ public class DocumentationGenerator {
     OntologyManager ontoManager = new OntologyManager();
     GlobalPropertiesReader globalReader = new GlobalPropertiesReader(ontoManager);
     GlobalProperties global = globalReader.scan(rdfDir);
+    if (global == null) {
+    	global = new GlobalProperties();
+    }
     UmlFileManager umlFileManager = new UmlFileManager(umlDir);
     
     TypeManager typeManager = new TypeManager();

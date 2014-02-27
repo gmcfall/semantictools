@@ -1165,6 +1165,10 @@ public class ContextHtmlPrinter extends PrintEngine {
     // 0, false, false);
 
     TreeNode node = treeGenerator.generateNode(field);
+    if (node == null) {
+    	logger.error("Cannot generated diagram for repeated field using {} for class {}", field.getLocalName(), contextProperties.getRdfTypeURI());
+    	return;
+    }
     CreateDiagramRequest request = new CreateDiagramRequest(context, node, src);
     diagramGenerator.generateDiagram(request);
     printFigure(src, caption);
@@ -1415,6 +1419,7 @@ public class ContextHtmlPrinter extends PrintEngine {
     Set<String> visited = new HashSet<String>();
     List<Field> fieldList = new ArrayList<Field>();
     
+    logger.debug("getFieldList for {}", contextProperties.getRdfTypeURI());
     addFields(visited, fieldList, root);
     
     sort(fieldList);
@@ -1450,6 +1455,7 @@ public class ContextHtmlPrinter extends PrintEngine {
         
         TermInfo term = context.getTermInfoByURI(uri);
         if (term != null) {
+        	logger.debug("      {}", field.getLocalName());
           sink.add(field);
           
           RdfType type = field.getRdfType();
@@ -2358,6 +2364,12 @@ public class ContextHtmlPrinter extends PrintEngine {
   }
 
   private void addSubdatatypes(Set<String> set, Frame frame) {
+    // Don't add subtypes for rdfs:Resource.
+    // This is a bit of a hack.
+    // TODO: find a more elegant solution.
+    if (frame.getUri().equals(RDFS.Resource.getURI())) {
+      return;
+    }
     List<Datatype> list = frame.getSubdatatypeList();
     for (Datatype type : list) {
       set.add(type.getUri());

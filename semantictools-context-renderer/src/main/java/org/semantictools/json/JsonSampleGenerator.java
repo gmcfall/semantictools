@@ -59,6 +59,7 @@ public class JsonSampleGenerator {
   
   private int maxCyclicDepth = 2;
   private int maxRepeat = 2;
+  private int maxDepth = 5;
 
   public JsonSampleGenerator(TypeManager typeManager) {
     this.typeManager = typeManager;
@@ -121,11 +122,13 @@ public class JsonSampleGenerator {
     addConditionalTypeProperty(branch);
     addIdProperty(branch);
     
-    List<Field> fieldList = branch.getFrame().listAllFields();
-    
-    for (Field field : fieldList) {
-      if (!isIncluded(field, contextProperties, branch.getFrame())) continue;
-      addField(branch, field, null);
+    if (branch.getDepth() < maxDepth) {
+	    List<Field> fieldList = branch.getFrame().listAllFields();
+	    
+	    for (Field field : fieldList) {
+	      if (!isIncluded(field, contextProperties, branch.getFrame())) continue;
+	      addField(branch, field, null);
+	    }
     }
     
     
@@ -246,7 +249,7 @@ public class JsonSampleGenerator {
   }
   
   private void createFrame(Branch branch, TermInfo term, Field field, Frame frame, NodeConsumer callback) {
-
+	  
     boolean iriReference = term!=null && term.isCoercedAsIriRef();
     
     if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE) {
@@ -682,6 +685,9 @@ public class JsonSampleGenerator {
       return field;
     }
    
+    public int getDepth() {
+    	return parent==null ? 0 : parent.getDepth() + 1;
+    }
     
     
   }

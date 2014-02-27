@@ -2,7 +2,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 @prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
-@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 
 lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
 lti:BaseUrlChoice rdfs:subClassOf
@@ -181,11 +180,6 @@ lti:ProductInstance rdfs:subClassOf
     bind:onProperty lti:service_owner ;
     bind:associationType bind:Aggregation
   ] .
-lti:ServiceOwner rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty lti:support ;
-    bind:associationType bind:Composition
-  ] .
 lti:ToolProxy rdf:type bind:Addressable .
 lti:ToolProxy rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
@@ -213,14 +207,41 @@ lti:ToolProxyBinding rdfs:subClassOf
 lti:LtiLink rdf:type bind:Addressable .
 lti:LtiLink rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:lineItem ;
-    bind:associationType bind:Aggregation
+    bind:onProperty lti:linkCapability
   ] .
 lti:Context rdf:type bind:Addressable .
+lti:Context rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:lineItem ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:lineItems ;
+    bind:associationType bind:Composition
+  ] .
 lti:ToolSettingsContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:custom ;
     bind:associationType bind:Composition
+  ] .
+lti:AssignmentLink rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:context_lineitems
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_results
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:latestResult
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_assignedActivity
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_assignedActivity_activityTemplate
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem
   ] .
 
 lti:HttpMethod rdf:type bind:Enum .

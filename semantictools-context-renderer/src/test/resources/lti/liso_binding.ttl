@@ -6,17 +6,13 @@
 liso:Result rdf:type bind:Addressable .
 liso:Result rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:resultScore ;
-    bind:associationType bind:Composition
+    bind:onProperty liso:resultAgent ;
+    bind:associationType bind:Aggregation
   ] .
 liso:LineItem rdf:type bind:Addressable .
 liso:LineItem rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:assessedActivity ;
-    bind:associationType bind:Aggregation
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:scoreConstraints ;
+    bind:onProperty liso:reportingMethod ;
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
@@ -24,10 +20,25 @@ liso:LineItem rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:scoreConstraints ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty liso:results ;
     bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:assignedActivity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:dataSource
   ] .
 liso:ScoreConstraints rdf:type bind:Addressable .
 liso:ScoreConstraints rdf:type bind:AbstractClass .
 liso:NumericLimits rdf:type bind:Addressable .
+liso:ResultContainer rdf:type bind:Addressable .
+liso:LineItemContainer rdf:type bind:Addressable .
+liso:AssignmentAdministration rdf:type bind:Addressable .
+liso:LISResult rdf:type bind:Addressable .
 

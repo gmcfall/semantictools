@@ -2337,6 +2337,7 @@ function RdfClass(ontology, name, umlClass) {
   this.computeLdpRestrictions = RdfClass_computeLdpRestrictions;
   this.applyContainerRestrictions = RdfClass_applyContainerRestrictions;
   this.isSubclassOf = RdfClass_isSubclassOf;
+  this.getMembershipPredicate = RdfClass_getMembershipPredicate;
   this.ontology = ontology;
   this.name = name;
   this.uri = ontology.uri + name;
@@ -2411,33 +2412,61 @@ function RdfClass_computeLdpRestrictions() {
   }
 }
 
+function RdfClass_getMembershipPredicate(property, containerClass) {
+	logger.debug("begin getMembershipPredicate");
+	var attachments = containerClass.umlClass.uml.Attachments;
+	if (attachments) {
+		logger.debug("attachments: " + attachments);
+	    var lines = attachments.split('\r\n');
+	    for (var i=0; i<lines.length; i++) {
+	    	var line = lines[i];
+	    	logger.debug("line: " + line);
+	      
+		    var colon = line.indexOf('=');
+		    if (colon>0) {
+			    var key = line.substring(0, colon);
+			    var value = line.substring(colon+1);
+			    if (key == "membershipPredicate") {
+			    	return this.ontology.universe.getRdfObject(value);
+			    }
+		    }
+	    }
+	}
+    logger.debug("membershipPredicate annotation not found.  Trying to match singular form of property name");
+    
+    /* Compute the word stem from the property name by dropping the plural suffix "s" or "es" */
+    var stem = property.name;
+    var end = stem.length-1;
+    if (stem.charAt(end-1)=='e') {
+      end--;
+    }
+    stem = stem.substring(0, end);
+    
+    /* Search for another property that matches the word stem */
+    var regex = new RegExp("^" + stem);
+    var list = this.propertyList;
+    var match = null;
+    for (var i=0; i<list.length; i++) {
+      var p = list[i];
+      if (p.name == property.name) continue;
+      if (p.name.match(regex)) {
+        if (match) {
+          var msg = "Multiple matches found for container property " + property.name + ": " + match.name + ", " + p.name;
+          logger.warn(msg);
+          return;
+        }
+        match = p;
+      }
+    }
+    logger.debug("end getMembershipPredicate");
+    return match;
+	
+}
+
 function RdfClass_applyContainerRestrictions(property, containerClass) {
   logger.debug("applyContainerRestrictions " + property.name);
   
-  /* Compute the word stem from the property name by dropping the plural suffix "s" or "es" */
-  var stem = property.name;
-  var end = stem.length-1;
-  if (stem.charAt(end-1)=='e') {
-    end--;
-  }
-  stem = stem.substring(0, end);
-  
-  /* Search for another property that matches the word stem */
-  var regex = new RegExp("^" + stem);
-  var list = this.propertyList;
-  var match = null;
-  for (var i=0; i<list.length; i++) {
-    var p = list[i];
-    if (p.name == property.name) continue;
-    if (p.name.match(regex)) {
-      if (match) {
-        var msg = "Multiple matches found for container property " + property.name + ": " + match.name + ", " + p.name;
-        logger.warn(msg);
-        return;
-      }
-      match = p;
-    }
-  }
+  var match = this.getMembershipPredicate(property, containerClass);
   if (match) {
 
     // We found a unique match, so create the restrictions.
@@ -2663,7 +2692,7 @@ function RdfProperty_normalize() {
     }
     this.functional = functional;
   }
-  logger.debug("normalize: " + this.uri + " functional=" + functional + " [" + list.length + "]");
+  logger.debug("normalize: " + this.uri + " functional=" + this.functional + " [" + list.length + "]");
   
 }
 
@@ -3192,6 +3221,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
     this.addOntologyImportsFromList(map, property.rangeList);
     this.addOntologyImportsFromList(map, property.typeList);
     this.addOntologyImportsFromList(map, property.superList);
+    
+    if (property.inverseOf != null) {
+    	this.addImport(map, property.inverseOf.ontology);
+    }
     
     for (var j=0; j<property.usage.length; j++) {
       var restriction = property.usage[j];
@@ -4661,6 +4694,7 @@ function getProjectAttachments(project) {
 
 
 
+
 function writeOntology() {
 
   var project = current();
@@ -4704,20 +4738,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4692):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4726):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4692):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4726):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4692):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4726):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4748,20 +4782,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4736):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4736):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4702):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4736):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4807,20 +4841,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4727):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4761):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4727):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4761):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4727):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4761):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4849,20 +4883,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4735):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4769):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4735):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4769):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4735):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4769):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4894,20 +4928,20 @@ currentItemStack.push(currentItem);
 try {
     eval('currentItem = currentItem');
 } catch (ex) {
-    log('template.cot(4746):<@DISPLAY@> Error exists in path expression.');
+    log('template.cot(4780):<@DISPLAY@> Error exists in path expression.');
     throw ex;
 }
 var value;
 try {
     eval('value = writer.text');
 } catch (ex) {
-    log('template.cot(4746):<@DISPLAY@> Error exists in arguments.');
+    log('template.cot(4780):<@DISPLAY@> Error exists in arguments.');
     throw ex;
 }
 try {
    print(value);
 } catch (ex) {
-    log('template.cot(4746):<@DISPLAY@> Error exists in command.');
+    log('template.cot(4780):<@DISPLAY@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();
@@ -4936,13 +4970,13 @@ currentItemStack.push(currentItem);
 try {
     eval('var rootElem = currentItem');
 }catch (ex) {
-    log('template.cot(4754):<@REPEAT@> Error exists in  path expression.');
+    log('template.cot(4788):<@REPEAT@> Error exists in  path expression.');
     throw ex
 }
 try {
     eval('var elemArr1 = getAllElements(false, rootElem, \'UMLModel\', \'\', \'\')');
 }catch (ex) {
-    log('template.cot(4754):<@REPEAT@> Error exists in path, type, collection name.');
+    log('template.cot(4788):<@REPEAT@> Error exists in path, type, collection name.');
     throw ex
 }
 try {
@@ -4957,20 +4991,20 @@ try {
         try {
             eval('currentItem = currentItem');
         } catch (ex) {
-            log('template.cot(4755):<@DISPLAY@> Error exists in path expression.');
+            log('template.cot(4789):<@DISPLAY@> Error exists in path expression.');
             throw ex;
         }
         var value;
         try {
             eval('value = OUTPUT');
         } catch (ex) {
-            log('template.cot(4755):<@DISPLAY@> Error exists in arguments.');
+            log('template.cot(4789):<@DISPLAY@> Error exists in arguments.');
             throw ex;
         }
         try {
            print(value);
         } catch (ex) {
-            log('template.cot(4755):<@DISPLAY@> Error exists in command.');
+            log('template.cot(4789):<@DISPLAY@> Error exists in command.');
             throw ex;
         }
         currentItem = currentItemStack.pop();
@@ -4981,7 +5015,7 @@ try {
 
     }
 } catch (ex) {
-    log('template.cot(4754):<@REPEAT@> Error exists in command.');
+    log('template.cot(4788):<@REPEAT@> Error exists in command.');
     throw ex;
 }
 currentItem = currentItemStack.pop();

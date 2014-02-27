@@ -1103,10 +1103,10 @@ public class ServiceDocumentationManager {
         String text = null;
         List<String> mediaTypeList = method.getResponseMediaTypes();
         
-        String containerName = doc.getContainerType().getLocalName();
-        String containerArticle = StringUtil.article(containerName);
         
-        if (mediaTypeList.size()==1) {
+        if (mediaTypeList.size()==1 && doc.getContainerType()!=null) {
+          String containerName = doc.getContainerType().getLocalName();
+          String containerArticle = StringUtil.article(containerName);
           
           String containerMediaType = mediaTypeList.get(0);
           ContextProperties context = contextManager.getContextPropertiesByMediaType(containerMediaType);

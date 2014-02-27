@@ -93,10 +93,10 @@ public class ContextBuilder {
     if (frame == null) {
       throw new FrameNotFoundException(typeURI);
     }
-    addType(properties, context, frame, false);
+    addType(properties, context, frame, false, true);
     if (frame.isSubclassOf(CONTAINER)) {
       Frame page = typeManager.getFrameByUri(PAGE);
-      addType(properties, context, page, false);
+      addType(properties, context, page, false, true);
 
       TermInfo term = new TermInfo("nil");
       term.setIriValue(NIL);
@@ -123,7 +123,7 @@ public class ContextBuilder {
         if (frame == null) {
           throw new FrameNotFoundException(uri);
         }
-        addType(properties, context, frame, false);
+        addType(properties, context, frame, false, true);
       }
     }
     
@@ -157,7 +157,7 @@ public class ContextBuilder {
 //        uri.startsWith("http://www.w3.org/2002/07/owl#");
   }
 
-  private void addType(ContextProperties properties, JsonContext context, RdfType rdfType, boolean stubbed) {
+  private void addType(ContextProperties properties, JsonContext context, RdfType rdfType, boolean stubbed, boolean allFields) {
 
     String typeURI = rdfType.getUri();
     if (properties.getExcludedTypes().contains(typeURI)) {
@@ -165,7 +165,7 @@ public class ContextBuilder {
     }
     if (rdfType.canAsListType() && embedListMembers(properties)) {
 //      rdfType = rdfType.asListType().getElementType();
-      addType(properties, context, rdfType.asListType().getElementType(), stubbed);
+      addType(properties, context, rdfType.asListType().getElementType(), stubbed, allFields);
     }
     
         
@@ -199,9 +199,13 @@ public class ContextBuilder {
     
     history.add(typeURI);
     
+    if (typeURI.equals(RDFS.Resource.getURI())) {
+    	return;
+    }
+    
     FrameConstraints constraints = properties.getFrameConstraints(localName);
     
-    List<Field> fieldList = frame.listAllFields();
+    List<Field> fieldList = allFields ? frame.listAllFields() : frame.getDeclaredFields();
     for (Field field : fieldList) {
       if (constraints == null || constraints.isIncludedProperty(field.getURI())) {
         addField(properties, context, field, frame);
@@ -229,6 +233,10 @@ public class ContextBuilder {
     
     List<Frame> list = frame.listAllSubtypes();
     for (Frame sub : list) {
+      if (properties.getExcludedTypes().contains(sub.getUri())) {
+    	continue;
+      }
+    		
       if (c != null) {
         // If the supertype has constraints, then they must bubble down to 
         // subtypes.  This means that the constraints cannot be null on the subtypes...
@@ -240,7 +248,7 @@ public class ContextBuilder {
         cc.copyAll(c);
       } 
       
-      addType(properties, context, sub, false);
+      addType(properties, context, sub, false, false);
     }
     
   }
@@ -252,6 +260,7 @@ public class ContextBuilder {
     
     if (!isIncluded(field, properties, declaringFrame)) return;
     
+    boolean allFields = field.getDeclaringFrame() == declaringFrame;
     
     String localName = property.getLocalName();
     String propertyURI = property.getURI();
@@ -326,15 +335,15 @@ public class ContextBuilder {
     
     
     if (value != null && value.getContainer() == Container.LIST) {
-      addType(properties, context, rdfType, stubbed);
+      addType(properties, context, rdfType, stubbed, allFields);
       
     } else if (rdfType.canAsFrame()) {
-      addType(properties, context, rdfType, stubbed);
+      addType(properties, context, rdfType, stubbed, allFields);
       
     } else {
       
       addNamespace(context, rdfType);
-      addType(properties, context, rdfType, true);
+      addType(properties, context, rdfType, true, allFields);
       
       if (!properties.getExpandedValues().contains(propertyURI)) {
         String propertyTypeURI = rdfType.getUri();
@@ -419,6 +428,13 @@ public class ContextBuilder {
     
     String fieldType = field.getRdfType().getUri();
     if (properties.getExcludedTypes().contains(fieldType)) return false;
+    
+    List<Frame> superList = declaringFrame.getSupertypeList();
+    for (Frame superFrame : superList) {
+    	if (!isIncluded(field, properties, superFrame)) {
+    		return false;
+    	}
+    }
     
     FrameConstraints constraints = properties.getFrameConstraints(declaringFrame.getLocalName());
    

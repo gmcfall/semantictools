@@ -4,6 +4,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/caliper/v1/core/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -73,7 +74,7 @@ lti:ServiceProvider rdf:type owl:Class;
     rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      lti:provider_name;
+    owl:onProperty      lti:service_provider_name;
     owl:minCardinality  1;
     rdfs:comment "The name of the service provider, suitable for display to end users."
   ] ,
@@ -216,7 +217,7 @@ lti:ProductProfile rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:allValuesFrom  xsd:token;
+    owl:allValuesFrom  xsd:normalizedString;
     owl:minCardinality  1;
     rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract."
   ] ,
@@ -492,16 +493,12 @@ lti:ServiceOwner rdf:type owl:Class;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      lti:service_owner_name
+    owl:onProperty      lti:service_owner_name;
+    owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:description;
     owl:allValuesFrom  lti:LocalizedText
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:support;
-    owl:allValuesFrom  lti:Contact;
-    rdfs:comment "Contact information for support from the service owner."
   ] ; 
   rdfs:comment "The entity that owns the services provided by a product instance." .
 
@@ -554,12 +551,6 @@ lti:LtiLink rdf:type owl:Class ;
     owl:onProperty      lti:resource_link_id;
     owl:minCardinality  1;
     rdfs:comment "A globally unique identifier for this LTI link."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:lineItem;
-    owl:allValuesFrom  liso:LineItem;
-    owl:maxCardinality  1;
-    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity."
   ] ; 
   rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
 
@@ -571,13 +562,22 @@ lti:Context rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:sourcedId
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:lineItem;
+    rdfs:comment "A LineItem that records results for some learning activity within this context."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:lineItems;
+    rdfs:comment """The container that holds the collection of LineItem resources for this Context.  In general, this container is optional.  However, if the Context has any associated LineItems, then the container is required.  As a best practice, implementations every Context should expose a LineItemContainer to clients, even if it is empty.
+"""
   ] ; 
   rdfs:comment "A learning context, such as a Course Section." .
 
 lti:ToolSettingsContainer rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      lti:custom_uri;
+    owl:onProperty      lti:custom_url;
     rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer."
   ] ,
   [ a owl:Restriction ;
@@ -589,13 +589,34 @@ lti:ToolSettingsContainer rdf:type owl:Class;
 lti:PropertyMap rdf:type owl:Class ; 
   rdfs:comment "An abstract class whose properties are defined by the Tool Provider and stored in the Tool Consumer.   When represented in JSON-LD, the PropertyMap object typically appears as a plain-old JSON object (though it may have a custom JSON-LD context that defines the semantics for the custom properties).  It is a best practice for the values in a PropertyMap to be strings.  This best practice may be revised if the development community expresses a desire to support other data types in a PropertyMap." .
 
+lti:AssignmentLink rdf:type owl:Class ;
+  rdfs:subClassOf lti:LtiLink ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:context_lineitems;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_results
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:latestResult
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_assignedActivity
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_assignedActivity_activityTemplate
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem;
+    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singule, scoreable activity."
+  ] .
+
 lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
     owl:oneOf (
       lti:POST 
-      lti:GET 
-      lti:PUT 
-      lti:DELETE
+      lti:GET
     )
   ] ;
   rdfs:comment "Enumerates the HTTP methods that can be used when sending a message, as defined by IETF RFC 2616 ." .
@@ -655,7 +676,7 @@ lti:timestamp rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:dateTime ;
   rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current." .
 
-lti:provider_name rdf:type owl:FunctionalProperty ;
+lti:service_provider_name rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ServiceProvider ;
   rdfs:range lti:LocalizedName ;
   rdfs:comment "The name of the service provider, suitable for display to end users." .
@@ -680,7 +701,6 @@ lti:support rdf:type owl:FunctionalProperty ;
     owl:unionOf (
       lti:ServiceProvider
       lti:ProductInstance
-      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;
@@ -796,7 +816,13 @@ lti:lti_version rdf:type owl:FunctionalProperty ;
       lti:ToolProxy
     )
   ] ;
-  rdfs:range xsd:token ;
+  rdfs:range  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      xsd:normalizedString
+      xsd:token
+    )
+  ] ;
   rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract." .
 
 lti:service_offered rdf:type rdf:Property ;
@@ -973,7 +999,7 @@ lti:service_owner rdf:type owl:FunctionalProperty ;
   rdfs:range lti:ServiceOwner ;
   rdfs:comment "The entity that owns the services provided by this product instance." .
 
-lti:service_owner_name rdf:type rdf:Property ;
+lti:service_owner_name rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ServiceOwner ;
   rdfs:range lti:LocalizedName .
 
@@ -1007,6 +1033,10 @@ lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:range lti-type:GUID.Type ;
   rdfs:comment "A globally unique identifier for this LTI link." .
 
+lti:linkCapability rdf:type rdf:Property ;
+  rdfs:domain lti:LtiLink ;
+  rdfs:range lti:Capability .
+
 lti:id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
@@ -1015,7 +1045,19 @@ lti:sourcedId rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
 
-lti:custom_uri rdf:type owl:FunctionalProperty ;
+lti:lineItem rdf:type rdf:Property ;
+  rdfs:domain lti:Context ;
+  rdfs:range liso:LineItem ;
+  owl:inverseOf liso:lineItemOf ;
+  rdfs:comment "A LineItem that records results for some learning activity within this context." .
+
+lti:lineItems rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Context ;
+  rdfs:range liso:LineItemContainer ;
+  rdfs:comment """The container that holds the collection of LineItem resources for this Context.  In general, this container is optional.  However, if the Context has any associated LineItems, then the container is required.  As a best practice, implementations every Context should expose a LineItemContainer to clients, even if it is empty.
+""" .
+
+lti:custom_url rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
   rdfs:range xsd:anyURI ;
   rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer." .
@@ -1024,11 +1066,35 @@ lti:custom rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
   rdfs:range lti:PropertyMap ;
   rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer." .
+
+lti:context_lineitems rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:LineItemContainer .
+
+lti:linkLineItem_results rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:ResultContainer .
+
+lti:latestResult rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:Result .
+
+lti:linkLineItem_assignedActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range exp:Activity .
+
+lti:linkLineItem_assignedActivity_activityTemplate rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range exp:Activity .
+
+lti:linkLineItem rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:LineItem ;
+  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singule, scoreable activity." .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 @prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
-@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
 
 lti:BaseUrlChoice rdf:type bind:EmbeddableClass .
 lti:BaseUrlChoice rdfs:subClassOf
@@ -1207,11 +1273,6 @@ lti:ProductInstance rdfs:subClassOf
     bind:onProperty lti:service_owner ;
     bind:associationType bind:Aggregation
   ] .
-lti:ServiceOwner rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty lti:support ;
-    bind:associationType bind:Composition
-  ] .
 lti:ToolProxy rdf:type bind:Addressable .
 lti:ToolProxy rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
@@ -1239,14 +1300,41 @@ lti:ToolProxyBinding rdfs:subClassOf
 lti:LtiLink rdf:type bind:Addressable .
 lti:LtiLink rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:lineItem ;
-    bind:associationType bind:Aggregation
+    bind:onProperty lti:linkCapability
   ] .
 lti:Context rdf:type bind:Addressable .
+lti:Context rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:lineItem ;
+    bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:lineItems ;
+    bind:associationType bind:Composition
+  ] .
 lti:ToolSettingsContainer rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
     bind:onProperty lti:custom ;
     bind:associationType bind:Composition
+  ] .
+lti:AssignmentLink rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:context_lineitems
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_results
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:latestResult
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_assignedActivity
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem_assignedActivity_activityTemplate
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty lti:linkLineItem
   ] .
 
 lti:HttpMethod rdf:type bind:Enum .
@@ -1766,11 +1854,35 @@ ltiv:Result.dataSource rdf:type ltiv:Variable ;
 <pre>resultRecord/result/dataSource
 </pre></p>""" .
 
-ltiv:Result.uri rdf:type ltiv:Variable ;
-  rdfs:comment "The URI of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URI." .
+ltiv:Result.url rdf:type ltiv:Variable ;
+  rdfs:comment "The URL of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URL." .
 
 ltiv:User.username rdf:type ltiv:Variable ;
   rdfs:comment "The username that identifies the user within the Tool Consumer system." .
+
+ltiv:User.org rdf:type ltiv:Variable ;
+  rdfs:comment "A URI describing the user's organisational properties; for example, an ldap:// URI such as <pre>ldap://host.com:6666/uid=user,ou=people,dc=example,dc=com</pre>.  If more than one format of organisational URI is specified, each should be separated with a space." .
+
+ltiv:ResourceLink.description rdf:type ltiv:Variable ;
+  rdfs:comment "A plain text description of the link\u2019s destination, suitable for display alongside the link." .
+
+ltiv:ResourceLink.title rdf:type ltiv:Variable ;
+  rdfs:comment "A plain text title for the resource." .
+
+ltiv:Context.org rdf:type ltiv:Variable ;
+  rdfs:comment "A URI describing the organisational properties of the context from which a launch request originates (typically a CourseSection); for example, an ldap:// URI such as <pre>ldap://host.com:6666/cid=abc123,ou=dept,dc=plainjoe,dc=org</pre>. If more than one format of organisational URI is specified, each should be separated with a space." .
+
+ltiv:ToolProxy.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing system-wide tool settings." .
+
+ltiv:ToolProxyBinding.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing context-level tool settings." .
+
+ltiv:LtiLink.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing link-level tool settings." .
+
+ltiv:Result.comment rdf:type ltiv:Variable ;
+  rdfs:comment "A comment associated with the outcome which may be made visible to the student." .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -1800,14 +1912,15 @@ ltic:Result.autocreate rdf:type ltic:OutcomesCapability .
 @prefix ltic: <http://purl.imsglobal.org/vocab/lti/v2/capability#> .
 
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
-@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
-@prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
+@prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix lti: <http://purl.imsglobal.org/vocab/lti/v2/lti#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/caliper/v1/core/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
 @prefix ldp: <http://www.w3.org/ns/ldp#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
 <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> a owl:Ontology  ;
@@ -1830,7 +1943,7 @@ liso:Result rdf:type owl:Class;
     rdfs:comment "The number of exta credit points earned by the learner."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      liso:penalty;
+    owl:onProperty      liso:penaltyScore;
     rdfs:comment "The number of points deducted from the normal score due to some penalty such as submitting an assignment after the due date."
   ] ,
   [ a owl:Restriction ;
@@ -1843,21 +1956,11 @@ This value does not take into account the effects of curving.
 """
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      liso:curvedScore;
-    rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:lineItem;
-    owl:allValuesFrom  liso:LineItem;
+    owl:onProperty      liso:resultAgent;
     owl:minCardinality  1;
-    owl:maxCardinality  1;
-    rdfs:comment "The LineItem within which this Result is contained."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:resultScore;
-    rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade."
+    rdfs:comment "The person whose score is recorded in this Result."
   ] ; 
-  rdfs:comment "An object that holds the result of some scorable activity or assignment." .
+  rdfs:comment "A container that holds the result of some scorable activity or assignment." .
 
 liso:LineItem rdf:type owl:Class;
   rdfs:subClassOf 
@@ -1867,23 +1970,34 @@ liso:LineItem rdf:type owl:Class;
     rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      liso:assessmentContext;
-    rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:assessedActivity
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:scoreConstraints
+    owl:onProperty      liso:reportingMethod;
+    owl:minCardinality  1;
+    rdfs:comment "Identifies the property that is reported as the <code>resultScore</code> of the Results within this LineItem."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      liso:result;
-    rdfs:comment "A result associated with this LineItem."
+    rdfs:comment "A Result associated with this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:scoreConstraints;
+    rdfs:comment "Constraints on the scores recorded in the Results associated with this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:lineItemOf;
+    owl:minCardinality  1;
+    rdfs:comment "The context to which this LineItem belongs."
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      liso:results;
     owl:minCardinality  1;
-    rdfs:comment "The container holding the Results for this LineItem.  This property is <em>read-only</em>; it should not be supplied in POST or PUT requests."
+    rdfs:comment "The container holding the Results for this LineItem.  "
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:assignedActivity;
+    rdfs:comment "The Activity that learners engage with to produce the Results recorded in this LineItem."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:dataSource
   ] .
 
 liso:ScoreConstraints rdf:type owl:Class ; 
@@ -1924,49 +2038,51 @@ liso:LineItemContainer rdf:type owl:Class ;
   rdfs:subClassOf ldp:Container ,
   [ a owl:Restriction ;
     owl:onProperty      ldp:membershipPredicate;
-    owl:hasValue liso:lineItem
+    owl:hasValue lti:lineItem
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      ldp:membershipSubject;
-    owl:allValuesFrom  liscm:Context
+    owl:allValuesFrom  lti:Context
   ] ; 
   rdfs:comment "A container that holds a collection of LineItem resources." .
 
-liso:lineItem rdf:type rdf:Property ;
-  rdfs:domain  [
-    rdf:type owl:Class ;
-    owl:unionOf (
-      lti:LtiLink
-      liso:Result
-      liscm:Context
-    )
-  ] ;
-  rdfs:range liso:LineItem ;
-  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity." .
+liso:AssignmentAdministration rdf:type owl:Class .
+
+liso:LISResult rdf:type owl:Class ;
+  rdfs:subClassOf liso:Result ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:resultScore;
+    rdfs:comment "The final score that should be displayed in a gradebook for this Result object."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      liso:resultOf;
+    owl:minCardinality  1;
+    rdfs:comment "The LineItem within which this Result is contained."
+  ] .
 
 liso:comment rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:string ;
+  rdfs:range lti-type:DataValue.Type ;
   rdfs:comment "A comment about this Result suitable for display to the learner.  Typically, this is a comment made by the instructor or grader." .
 
 liso:normalScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:float ;
+  rdfs:range xsd:decimal ;
   rdfs:comment "The score earned by the learner before adding extra credit or subtracting penalties." .
 
 liso:extraCreditScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:float ;
+  rdfs:range xsd:decimal ;
   rdfs:comment "The number of exta credit points earned by the learner." .
 
-liso:penalty rdf:type owl:FunctionalProperty ;
+liso:penaltyScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:float ;
+  rdfs:range xsd:decimal ;
   rdfs:comment "The number of points deducted from the normal score due to some penalty such as submitting an assignment after the due date." .
 
 liso:totalScore rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:float ;
+  rdfs:range xsd:decimal ;
   rdfs:comment """The total score on the assignment given by 
 <pre>
     totalScore = normalScore + extraCreditScore - penalty
@@ -1974,40 +2090,46 @@ liso:totalScore rdf:type owl:FunctionalProperty ;
 This value does not take into account the effects of curving.
 """ .
 
-liso:curvedScore rdf:type owl:FunctionalProperty ;
+liso:resultAgent rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:Result ;
-  rdfs:range xsd:float ;
-  rdfs:comment "The final score received by the learner after curving has been applied.  If the <code>curvedScore</code> is omitted, the result has not been curved and the <code>totalScore</code> is the final score." .
+  rdfs:range foaf:Agent ;
+  rdfs:comment "The person whose score is recorded in this Result." .
 
-liso:resultScore rdf:type owl:FunctionalProperty ;
-  rdfs:domain liso:Result ;
-  rdfs:range rdfs:Literal ;
-  rdfs:comment "The final score that should be displayed in a gradebook for this Result object.  This value may be a floating point number or a string designating a letter grade." .
-
-liso:assessmentContext rdf:type owl:FunctionalProperty ;
+liso:reportingMethod rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:LineItem ;
-  rdfs:range liscm:Context ;
-  owl:inverseOf liso:lineItem ;
-  rdfs:comment "The context in which the assessment occurred.  Typically this is a course section, but it may be any kind of learning context." .
-
-liso:assessedActivity rdf:type owl:FunctionalProperty ;
-  rdfs:domain liso:LineItem ;
-  rdfs:range exp:Activity .
-
-liso:scoreConstraints rdf:type owl:FunctionalProperty ;
-  rdfs:domain liso:LineItem ;
-  rdfs:range liso:ScoreConstraints .
+  rdfs:range rdf:Property ;
+  rdfs:comment "Identifies the property that is reported as the <code>resultScore</code> of the Results within this LineItem." .
 
 liso:result rdf:type rdf:Property ;
   rdfs:domain liso:LineItem ;
-  rdfs:range liso:Result ;
-  owl:inverseOf liso:lineItem ;
-  rdfs:comment "A result associated with this LineItem." .
+  rdfs:range liso:LISResult ;
+  owl:inverseOf liso:resultOf ;
+  rdfs:comment "A Result associated with this LineItem." .
+
+liso:scoreConstraints rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range liso:ScoreConstraints ;
+  rdfs:comment "Constraints on the scores recorded in the Results associated with this LineItem." .
+
+liso:lineItemOf rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range lti:Context ;
+  owl:inverseOf lti:lineItem ;
+  rdfs:comment "The context to which this LineItem belongs." .
 
 liso:results rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:LineItem ;
   rdfs:range liso:ResultContainer ;
-  rdfs:comment "The container holding the Results for this LineItem.  This property is <em>read-only</em>; it should not be supplied in POST or PUT requests." .
+  rdfs:comment "The container holding the Results for this LineItem.  " .
+
+liso:assignedActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range exp:Activity ;
+  rdfs:comment "The Activity that learners engage with to produce the Results recorded in this LineItem." .
+
+liso:dataSource rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range rdfs:Resource .
 
 liso:normalMaximum rdf:type owl:FunctionalProperty ;
   rdfs:domain liso:NumericLimits ;
@@ -2026,6 +2148,17 @@ liso:totalMaximum rdf:type owl:FunctionalProperty ;
 <pre>
     totalMaximum = normalMaximum + extraCreditMaximum
 </pre>""" .
+
+liso:resultScore rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LISResult ;
+  rdfs:range rdfs:Literal ;
+  rdfs:comment "The final score that should be displayed in a gradebook for this Result object." .
+
+liso:resultOf rdf:type owl:FunctionalProperty ;
+  rdfs:domain liso:LISResult ;
+  rdfs:range liso:LineItem ;
+  owl:inverseOf liso:result ;
+  rdfs:comment "The LineItem within which this Result is contained." .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -2034,17 +2167,13 @@ liso:totalMaximum rdf:type owl:FunctionalProperty ;
 liso:Result rdf:type bind:Addressable .
 liso:Result rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:resultScore ;
-    bind:associationType bind:Composition
+    bind:onProperty liso:resultAgent ;
+    bind:associationType bind:Aggregation
   ] .
 liso:LineItem rdf:type bind:Addressable .
 liso:LineItem rdfs:subClassOf
   [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:assessedActivity ;
-    bind:associationType bind:Aggregation
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:scoreConstraints ;
+    bind:onProperty liso:reportingMethod ;
     bind:associationType bind:Aggregation
   ], 
   [ rdf:type bind:AssociationQualifier ;
@@ -2052,79 +2181,105 @@ liso:LineItem rdfs:subClassOf
     bind:associationType bind:Composition
   ], 
   [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:scoreConstraints ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
     bind:onProperty liso:results ;
     bind:associationType bind:Composition
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:assignedActivity ;
+    bind:associationType bind:Aggregation
+  ], 
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty liso:dataSource
   ] .
 liso:ScoreConstraints rdf:type bind:Addressable .
 liso:ScoreConstraints rdf:type bind:AbstractClass .
 liso:NumericLimits rdf:type bind:Addressable .
-@prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
+liso:ResultContainer rdf:type bind:Addressable .
+liso:LineItemContainer rdf:type bind:Addressable .
+liso:AssignmentAdministration rdf:type bind:Addressable .
+liso:LISResult rdf:type bind:Addressable .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://purl.imsglobal.org/vocab/lis/v2/cm#> a owl:Ontology  ;
-  rdfs:label "LIS Course Management" ;
+<http://www.w3.org/2000/01/rdf-schema#> a owl:Ontology  ;
+  rdfs:label "rdfs" ;
   a bind:TargetNamespace ;
-  bind:suggestedPrefix "liscm" .
+  bind:suggestedPrefix "rdfs" .
 
-liscm:Context rdf:type owl:Class;
-  rdfs:subClassOf 
-  [ a owl:Restriction ;
-    owl:onProperty      liso:lineItem;
-    owl:allValuesFrom  liso:LineItem;
-    rdfs:comment "A LineItem associated with this Context."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liscm:lineItems;
-    owl:minCardinality  1;
-    rdfs:comment "The container that holds the collection of LineItem resources for this Context."
-  ] .
+rdfs:Resource rdf:type owl:Class .
 
-liscm:lineItems rdf:type owl:FunctionalProperty ;
-  rdfs:domain liscm:Context ;
-  rdfs:range liso:LineItemContainer ;
-  rdfs:comment "The container that holds the collection of LineItem resources for this Context." .
+rdfs:label rdf:type rdf:Property ;
+  rdfs:domain liso:LineItem ;
+  rdfs:range xsd:normalizedString ;
+  rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook." .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix liscm: <http://purl.imsglobal.org/vocab/lis/v2/cm#> .
-@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-liscm:Context rdf:type bind:Addressable .
-liscm:Context rdfs:subClassOf
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liso:lineItem ;
-    bind:associationType bind:Composition
-  ], 
-  [ rdf:type bind:AssociationQualifier ;
-    bind:onProperty liscm:lineItems ;
-    bind:associationType bind:Composition
-  ] .
-@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
+rdfs:Resource rdf:type bind:Addressable .
+@prefix lisp: <http://purl.imsglobal.org/vocab/lis/v2/pm#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://purl.imsglobal.org/vocab/lis/v2/experience#> a owl:Ontology  ;
-  rdfs:label "Experience" ;
+<http://purl.imsglobal.org/vocab/lis/v2/pm#> a owl:Ontology  ;
+  rdfs:label "LIS Person Management" ;
+  a bind:TargetNamespace ;
+  bind:suggestedPrefix "lisp" .
+
+lisp:Person rdf:type owl:Class ;
+  rdfs:subClassOf foaf:Agent ; 
+  rdfs:comment "A container for all the information about a single person." .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+@prefix lisp: <http://purl.imsglobal.org/vocab/lis/v2/pm#> .
+
+lisp:Person rdf:type bind:Addressable .
+@prefix exp: <http://purl.imsglobal.org/vocab/caliper/v1/core/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
+
+<http://purl.imsglobal.org/vocab/caliper/v1/core/> a owl:Ontology  ;
+  rdfs:label "Caliper Core" ;
   a bind:TargetNamespace ;
   bind:suggestedPrefix "exp" .
 
-exp:Activity rdf:type owl:Class ; 
-  rdfs:comment "The abstract base class for all learning activities." .
+exp:Activity rdf:type owl:Class;
+  rdfs:subClassOf 
+  [ a owl:Restriction ;
+    owl:onProperty      exp:activityTemplate
+  ] ; 
+  rdfs:comment "A resource that a person may experience such as a video or an assessment.  This entity represents the resource itself, not the person's engagement with the resource." .
+
+exp:activityTemplate rdf:type owl:FunctionalProperty ;
+  rdfs:domain exp:Activity ;
+  rdfs:range exp:Activity .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix exp: <http://purl.imsglobal.org/vocab/lis/v2/experience#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/caliper/v1/core/> .
 
 exp:Activity rdf:type bind:Addressable .
-exp:Activity rdf:type bind:AbstractClass .
+exp:Activity rdfs:subClassOf
+  [ rdf:type bind:AssociationQualifier ;
+    bind:onProperty exp:activityTemplate
+  ] .
 @prefix ldp: <http://www.w3.org/ns/ldp#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -2207,29 +2362,25 @@ ldp:Page rdfs:subClassOf
     bind:onProperty ldp:nextPage ;
     bind:associationType bind:Aggregation
   ] .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 
-<http://www.w3.org/2000/01/rdf-schema#> a owl:Ontology  ;
-  rdfs:label "rdfs" ;
+<http://xmlns.com/foaf/0.1/> a owl:Ontology  ;
+  rdfs:label "FOAF" ;
   a bind:TargetNamespace ;
-  bind:suggestedPrefix "rdfs" .
+  bind:suggestedPrefix "foaf" .
 
-rdfs:Resource rdf:type owl:Class .
-
-rdfs:label rdf:type rdf:Property ;
-  rdfs:domain liso:LineItem ;
-  rdfs:range xsd:normalizedString ;
-  rdfs:comment "A human-friendly label for this LineItem suitable for display.  For example, this label might be used as the heading of a column in a gradebook." .
+foaf:Agent rdf:type owl:Class .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
+foaf:Agent rdf:type bind:Addressable .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
 

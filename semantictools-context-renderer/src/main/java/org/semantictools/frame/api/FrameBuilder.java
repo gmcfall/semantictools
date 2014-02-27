@@ -612,7 +612,7 @@ public class FrameBuilder {
     while (classes.hasNext()) {
       Resource type = classes.next().getSubject();
       String uri = type.getURI();
-      if (uri == null) continue;
+      if (uri == null || manager.getDatatypeByUri(uri)!=null) continue;
       if (!isStandard(uri)) {
         result.add(type.as(OntClass.class));
       }
@@ -621,7 +621,7 @@ public class FrameBuilder {
     while (classes.hasNext()) {
       Resource type = classes.next().getSubject();
       String uri = type.getURI();
-      if (uri == null) continue;
+      if (uri == null || manager.getDatatypeByUri(uri)!=null) continue;
       if (!isStandard(uri)) {
         result.add(type.as(OntClass.class));
       }

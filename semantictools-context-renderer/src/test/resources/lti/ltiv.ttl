@@ -514,9 +514,33 @@ ltiv:Result.dataSource rdf:type ltiv:Variable ;
 <pre>resultRecord/result/dataSource
 </pre></p>""" .
 
-ltiv:Result.uri rdf:type ltiv:Variable ;
-  rdfs:comment "The URI of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URI." .
+ltiv:Result.url rdf:type ltiv:Variable ;
+  rdfs:comment "The URL of the Result resource.  Client applications may issue an HTTP request to read, update or delete the resource at this URL." .
 
 ltiv:User.username rdf:type ltiv:Variable ;
   rdfs:comment "The username that identifies the user within the Tool Consumer system." .
+
+ltiv:User.org rdf:type ltiv:Variable ;
+  rdfs:comment "A URI describing the user's organisational properties; for example, an ldap:// URI such as <pre>ldap://host.com:6666/uid=user,ou=people,dc=example,dc=com</pre>.  If more than one format of organisational URI is specified, each should be separated with a space." .
+
+ltiv:ResourceLink.description rdf:type ltiv:Variable ;
+  rdfs:comment "A plain text description of the link\u2019s destination, suitable for display alongside the link." .
+
+ltiv:ResourceLink.title rdf:type ltiv:Variable ;
+  rdfs:comment "A plain text title for the resource." .
+
+ltiv:Context.org rdf:type ltiv:Variable ;
+  rdfs:comment "A URI describing the organisational properties of the context from which a launch request originates (typically a CourseSection); for example, an ldap:// URI such as <pre>ldap://host.com:6666/cid=abc123,ou=dept,dc=plainjoe,dc=org</pre>. If more than one format of organisational URI is specified, each should be separated with a space." .
+
+ltiv:ToolProxy.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing system-wide tool settings." .
+
+ltiv:ToolProxyBinding.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing context-level tool settings." .
+
+ltiv:LtiLink.custom.url rdf:type ltiv:Variable ;
+  rdfs:comment "The endpoint URL for accessing link-level tool settings." .
+
+ltiv:Result.comment rdf:type ltiv:Variable ;
+  rdfs:comment "A comment associated with the outcome which may be made visible to the student." .
 

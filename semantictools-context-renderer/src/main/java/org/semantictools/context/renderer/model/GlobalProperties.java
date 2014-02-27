@@ -36,6 +36,9 @@ public class GlobalProperties  extends BaseDocumentMetadata {
   
 
   public Properties getProperties() {
+	  if (properties == null) {
+		  properties = new Properties();
+	  }
     return properties;
   }
 

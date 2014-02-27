@@ -728,7 +728,7 @@ public class TreeGenerator {
         String uri = subtype.getUri();
         TermInfo term = context.getTermInfoByURI(uri);
         if (term == null) {
-          throw new TermNotFoundException(uri);
+        	continue; // The class must have been excluded
         }
         set.add(term.getTermName());
       }

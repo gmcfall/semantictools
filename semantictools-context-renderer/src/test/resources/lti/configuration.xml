@@ -38,14 +38,20 @@
     <format>TURTLE</format>
   </ontology>
   <ontology>
-    <prefix>liscm</prefix>
-    <uri>http://purl.imsglobal.org/vocab/lis/v2/cm#</uri>
-    <file>${basedir}/src/main/resources/rdf/liscm.ttl</file>
+    <prefix>rdfs</prefix>
+    <uri>http://www.w3.org/2000/01/rdf-schema#</uri>
+    <file>${basedir}/src/main/resources/rdf/rdfs.ttl</file>
+    <format>TURTLE</format>
+  </ontology>
+  <ontology>
+    <prefix>lisp</prefix>
+    <uri>http://purl.imsglobal.org/vocab/lis/v2/pm#</uri>
+    <file>${basedir}/src/main/resources/rdf/lisp.ttl</file>
     <format>TURTLE</format>
   </ontology>
   <ontology>
     <prefix>exp</prefix>
-    <uri>http://purl.imsglobal.org/vocab/lis/v2/experience#</uri>
+    <uri>http://purl.imsglobal.org/vocab/caliper/v1/core/</uri>
     <file>${basedir}/src/main/resources/rdf/exp.ttl</file>
     <format>TURTLE</format>
   </ontology>
@@ -56,9 +62,9 @@
     <format>TURTLE</format>
   </ontology>
   <ontology>
-    <prefix>rdfs</prefix>
-    <uri>http://www.w3.org/2000/01/rdf-schema#</uri>
-    <file>${basedir}/src/main/resources/rdf/rdfs.ttl</file>
+    <prefix>foaf</prefix>
+    <uri>http://xmlns.com/foaf/0.1/</uri>
+    <file>${basedir}/src/main/resources/rdf/foaf.ttl</file>
     <format>TURTLE</format>
   </ontology>
   </ontologies>

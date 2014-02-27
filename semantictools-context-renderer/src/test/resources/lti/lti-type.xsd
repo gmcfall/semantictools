@@ -38,6 +38,7 @@
   </xsd:simpleType>
   <xsd:simpleType id="Token.Type" name="Token.Type">
     <xsd:restriction base="xsd:token">
+      <xsd:maxLength value="64"/>
       <xsd:pattern value="\S*"/>
     </xsd:restriction>
   </xsd:simpleType>

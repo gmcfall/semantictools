@@ -3,6 +3,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix lti-type: <http://purl.imsglobal.org/xsd/lti/v2/ltid#> .
 @prefix liso: <http://purl.imsglobal.org/vocab/lis/v2/outcomes#> .
+@prefix exp: <http://purl.imsglobal.org/vocab/caliper/v1/core/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .
@@ -72,7 +73,7 @@ lti:ServiceProvider rdf:type owl:Class;
     rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current."
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      lti:provider_name;
+    owl:onProperty      lti:service_provider_name;
     owl:minCardinality  1;
     rdfs:comment "The name of the service provider, suitable for display to end users."
   ] ,
@@ -215,7 +216,7 @@ lti:ProductProfile rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
     owl:onProperty      lti:lti_version;
-    owl:allValuesFrom  xsd:token;
+    owl:allValuesFrom  xsd:normalizedString;
     owl:minCardinality  1;
     rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract."
   ] ,
@@ -491,16 +492,12 @@ lti:ServiceOwner rdf:type owl:Class;
     owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
-    owl:onProperty      lti:service_owner_name
+    owl:onProperty      lti:service_owner_name;
+    owl:minCardinality  1
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:description;
     owl:allValuesFrom  lti:LocalizedText
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      lti:support;
-    owl:allValuesFrom  lti:Contact;
-    rdfs:comment "Contact information for support from the service owner."
   ] ; 
   rdfs:comment "The entity that owns the services provided by a product instance." .
 
@@ -553,12 +550,6 @@ lti:LtiLink rdf:type owl:Class ;
     owl:onProperty      lti:resource_link_id;
     owl:minCardinality  1;
     rdfs:comment "A globally unique identifier for this LTI link."
-  ] ,
-  [ a owl:Restriction ;
-    owl:onProperty      liso:lineItem;
-    owl:allValuesFrom  liso:LineItem;
-    owl:maxCardinality  1;
-    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singular scoreable activity."
   ] ; 
   rdfs:comment "An <code>LtiLink</code> represents a link within the Tool Consumer system pointing to a resource within the Tool Provider." .
 
@@ -570,13 +561,22 @@ lti:Context rdf:type owl:Class;
   ] ,
   [ a owl:Restriction ;
     owl:onProperty      lti:sourcedId
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:lineItem;
+    rdfs:comment "A LineItem that records results for some learning activity within this context."
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:lineItems;
+    rdfs:comment """The container that holds the collection of LineItem resources for this Context.  In general, this container is optional.  However, if the Context has any associated LineItems, then the container is required.  As a best practice, implementations every Context should expose a LineItemContainer to clients, even if it is empty.
+"""
   ] ; 
   rdfs:comment "A learning context, such as a Course Section." .
 
 lti:ToolSettingsContainer rdf:type owl:Class;
   rdfs:subClassOf 
   [ a owl:Restriction ;
-    owl:onProperty      lti:custom_uri;
+    owl:onProperty      lti:custom_url;
     rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer."
   ] ,
   [ a owl:Restriction ;
@@ -588,13 +588,34 @@ lti:ToolSettingsContainer rdf:type owl:Class;
 lti:PropertyMap rdf:type owl:Class ; 
   rdfs:comment "An abstract class whose properties are defined by the Tool Provider and stored in the Tool Consumer.   When represented in JSON-LD, the PropertyMap object typically appears as a plain-old JSON object (though it may have a custom JSON-LD context that defines the semantics for the custom properties).  It is a best practice for the values in a PropertyMap to be strings.  This best practice may be revised if the development community expresses a desire to support other data types in a PropertyMap." .
 
+lti:AssignmentLink rdf:type owl:Class ;
+  rdfs:subClassOf lti:LtiLink ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:context_lineitems;
+    owl:minCardinality  1
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_results
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:latestResult
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_assignedActivity
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem_assignedActivity_activityTemplate
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty      lti:linkLineItem;
+    rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singule, scoreable activity."
+  ] .
+
 lti:HttpMethod a owl:Class  ;
   owl:equivalentClass [
     owl:oneOf (
       lti:POST 
-      lti:GET 
-      lti:PUT 
-      lti:DELETE
+      lti:GET
     )
   ] ;
   rdfs:comment "Enumerates the HTTP methods that can be used when sending a message, as defined by IETF RFC 2616 ." .
@@ -654,7 +675,7 @@ lti:timestamp rdf:type owl:FunctionalProperty ;
   rdfs:range xsd:dateTime ;
   rdfs:comment "A timestamp for the ServiceProvider record. This value is useful for determining which record is most current." .
 
-lti:provider_name rdf:type owl:FunctionalProperty ;
+lti:service_provider_name rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ServiceProvider ;
   rdfs:range lti:LocalizedName ;
   rdfs:comment "The name of the service provider, suitable for display to end users." .
@@ -679,7 +700,6 @@ lti:support rdf:type owl:FunctionalProperty ;
     owl:unionOf (
       lti:ServiceProvider
       lti:ProductInstance
-      lti:ServiceOwner
     )
   ] ;
   rdfs:range lti:Contact ;
@@ -795,7 +815,13 @@ lti:lti_version rdf:type owl:FunctionalProperty ;
       lti:ToolProxy
     )
   ] ;
-  rdfs:range xsd:token ;
+  rdfs:range  [
+    rdf:type owl:Class ;
+    owl:unionOf (
+      xsd:normalizedString
+      xsd:token
+    )
+  ] ;
   rdfs:comment "The identifier for an LTI version that the version supports.  A given product (Tool or Tool Consumer) may support multiple versions, but only one version is selected for use in the integration contract." .
 
 lti:service_offered rdf:type rdf:Property ;
@@ -972,7 +998,7 @@ lti:service_owner rdf:type owl:FunctionalProperty ;
   rdfs:range lti:ServiceOwner ;
   rdfs:comment "The entity that owns the services provided by this product instance." .
 
-lti:service_owner_name rdf:type rdf:Property ;
+lti:service_owner_name rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ServiceOwner ;
   rdfs:range lti:LocalizedName .
 
@@ -1006,6 +1032,10 @@ lti:resource_link_id rdf:type owl:FunctionalProperty ;
   rdfs:range lti-type:GUID.Type ;
   rdfs:comment "A globally unique identifier for this LTI link." .
 
+lti:linkCapability rdf:type rdf:Property ;
+  rdfs:domain lti:LtiLink ;
+  rdfs:range lti:Capability .
+
 lti:id rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
@@ -1014,7 +1044,19 @@ lti:sourcedId rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:Context ;
   rdfs:range xsd:normalizedString .
 
-lti:custom_uri rdf:type owl:FunctionalProperty ;
+lti:lineItem rdf:type rdf:Property ;
+  rdfs:domain lti:Context ;
+  rdfs:range liso:LineItem ;
+  owl:inverseOf liso:lineItemOf ;
+  rdfs:comment "A LineItem that records results for some learning activity within this context." .
+
+lti:lineItems rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:Context ;
+  rdfs:range liso:LineItemContainer ;
+  rdfs:comment """The container that holds the collection of LineItem resources for this Context.  In general, this container is optional.  However, if the Context has any associated LineItems, then the container is required.  As a best practice, implementations every Context should expose a LineItemContainer to clients, even if it is empty.
+""" .
+
+lti:custom_url rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
   rdfs:range xsd:anyURI ;
   rdfs:comment "The REST endpoint at which custom tool settings may be accessed for this ToolSettingsContainer." .
@@ -1023,4 +1065,29 @@ lti:custom rdf:type owl:FunctionalProperty ;
   rdfs:domain lti:ToolSettingsContainer ;
   rdfs:range lti:PropertyMap ;
   rdfs:comment "A collection of custom properties defined by the Tool Provider and stored in this ToolSettingsContainer." .
+
+lti:context_lineitems rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:LineItemContainer .
+
+lti:linkLineItem_results rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:ResultContainer .
+
+lti:latestResult rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:Result .
+
+lti:linkLineItem_assignedActivity rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range exp:Activity .
+
+lti:linkLineItem_assignedActivity_activityTemplate rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range exp:Activity .
+
+lti:linkLineItem rdf:type owl:FunctionalProperty ;
+  rdfs:domain lti:AssignmentLink ;
+  rdfs:range liso:LineItem ;
+  rdfs:comment "A LineItem associated with this LtiLink.   Scores on the activity launched from this link should be recorded in the ResultContainer belonging to this LineItem.  This association is established only if the link launches a singule, scoreable activity." .
 
