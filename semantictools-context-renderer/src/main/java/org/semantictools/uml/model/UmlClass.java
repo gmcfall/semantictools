@@ -59,6 +59,26 @@ public class UmlClass {
     return type.asFrame().listInstances(direct);
   }
   
+  public void addSupertype(UmlClass type) {
+    List<UmlClass> list = getSupertypeList();
+    for (UmlClass other : list) {
+      if (other.getURI().equals(type.getURI())) {
+        return;
+      }
+    }
+    list.add(type);
+  }
+  
+  public void addSubtype(UmlClass type) {
+    List<UmlClass> list = getSubtypeList();
+    for (UmlClass other : list) {
+      if (other.getURI().equals(type.getURI())) {
+        return;
+      }
+    }
+    list.add(type);
+  }
+  
   public void add(Field field) {
     fieldList.add(field);
   }

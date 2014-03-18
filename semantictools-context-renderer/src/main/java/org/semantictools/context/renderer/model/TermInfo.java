@@ -21,6 +21,7 @@ public class TermInfo implements Comparable<TermInfo> {
     NAMESPACE,
     TYPE,
     PROPERTY,
+    INDIVIDUAL,
     UNKNOWN
   }
   

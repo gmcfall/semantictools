@@ -42,6 +42,7 @@ import org.semantictools.frame.model.RdfType;
 import org.semantictools.frame.model.RestCategory;
 
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -192,6 +193,8 @@ public class JsonSampleGenerator {
   
   private void addFrame(final Branch branch, Field field, String fieldNameOverride, Frame frame) {
     
+   
+    
     int maxCount = field.getMaxCardinality();
     if (maxCount < 0 || maxCount>maxRepeat) {
       maxCount = maxRepeat;
@@ -252,8 +255,22 @@ public class JsonSampleGenerator {
 	  
     boolean iriReference = term!=null && term.isCoercedAsIriRef();
     
-    if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE) {
+    if (field.getType().canAs(OntProperty.class)) {
+      createPropertyReference(branch, field, callback);
+      
+    } else if (iriReference && frame.getCategory() == RestCategory.ENUMERABLE) {
       createEnumReference(branch, frame, callback);
+      
+    } else if (iriReference && field.getValueRestriction()!=null) {
+      String text = field.getValueRestriction().getLocalName();
+      TermInfo info = context.getTermInfoByShortName(text);
+      if (info != null) {
+        callback.consume(factory.textNode(text));
+        
+      } else {
+        text = field.getValueRestriction().getUri();
+        callback.consume(factory.textNode(text));
+      }
       
     } else if (iriReference) {
       String typeName = frame.getLocalName();
@@ -276,6 +293,23 @@ public class JsonSampleGenerator {
       callback.consume(child);
     }
     
+    
+  }
+
+  private void createPropertyReference(Branch branch, Field field,  NodeConsumer callback) {
+    
+    List<? extends OntProperty> list = field.getType().asProperty().listSubProperties().toList();
+    for (int i=0; i<list.size(); i++) {
+      int rand = random.nextInt(list.size());
+      OntProperty value = list.get(rand);
+      String uri = value.getURI();
+      TermInfo info = context.getTermInfoByURI(uri);
+      if (info != null) {
+        callback.consume(factory.textNode(info.getTermName()));
+        return;
+      }
+    }
+    callback.consume(factory.textNode("http://schema.example.com/foo"));
     
   }
 

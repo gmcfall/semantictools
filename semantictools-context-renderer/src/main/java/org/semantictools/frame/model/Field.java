@@ -39,6 +39,8 @@ public class Field implements Comparable<Field> {
   private Encapsulation encapsulation = null;
   private InverseProperty inverse;
   
+  private NamedIndividual valueRestriction;
+  
   public Field(Frame frame, OntProperty property, OntResource type, int minCardinality,
       int maxCardinality) {
     this.frame = frame;
@@ -80,6 +82,18 @@ public class Field implements Comparable<Field> {
     return null;
   }
 
+  
+  /**
+   * Returns an individual named as the owl:hasValue restriction on this
+   * field.
+   */
+  public NamedIndividual getValueRestriction() {
+    return valueRestriction;
+  }
+
+  public void setValueRestriction(NamedIndividual valueRestriction) {
+    this.valueRestriction = valueRestriction;
+  }
 
   public InverseProperty getInverseProperty() {
     if (inverse == null) {
@@ -213,10 +227,16 @@ public class Field implements Comparable<Field> {
         rdfType = manager.getListTypeByListUri(type.getURI());
       }
       
-      if (type.getURI().startsWith(RDF.getURI())) {
+      if (rdfType==null && type.getURI().startsWith(RDF.getURI())) {
         
         Frame f = new Frame(frame.getTypeManager(), type.as(OntClass.class));
         frame.getTypeManager().add(f);
+        rdfType = f;
+      }
+      
+      if (rdfType==null && type.canAs(OntProperty.class)) {
+        Frame f = new Frame(manager, type.asClass());
+        manager.add(f);
         rdfType = f;
       }
      

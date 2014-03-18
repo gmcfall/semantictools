@@ -2167,6 +2167,35 @@ public class ContextHtmlPrinter extends PrintEngine {
       print("<em>Read Only</em>. ");
     }
     print(description);
+    String value = field.getValueRestriction();
+    List<String> knownValues = field.getKnownValues();
+    
+    if (value != null) {
+      println();
+      indent().print("<P>");
+      indent().print("This property is restricted and must have the value <code>\"");
+      print(value).println("\"</code>.");
+      indent().println("</P>");
+    } else if (knownValues != null) {
+      println();
+      indent().print("<P>");
+      if (knownValues.size()==1) {
+        indent().print("The only known value for this property is <code>");
+        print(knownValues.get(0));
+        println("</code>.");
+      }
+      indent().print("Known values for this property include ");
+      indent().print("(");
+      String comma = "";
+      Collections.sort(knownValues);
+      for (String known : knownValues) {
+       print(comma).print("<code>").print(known).print("</code>");
+       comma = ", ";
+      }
+      println(").");
+      indent().println("</P>");
+    }
+    
     println("</TD>");
 
     indent().print("<TD>");

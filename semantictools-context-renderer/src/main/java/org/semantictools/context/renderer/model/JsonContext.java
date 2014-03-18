@@ -69,6 +69,10 @@ public class JsonContext {
     this.mediaType = mediaType;
   }
   
+  public void put(String key, TermInfo info) {
+    rewriteMap.put(key, info.getTermName());
+  }
+  
   public TermInfo add(String term, String iri) {
     TermInfo info = new TermInfo(term);
     info.setIriValue(iri);

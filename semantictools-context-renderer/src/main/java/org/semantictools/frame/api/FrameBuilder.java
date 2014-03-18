@@ -46,7 +46,6 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.ontology.impl.OntResourceImpl;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -104,7 +103,7 @@ public class FrameBuilder {
     addFieldsFromRestrictions();
   }
 
-
+ 
 
   /**
    * For all inverse relations, ensure that the relationship
@@ -175,6 +174,13 @@ public class FrameBuilder {
         range = valueType.as(OntResource.class);
       }
       
+      Resource hasValue = restriction.getPropertyResourceValue(OWL.hasValue);
+      NamedIndividual individualValue = null;
+      if (hasValue != null && hasValue.getURI() != null) {
+        String individualURI = hasValue.getURI();
+        individualValue = new NamedIndividual(hasValue.as(OntResource.class));
+      }
+      
     
 //      Resource onClass = restriction.getPropertyResourceValue(OWL2.onClass);
 //      if (onClass != null) {
@@ -211,10 +217,12 @@ public class FrameBuilder {
         priorField.setComment(comment);
         priorField.setMinCardinality(minCardinality);
         priorField.setMaxCardinality(maxCardinality);
+        priorField.setValueRestriction(individualValue);
         return;
       }
      Field field = new Field(frame, property, range, minCardinality, maxCardinality);
      field.setComment(comment);
+     field.setValueRestriction(individualValue);
      fieldMap.put(uri, field);
      
      frame.getDeclaredFields().add(field);

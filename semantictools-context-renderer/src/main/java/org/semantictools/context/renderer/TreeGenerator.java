@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.semantictools.context.renderer;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +38,8 @@ import org.semantictools.frame.model.Frame;
 import org.semantictools.frame.model.RdfType;
 import org.semantictools.frame.model.RestCategory;
 
+import com.hp.hpl.jena.ontology.OntProperty;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.vocabulary.OWL;
 
 public class TreeGenerator {
@@ -294,6 +297,15 @@ public class TreeGenerator {
       }
     }
     
+    if (field.getValueRestriction() != null) {
+      String valueURI = field.getValueRestriction().getUri();
+      TermInfo info = context.getTermInfoByURI(valueURI);
+      if (info != null) {
+        valueURI = info.getTermName();
+      }
+      node.setValueRestriction(valueURI);
+    }
+    
     boolean readOnly = 
         field.getRdfType().canAsFrame() &&
         (field.getRdfType().asFrame().getContainerRestriction() != null);
@@ -411,7 +423,7 @@ public class TreeGenerator {
       node = node.getChildren().get(1);
     }
     
-    
+    setKnownValues(node, field);
     
     Frame frame = getFieldTypeAsFrame(field);
     if (frame == null || isCyclic(node)) return;
@@ -446,6 +458,35 @@ public class TreeGenerator {
     
   }
  
+  private void setKnownValues(TreeNode node, Field field) {
+    OntResource type = field.getType();
+    if (type.canAs(OntProperty.class)) {
+      List<String> knownValues = new ArrayList<String>();
+      node.setKnownValues(knownValues);
+      getKnownValues(knownValues, type.asProperty());
+    }
+    
+  }
+
+  private void getKnownValues(List<String> knownValues, OntProperty property) {
+    
+    List<? extends OntProperty> sequence = property.listSubProperties().toList();
+    for (OntProperty p : sequence) {
+      String uri = p.getURI();
+      if (uri.equals(property.getURI())) {
+        continue;
+      }
+      TermInfo info = context.getTermInfoByURI(uri);
+      if (info != null) {
+        knownValues.add(info.getTermName());
+      } else {
+        knownValues.add(uri);
+      }
+      
+    }
+    
+  }
+
   private boolean excludeSubtypes(Frame frame, Field field) {
     FrameConstraints constraints = contextProperties.getFrameConstraints(frame.getUri());
     return constraints != null && constraints.isExcludesSubtypes(field.getURI());

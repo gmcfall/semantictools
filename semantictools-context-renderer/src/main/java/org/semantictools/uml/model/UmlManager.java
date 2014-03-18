@@ -30,6 +30,12 @@ import org.semantictools.frame.model.Frame;
 import org.semantictools.frame.model.InverseProperty;
 import org.semantictools.frame.model.RdfType;
 
+import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntProperty;
+import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+
 public class UmlManager {
   private TypeManager typeManager;
   
@@ -80,14 +86,84 @@ public class UmlManager {
   }
 
   private void buildClasses() {
-    
-    for (Frame frame : typeManager.listFrames() ) {
+    List<Frame> list = new ArrayList<Frame>(typeManager.listFrames());
+    for (Frame frame : list ) {
       buildClass(frame);
+    }
+    for (Frame frame : list) {
+      buildPropertyClasses(frame);
     }
     for (Frame frame : typeManager.listListTypes()) {
       buildClass(frame);
     }
     
+    
+    
+  }
+
+  private void buildPropertyClasses(Frame frame) {
+
+    for (Field field : frame.getDeclaredFields()) {
+      
+      OntResource type = field.getType();
+      if (type.canAs(OntProperty.class)) {
+        String uri = type.getURI();
+        UmlClass umlClass = addPropertyClass(type, true);
+      }
+      
+      
+    }
+    
+  }
+
+  private UmlClass addPropertyClass(OntResource type, boolean addSuperProperties) {
+    String uri = type.getURI();
+    UmlClass umlClass = uri2Class.get(uri);
+    if (umlClass == null) {
+      Frame propertyFrame = typeManager.getFrameByUri(uri);
+      if (propertyFrame == null) {
+        
+        if (!type.canAs(OntClass.class)) {
+          type.addProperty(RDF.type, OWL.Class);
+        }
+        
+        propertyFrame = new Frame(typeManager, type.asClass());
+        typeManager.add(propertyFrame);
+      }
+      umlClass = new UmlClass(propertyFrame, this);
+      uri2Class.put(uri, umlClass);
+      addSubProperties(umlClass, type.asProperty());
+    }
+    if (addSuperProperties) {
+      addSuperProperties(umlClass, type.asProperty());
+    }
+    return umlClass;
+  }
+
+  private void addSuperProperties(UmlClass umlClass, OntProperty property) {
+    List<? extends OntProperty> list = property.listSuperProperties(true).toList();
+    for (OntProperty superProperty : list) {
+      if (superProperty.getURI().equals(property.getURI())) {
+        continue;
+      }
+      UmlClass superClass = addPropertyClass(superProperty, true);
+      umlClass.addSupertype(superClass);
+      superClass.addSubtype(umlClass);
+    }
+    
+  }
+
+  private void addSubProperties(UmlClass umlClass, OntProperty type) {
+    
+    List<? extends OntProperty> list = type.listSubProperties(true).toList();
+    for (OntProperty p : list) {
+      if (p.getURI().equals(type.getURI())) {
+        continue;
+      }
+      UmlClass subProperty = addPropertyClass(p, false);
+      umlClass.addSubtype(subProperty);
+      subProperty.addSupertype(umlClass);
+    }
     
   }
 
@@ -100,6 +176,7 @@ public class UmlManager {
     
     for (Field field : frame.getDeclaredFields()) {
       
+     
       RdfType fieldType = field.getRdfType();
      
       

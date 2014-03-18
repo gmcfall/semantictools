@@ -762,6 +762,7 @@ public class UmlPrinter extends HtmlPrinter {
       indent();
       print(field.getComment());
       printer.endDiv();
+      printValueRestriction(field);
       print("</TD>");
       printer.printTD("propertyType", link);
       printer.printTD("multiplicity", field.getMultiplicity());
@@ -797,6 +798,20 @@ public class UmlPrinter extends HtmlPrinter {
     
   }
 
+
+  private void printValueRestriction(Field field) {
+    NamedIndividual value = field.getValueRestriction();
+    if (value != null) {
+      String message =
+          "This property is restricted and must have the value " +
+          "<pre>   " + value.getUri() + "</pre>";
+      ;
+      printer.beginParagraph();
+      print(message);
+      printer.endParagraph();
+    }
+    
+  }
 
   private int dirCount(String relativePath) {
     int count = 0;

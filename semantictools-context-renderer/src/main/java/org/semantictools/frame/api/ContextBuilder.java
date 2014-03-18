@@ -260,6 +260,7 @@ public class ContextBuilder {
     
     if (!isIncluded(field, properties, declaringFrame)) return;
     
+    
     boolean allFields = field.getDeclaringFrame() == declaringFrame;
     
     String localName = property.getLocalName();
@@ -316,6 +317,7 @@ public class ContextBuilder {
       addIndividuals(context, rdfType.asFrame());
     }
     
+    addValueRestriction(context, field);
     
     
     if (value != null) {
@@ -365,9 +367,64 @@ public class ContextBuilder {
     
     coerceType(info, properties);
     
+    if (field.getType().canAs(OntProperty.class)) {
+      addPropertyHierarchy(context, field.getType().asProperty());
+    }
   }
   
   
+  private void addPropertyHierarchy(JsonContext context, OntProperty property) {
+    
+    String localName = property.getLocalName();
+    TermInfo info = context.getTermInfoByShortName(localName);
+    if (info == null) {
+      info = new TermInfo(localName);
+      String uri = property.getURI();
+      info.setIriValue(uri);
+      info.setCategory(TermCategory.PROPERTY);
+      TermValue value = new TermValue();
+      
+      TermInfo namespace = addNamespace(context, property);
+      
+      StringBuilder id = new StringBuilder();
+      id.append(namespace.getTermName());
+      id.append(":");
+      id.append(property.getLocalName());
+      value.setId(id.toString());
+     
+      value.setType("@id");
+      info.setObjectValue(value);
+      context.add(info);
+      context.put(uri, info);
+    }
+    
+    List<? extends OntProperty> list = property.listSubProperties(true).toList();
+    for (OntProperty p : list) {
+      addPropertyHierarchy(context, p);
+    }
+    
+  }
+
+
+
+  private void addValueRestriction(JsonContext context, Field field) {
+    
+    NamedIndividual value = field.getValueRestriction();
+    if (value != null) {
+      String uri = value.getUri();
+      TermInfo info = context.getTermInfoByURI(uri);
+      if (info == null) {
+        info = new TermInfo(value.getLocalName());
+        info.setCategory(TermCategory.INDIVIDUAL);
+        info.setIriValue(uri);
+        context.add(info);
+      }
+    }
+    
+  }
+
+
+
   private void coerceType(TermInfo info, ContextProperties properties) {
     
     String key = info.getTermName() + ".@type";
@@ -520,6 +577,21 @@ public class ContextBuilder {
     term.setIriValue(namespace);
     
     context.add(term);
+  }
+  
+  private TermInfo addNamespace(JsonContext context, OntProperty property) {
+    String namespace = property.getNameSpace();
+    String prefix = getPrefix(context, namespace);
+    TermInfo term = context.getTermInfoByShortName(prefix);
+    
+    if (term != null) {
+      return term;
+    }
+    term = new TermInfo(prefix);
+    term.setCategory(TermCategory.NAMESPACE);
+    term.setIriValue(namespace);
+    context.add(term);
+    return term;
   }
 
 

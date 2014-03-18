@@ -30,6 +30,7 @@ public class TreeNode implements Comparable<TreeNode> {
   private String typeName;
   private String typeHref;
   private String typeURI;
+  private String valueRestriction;
   
   private int minCardinality;
   private int maxCardinality;
@@ -41,6 +42,7 @@ public class TreeNode implements Comparable<TreeNode> {
   private TreeNode parent;
   private boolean sequential;
   private List<TreeNode> children;
+  private List<String> knownValues;
   
   public TreeNode() {}
   
@@ -159,7 +161,21 @@ public class TreeNode implements Comparable<TreeNode> {
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
   }
-  
-  
+
+  public String getValueRestriction() {
+    return valueRestriction;
+  }
+
+  public void setValueRestriction(String valueRestriction) {
+    this.valueRestriction = valueRestriction;
+  }
+
+  public List<String> getKnownValues() {
+    return knownValues;
+  }
+
+  public void setKnownValues(List<String> knownValues) {
+    this.knownValues = knownValues;
+  }
 
 }
