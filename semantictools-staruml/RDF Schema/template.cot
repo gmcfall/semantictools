@@ -404,6 +404,7 @@ function ModelBuilder() {
   this.scanObject = ModelBuilder_scanObject;
   this.handleParticipantAttachment = ModelBuilder_handleParticipantAttachment;
   this.scanProperty = ModelBuilder_scanProperty;
+  this.keepProperty = ModelBuilder_keepProperty;
   
   this.universe = null; /* will be assigned later */
   
@@ -525,8 +526,8 @@ function ModelBuilder_scanAssociations() {
           
           logger.debug("ASSOCIATION: " + t1.name + " => " + t2.name);
           
-          var classOrEnum1 = (t1.constructor == ClassType) || (t1.constructor == EnumType);
-          var classOrEnum2 = (t2.constructor == ClassType) || (t2.constructor == EnumType);
+          var classOrEnum1 = (t1.constructor == ClassType) || (t1.constructor == EnumType) || this.keepProperty(e1);
+          var classOrEnum2 = (t2.constructor == ClassType) || (t2.constructor == EnumType) || this.keepProperty(e2);
           if (classOrEnum1 && classOrEnum2) {
 
             var f1 = this.createFieldFromAssociation(t1, t2, e2, e1);
@@ -549,6 +550,24 @@ function ModelBuilder_scanAssociations() {
          
         } 
     }
+}
+
+function ModelBuilder_keepProperty(connectionEnd) {
+  var result = false;
+  var attachments = connectionEnd.Attachments;
+   var lines = attachments.split('\r\n');
+   for (var i=0; i<lines.length; i++) {
+     var line = lines[i];
+     if (line.length == 0) continue;
+    
+     var equals = line.indexOf('=');
+     var key = line.substring(0, equals);
+     if (key == "preserveProperty") {
+       var value = line.substring(equals+1);
+       result = "true"==value;
+     }
+   }
+   return result;
 }
 
 
@@ -661,7 +680,12 @@ function ModelBuilder_handleParticipantAttachment(field, key, value) {
   } if (key == "uri") {
     field.uri = value;
   } if (key == "preserveRestriction" && "true"==value) {
+    logger.debug("preserveRestriction for " + field.name);
     field.preserveRestriction = true;
+  } if (key == "range") {
+    field.rangeURI = value;
+  } if (key == "hasValue") {
+    field.hasValue = value;
   }
 } 
 
@@ -1074,7 +1098,9 @@ function Field(uml, parent, umlPackage, universe) {
   this.umlClass = parent;
   this.subPropertyOf = null;
   this.domainURI = null;
+  this.rangeURI = null;
   this.preserveRestriction = false;
+  this.hasValue = null;
 
   if (uml) {
     this.name = uml.Name;
@@ -1168,7 +1194,7 @@ function Field_handleAttachment(key, value) {
   } if (key == "uri") {
     this.uri = value;
   } if (key == "functional") {
-    this.isFunctional = value;
+    this.isFunctional = "true" == value;
   }
   if (key == "preserveRestriction") {
     this.preserveRestriction = "true" == value;
@@ -1528,8 +1554,21 @@ function OntologyWriter_printRestrictions(delim, rdfClass) {
       if (r.hasValue) {
         this.println(";");
         this.indent().print("owl:hasValue ");
+        
         /* TODO: support literal values for hasValue */
+        logger.trace("  print hasValue..."); 
+        
+        if (typeof r.hasValue == "string") {
+          var value = rdfClass.ontology.universe.getRdfObject(r.hasValue);
+          if (!value) {
+            logger.error("     Individual not found: " + r.hasValue);
+          } else {
+            r.hasValue = value;
+          }
+          
+        }
         this.printQName(r.hasValue);
+        logger.trace("       ..." + r.hasValue);
       }
       if (r.comment) {
         this.println(";");
@@ -2333,6 +2372,7 @@ function RdfClass(ontology, name, umlClass) {
   this.computeLdpRestrictions = RdfClass_computeLdpRestrictions;
   this.applyContainerRestrictions = RdfClass_applyContainerRestrictions;
   this.isSubclassOf = RdfClass_isSubclassOf;
+  this.getMembershipPredicate = RdfClass_getMembershipPredicate;
   this.ontology = ontology;
   this.name = name;
   this.uri = ontology.uri + name;
@@ -2407,33 +2447,61 @@ function RdfClass_computeLdpRestrictions() {
   }
 }
 
+function RdfClass_getMembershipPredicate(property, containerClass) {
+  logger.debug("begin getMembershipPredicate");
+  var attachments = containerClass.umlClass.uml.Attachments;
+  if (attachments) {
+    logger.debug("attachments: " + attachments);
+      var lines = attachments.split('\r\n');
+      for (var i=0; i<lines.length; i++) {
+        var line = lines[i];
+        logger.debug("line: " + line);
+        
+        var colon = line.indexOf('=');
+        if (colon>0) {
+          var key = line.substring(0, colon);
+          var value = line.substring(colon+1);
+          if (key == "membershipPredicate") {
+            return this.ontology.universe.getRdfObject(value);
+          }
+        }
+      }
+  }
+    logger.debug("membershipPredicate annotation not found.  Trying to match singular form of property name");
+    
+    /* Compute the word stem from the property name by dropping the plural suffix "s" or "es" */
+    var stem = property.name;
+    var end = stem.length-1;
+    if (stem.charAt(end-1)=='e') {
+      end--;
+    }
+    stem = stem.substring(0, end);
+    
+    /* Search for another property that matches the word stem */
+    var regex = new RegExp("^" + stem);
+    var list = this.propertyList;
+    var match = null;
+    for (var i=0; i<list.length; i++) {
+      var p = list[i];
+      if (p.name == property.name) continue;
+      if (p.name.match(regex)) {
+        if (match) {
+          var msg = "Multiple matches found for container property " + property.name + ": " + match.name + ", " + p.name;
+          logger.warn(msg);
+          return;
+        }
+        match = p;
+      }
+    }
+    logger.debug("end getMembershipPredicate");
+    return match;
+  
+}
+
 function RdfClass_applyContainerRestrictions(property, containerClass) {
   logger.debug("applyContainerRestrictions " + property.name);
   
-  /* Compute the word stem from the property name by dropping the plural suffix "s" or "es" */
-  var stem = property.name;
-  var end = stem.length-1;
-  if (stem.charAt(end-1)=='e') {
-    end--;
-  }
-  stem = stem.substring(0, end);
-  
-  /* Search for another property that matches the word stem */
-  var regex = new RegExp("^" + stem);
-  var list = this.propertyList;
-  var match = null;
-  for (var i=0; i<list.length; i++) {
-    var p = list[i];
-    if (p.name == property.name) continue;
-    if (p.name.match(regex)) {
-      if (match) {
-        var msg = "Multiple matches found for container property " + property.name + ": " + match.name + ", " + p.name;
-        logger.warn(msg);
-        return;
-      }
-      match = p;
-    }
-  }
+  var match = this.getMembershipPredicate(property, containerClass);
   if (match) {
 
     // We found a unique match, so create the restrictions.
@@ -2591,6 +2659,8 @@ function RdfIndividual(ontology, name, type, documentation) {
   this.uri = ontology.uri + name;
   this.type = type;
   this.documentation = documentation;
+  logger.debug("    type=" + type.name);
+  logger.debug("    type.ontology=" + type.ontology.uri);
 }
 
 function RdfProperty(ontology, name, umlField) {
@@ -2614,6 +2684,7 @@ function RdfProperty(ontology, name, umlField) {
   /* TODO: eliminate subPropertyOf and use superList only */
   this.subPropertyOf = umlField ? umlField.subPropertyOf : null;
   this.comment = umlField ? umlField.description : null;
+
   logger.debug("   comment=" + this.comment);
   
   this.type = RDF.Property;
@@ -2646,7 +2717,7 @@ function RdfProperty_normalize() {
   // If all uses of this property have maxCardinality=1, then
   // this property is functional.
   var list = this.usage;
-  if ("false" == this.isFunctional) {
+  if (!this.isFunctional) {
     this.functional = false;
   } else {
     var functional = list.length>0;
@@ -2659,7 +2730,7 @@ function RdfProperty_normalize() {
     }
     this.functional = functional;
   }
-  logger.debug("normalize: " + this.uri + " functional=" + functional + " [" + list.length + "]");
+  logger.debug("normalize: " + this.uri + " functional=" + this.functional + " [" + list.length + "]");
   
 }
 
@@ -2688,6 +2759,8 @@ function Qualifier(property, domain) {
 }
 
 function RdfRestriction(property, domain, range, minCardinality, maxCardinality, comment) {
+  logger.debug("new Restriction(property=" + property.name + ", domain=" + domain.name + 
+      ", range=" + range.name + ", minCardinality=" + minCardinality + ", maxCardinality=" + maxCardinality + ")");
   this.comment = comment;
   this.property = property;
   this.domain = domain;
@@ -2904,6 +2977,7 @@ function OntologyBuilder_buildIndividuals(pkg, ontology) {
     var classifier = umlObject.Classifier;
     var path = classifier.Pathname;
     var type = this.universe.getRdfObject(path);
+    logger.debug("     path=" + path);
     var documentation = umlObject.documentation;
     var individual = new RdfIndividual(ontology, name, type, documentation);
     ontology.universe.putRdfObject(individual.uri, individual);
@@ -3189,6 +3263,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
     this.addOntologyImportsFromList(map, property.typeList);
     this.addOntologyImportsFromList(map, property.superList);
     
+    if (property.inverseOf != null) {
+      this.addImport(map, property.inverseOf.ontology);
+    }
+    
     for (var j=0; j<property.usage.length; j++) {
       var restriction = property.usage[j];
       var domain = restriction.domain;
@@ -3310,10 +3388,17 @@ function OntologyBuilder_createProperty(rdfClass, field) {
     /* TODO:  Shouldn't the stereotype be set on the property?  not on this OntologyBuilder! */
     this.stereotypeName = field.stereotypeName;
   }
-  var objectUri = field.type.uri;
+  
+  
+  var objectUri = field.rangeURI || field.type.uri;
   var object = universe.getRdfObject(objectUri);
+  var restrictionRange = universe.getRdfObject(field.type.uri);
   if (!object) {
     logger.error("type not found for field: " + rdfClass.name + "." + field.name + "->" + objectUri);
+    return;
+  }
+  if (!restrictionRange) {
+    logger.error("type not found for field: " + rdfClass.name + "." + field.name + "->" + field.type.uri);
     return;
   }
 
@@ -3329,7 +3414,7 @@ function OntologyBuilder_createProperty(rdfClass, field) {
     object = listType;
   }
   
-  
+  var restrictionDomain = rdfClass;
   var subject = rdfClass;
   if (field.domainURI) {
     subject = universe.getRdfObject(field.domainURI);
@@ -3345,13 +3430,16 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   var maxCardinality = field.maxCardinality;
   var comment = field.description;
   
-  var restriction = new RdfRestriction(property, domain, range, minCardinality, maxCardinality, comment);
+  var restriction = new RdfRestriction(property, restrictionDomain, restrictionRange, minCardinality, maxCardinality, comment);
   if (field.preserveRestriction) {
     restriction.preserve = true;
   }
+  if (field.hasValue) {
+    restriction.hasValue = field.hasValue;
+  }
   
   append(property.usage, restriction);
-  append(domain.restrictions, restriction);
+  append(rdfClass.restrictions, restriction);
   
   append(property.domainList, domain);
   append(property.rangeList, range);
@@ -3444,7 +3532,7 @@ function OntologyBuilder_setListElemTypes(ontology) {
 
 function OntologyBuilder_buildOntology(pkg) {
   if (pkg.name == "xsd") return;
-  if (pkg.name == "rdf") return;
+  // if (pkg.name == "rdf") return;
   logger.debug("buildOntology: " + pkg.name);
   
   var onto = this.universe.getRdfObject(pkg.uri);
@@ -3473,6 +3561,8 @@ function OntologyBuilder_buildOntology(pkg) {
     var prior = this.universe.getRdfObject(typeUri);
     if (prior) {
       logger.warn("Skipping class that appears to be a duplicate: " + typeUri);
+      logger.debug("     pathname=" + type.pathname);
+      this.universe.putRdfObject(type.pathname, prior);
       continue;
     }
     /* end workaround */
@@ -4653,7 +4743,6 @@ function getProjectAttachments(project) {
   }
   return result;
 }
-
 
 
 
