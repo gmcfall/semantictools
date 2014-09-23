@@ -493,6 +493,8 @@ function ModelBuilder_scanGeneralizations() {
 
 
 
+
+
 function ModelBuilder_scanAssociations() {
   logger.debug("scanAssociations");
    var metaClass = app.MetaModel.FindMetaClass("UMLAssociation");
@@ -716,6 +718,14 @@ function ModelBuilder_scanObject(umlObject) {
   var pkg = this.currentPackage();
   logger.trace("add individual " + umlObject.Name + " to " + pkg.name);
   append(pkg.individualList, umlObject);
+  
+  // TODO: put the individual in the individualList instead of the umlObject
+  var individual = new Object();
+  individual.uri = pkg.uri + umlObject.Name;
+  individual.localName = umlObject.Name;
+  
+  this.universe.pathMap[umlObject.Pathname] = individual;
+ 
 }
 
 function ModelBuilder_scanModel(uml, parent) {
@@ -1436,8 +1446,8 @@ function OntologyWriter_printOntologyHeader(ontology) {
   if (ontology.label) {
     this.indent().println("rdfs:label \"" + ontology.label + "\" ;");
   }
-  this.indent().println("a bind:TargetNamespace ;")
-  this.indent().println("bind:suggestedPrefix \"" + ontology.prefix + "\" .");
+  this.indent().println("vann:preferredNamespaceUri \"" + ontology.uri + "\" ;")
+  this.indent().println("vann:preferredNamespacePrefix \"" + ontology.prefix + "\" .");
   this.popIndent();
   
 }
@@ -1451,7 +1461,14 @@ function OntologyWriter_printIndividuals() {
     logger.trace("printIndividual " + individual.name);
     this.indent().printQName(individual);
     this.print(" rdf:type ");
-    this.printQName(individual.type);
+    
+    var typeList = individual.type;
+    for (j=0; j<typeList.length; j++) {
+      if (j>0) {
+        this.print(", ");
+      }
+      this.printQName(typeList[j]);
+    }
     if (individual.documentation) {
       this.println(" ;");
       this.pushIndent();
@@ -2051,6 +2068,7 @@ function OntologyWriter_printBinding(onto) {
   this.println("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
   this.println("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .");
   this.println("@prefix bind: <http://purl.org/semantictools/v1/vocab/bind#> .");
+  this.println("@prefix vann: <http://purl.org/vocab/vann/> .");
   for (var i=0; i<importList.length; i++) {
     var item = importList[i];
     this.println("@prefix " + item.prefix + ": <" + item.uri + "> .");
@@ -2499,13 +2517,14 @@ function RdfClass_getMembershipPredicate(property, containerClass) {
 }
 
 function RdfClass_applyContainerRestrictions(property, containerClass) {
-  logger.debug("applyContainerRestrictions " + property.name);
+  logger.debug("begin applyContainerRestrictions " + property.name);
   
   var match = this.getMembershipPredicate(property, containerClass);
   if (match) {
 
     // We found a unique match, so create the restrictions.
     
+    log(1);
     var predicate = this.ontology.universe.getMembershipPredicateProperty();
     var r = new RdfRestriction(predicate);
     r.hasValue = match;
@@ -2517,6 +2536,7 @@ function RdfClass_applyContainerRestrictions(property, containerClass) {
     r.preserve = true;
     append(containerClass.restrictions, r);
   }
+  logger.debug("end applyContainerRestrictions " + property.name);
   
 }
 
@@ -2650,8 +2670,6 @@ function RdfList(ontology, name, elemUML) {
   append(ontology.listList, this);
 }
 
-
-
 function RdfIndividual(ontology, name, type, documentation) {
   logger.debug("new RdfIndividual " + name);
   this.ontology = ontology;
@@ -2659,8 +2677,11 @@ function RdfIndividual(ontology, name, type, documentation) {
   this.uri = ontology.uri + name;
   this.type = type;
   this.documentation = documentation;
-  logger.debug("    type=" + type.name);
-  logger.debug("    type.ontology=" + type.ontology.uri);
+  for (var i=0; i<type.length; i++) {
+    logger.debug("    type=" + type[i].name);
+    logger.debug("    type.ontology=" + type[i].ontology.uri);
+  }
+ 
 }
 
 function RdfProperty(ontology, name, umlField) {
@@ -2759,8 +2780,11 @@ function Qualifier(property, domain) {
 }
 
 function RdfRestriction(property, domain, range, minCardinality, maxCardinality, comment) {
-  logger.debug("new Restriction(property=" + property.name + ", domain=" + domain.name + 
-      ", range=" + range.name + ", minCardinality=" + minCardinality + ", maxCardinality=" + maxCardinality + ")");
+  var domainName = domain? domain.name : "undefined";
+  var rangeName = range ? range.name : "undefined";
+  
+  logger.debug("new Restriction(property=" + property.name + ", domain=" + domainName + 
+      ", range=" + rangeName + ", minCardinality=" + minCardinality + ", maxCardinality=" + maxCardinality + ")");
   this.comment = comment;
   this.property = property;
   this.domain = domain;
@@ -2939,11 +2963,65 @@ function OntologyBuilder(universe) {
   this.addOntologyImportsFromList = OntologyBuilder_addOntologyImportsFromList;
   this.setSubtypes = OntologyBuilder_setSubtypes;
   this.normalizeAllProperties = OntologyBuilder_normalizeAllProperties;
+  this.scanRealizations = OntologyBuilder_scanRealizations;
+  this.createIndividual = OntologyBuilder_createIndividual;
   
   this.universe = universe;
   this.ontology = null;
   this.umlClassMap = new Object();
   
+}
+
+
+function OntologyBuilder_scanRealizations() {
+  logger.debug("scanRealizations");
+  var metaClass = app.MetaModel.FindMetaClass("UMLRealization");
+  var size = metaClass.GetInstanceCount();
+  for (var i=0; i<size; i++) {
+     elem = metaClass.GetInstanceAt(i);
+
+     if (elem.IsKindOf("UMLRealization") && elem.Client && elem.Supplier) {
+
+       
+       var clientName = elem.Client.Name;
+       var supplierName = elem.Supplier.Name;
+       
+       
+       logger.debug(clientName + " hasRealization " + supplierName);
+
+       var client = this.universe.pathMap[elem.Client.Pathname];
+       
+       if (!client || !client.uri) {
+         logger.error("Instance not found: " + clientName);
+         continue;
+       }
+       
+       var supplier = this.universe.pathMap[elem.Supplier.Pathname];
+       if (!supplier || !supplier.uri) {
+         logger.error("Class not found: " + supplierName);
+         continue;
+       }
+       
+       
+       client = this.universe.getRdfObject(client.uri);
+       supplier = this.universe.getRdfObject(supplier.uri);
+       
+       if (!client) {
+         logger.error("RdfIndividual not found: " + client.uri);
+         continue;
+       }
+       
+       if (!supplier) {
+         logger.error("RdfClass not found: " + supplier.uri);
+         continue;
+       }
+       
+       if (client.constructor == RdfIndividual ) {
+         append(client.type, supplier);
+       }
+       
+     }
+  }
 }
 
 function OntologyBuilder_buildImports() {
@@ -2975,12 +3053,15 @@ function OntologyBuilder_buildIndividuals(pkg, ontology) {
     
     var name = umlObject.Name;
     var classifier = umlObject.Classifier;
-    var path = classifier.Pathname;
-    var type = this.universe.getRdfObject(path);
-    logger.debug("     path=" + path);
-    var documentation = umlObject.documentation;
-    var individual = new RdfIndividual(ontology, name, type, documentation);
-    ontology.universe.putRdfObject(individual.uri, individual);
+    var typeArray = new Array();
+    if (classifier) {
+      var path = classifier.Pathname;
+      var type = this.universe.getRdfObject(path);
+      logger.debug("     path=" + path);
+      var documentation = umlObject.documentation;
+      typeArray[0] = type;
+    }
+    var individual = this.createIndividual(ontology, name, typeArray, documentation);
     append(ontology.individualList, individual);
     
   }
@@ -3317,7 +3398,10 @@ function OntologyBuilder_computeImportedOntologies(ont) {
   logger.debug("Add imports for individuals");
   for (var i=0; i<list.length; i++) {
     var n = list[i];
-    this.addImport(map, n.type.ontology);
+    var typeList = n.type;
+    for (var j=0; j<typeList.length; j++) {
+      this.addImport(map, typeList[j].ontology);
+    }
   }
   
   logger.debug("end computeImportedOntologies");
@@ -3419,7 +3503,7 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   if (field.domainURI) {
     subject = universe.getRdfObject(field.domainURI);
     if (subject == null) {
-      logger.error("Domain is declared for field " + rdfClass.name + "." + field.name + ", but domain class does not exist: " + domainURI);
+      logger.error("Domain is declared for field " + rdfClass.name + "." + field.name + ", but domain class does not exist: " + field.domainURI);
       throw "ERROR";
     }
   }
@@ -3448,6 +3532,20 @@ function OntologyBuilder_createProperty(rdfClass, field) {
   
 }
 
+function OntologyBuilder_createIndividual(ontology, name, type, documentation) {
+  var uri = ontology.uri + name;
+  var individual = ontology.universe.getRdfObject(uri);
+  if (individual) {
+    individual.recreate = RdfIndividual;
+    individual.recreate(ontology, name, type, documentation);
+  } else {
+    individual = new RdfIndividual(ontology, name, type, documentation);
+    ontology.universe.putRdfObject(uri, individual);
+  }
+  logger.trace("End OntologyBuilder.createIndividual");
+  return individual;
+}
+
 function OntologyBuilder_buildEnums(umlPackage) {
   logger.debug("buildEnums");
   var list = umlPackage.enumList;
@@ -3459,7 +3557,9 @@ function OntologyBuilder_buildEnums(umlPackage) {
     this.universe.putRdfObject(umlEnum.Pathname, rdfEnum);
     for (var j=0; j<umlEnum.literalList.length; j++) {
       var value = umlEnum.literalList[j].name;
-      var individual = new RdfIndividual(this.ontology, value, rdfEnum);
+      var typeArray = new Array();
+      typeArray[0] = rdfEnum;
+      var individual = this.createIndividual(this.ontology, value, typeArray);
       append(rdfEnum.individualList, individual);
       if (umlEnum.isExtensible) {
         append(this.ontology.individualList, individual);
@@ -3467,6 +3567,7 @@ function OntologyBuilder_buildEnums(umlPackage) {
     }
     
   }
+  logger.debug("end buildEnums");
 }
 
 function OntologyBuilder_createProperties(rdfClass) {
@@ -3585,7 +3686,7 @@ function OntologyBuilder_buildAll() {
   var builder = new PropertyBuilder(this.universe, this);
   builder.scanAll();
   builder.computeImports();
-
+  this.scanRealizations();
   this.normalizeAllRestrictions();
   this.buildImports();
   this.normalizeAllProperties();
@@ -4743,6 +4844,13 @@ function getProjectAttachments(project) {
   }
   return result;
 }
+
+
+
+
+
+
+
 
 
 
