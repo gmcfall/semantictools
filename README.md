@@ -4,4 +4,4 @@ DISCLAIMER:  Use at your own risk.  The software has not been
     
 The best way to learn about semantictools is to review an
 example. We recommend that you start by looking at
-[examples/lti] (http://githubenterprise.pearson.com/UMCFAG1/semantictools/tree/master/examples/lti).
+[examples/lti] (https://github.com/gmcfall/semantictools/tree/master/examples/lti).
