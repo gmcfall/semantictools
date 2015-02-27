@@ -3,15 +3,6 @@ This example shows how the IMS Learning Tools Interoperability (LTI) REST Servic
 specifications are generated.  We'll use this example as a cookbook for
 creating your own REST service specification.
 
-# Getting Started
-To use this project, you must first build the following two projects:
-
-1. [semantictools-code-renderer] (http://github.com/gmcfall/semantictools/tree/master/semantictools-context-renderer)
-2. [semantictools-maven-plugin] (http://github.com/gmcfall/semantictools/tree/master/semantictools-maven-plugin)
-
-You must also add the [RDF Schema] (http://github.com/gmcfall/semantictools/tree/master/semantictools-staruml)
-plugin to your StarUML installation.
-
 # Understanding the Methodology
  
 Our approach to defining REST services is based on the principles of
@@ -23,7 +14,7 @@ which Tim Berners-Lee summarized with four basic ideas :
 3.  When someone looks up a URI, provide useful information using RDF standards.
 4.  Include links to other URIs so that they can discover more things.
 
-JSON-LD is an emerging W3C standard that expresses linked data in JSON syntax.
+JSON-LD is a W3C standard that expresses linked data in JSON syntax.
 The big idea behind JSON-LD is that one can represent resources in a very simple
 JSON syntax, and the terms that appear in a JSON document are mapped to classes
 and properties in an RDF ontology.  As a result, the semantics of the JSON document
