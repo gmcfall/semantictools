@@ -28,10 +28,10 @@ go one step further and associate each JSON-LD context with a vendor-specific me
  
 The key artifact that drives the entire methodology is an RDF ontology.
 Unfortunately, most of the tools for constructing an RDF ontology require highly
-specialized knowledge.  To simplify the process, we start with UML since it is
+specialized knowledge.  To simplify the process, we geenerally start with UML since it is
 familiar to most software engineers.  In particular, we use StarUML to create a
 logical model of the resources, and then we generate the RDF ontologies using a
-custom template (the �RDF Schema� template discussed above).
+custom template. See  [semantictools-staruml/README] (http://github.com/gmcfall/semantictools/blob/master/semantictools-staruml/README.md) 
 
 
 # Cookbook
@@ -71,7 +71,7 @@ You start by creating a UML model in StarUML.  In this example, `LTI_v2.uml` con
 the StarUML model that was created by the IMS LTI working group. Obviously, you'll be 
 creating your own UML model.
 
-See  [semantictools-staruml/README] (http://githube.com/gmcfall/semantictools/blob/master/semantictools-staruml/README.md) 
+See  [semantictools-staruml/README] (http://github.com/gmcfall/semantictools/blob/master/semantictools-staruml/README.md) 
 for tips on how to build an effective UML model with StarUML. The RDF Schema generator assumes that
 you are following these modeling guidelines, and you may get surprising results if you deviate
 from the guidelines.
